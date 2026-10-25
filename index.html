@@ -3006,21 +3006,22 @@ const BOSS_DRAW = {
       P.line(8, 31, 18, 33, 'd'); P.line(34, 31, 24, 33, 'd');
       P.tri(17, 41, 25, 41, 21, 47, 'h');
     }, '#1f4a5c', ov);
-    const A = bossAnim(b, t), per = en ? 1.7 : 2.5;
-    A.pt = (A.pt || 0) + A.dt; const ph = (A.pt % per) / per, pv = ph < .14 ? eio(ph / .14) : 1 - eio((ph - .14) / .86);
-    const jet = ph < .14 && (A.lastPh || 1) > ph; A.lastPh = ph;
-    const lean = bspring(A, 'ln', clamp(A.vx / 1100, -.22, .22), 22, .6), by = -pv * 10 + Math.sin(t * 1.4) * 3;
-    rigM(A, { lean, sq: -pv * .45 });
+    // 느긋한 맥동: 천천히 오므렸다가(물 뿜기) 더 천천히 펴진다
+    const A = bossAnim(b, t), per = en ? 3.4 : 4.6;
+    A.pt = (A.pt || 0) + A.dt; const ph = (A.pt % per) / per, pv = ph < .24 ? eio(ph / .24) : 1 - eio((ph - .24) / .76);
+    const jet = ph < .24 && (A.lastPh || 1) > ph; A.lastPh = ph;
+    const lean = bspring(A, 'ln', clamp(A.vx / 1400, -.16, .16), 10, .95), by = -pv * 7 + Math.sin(t * .7) * 4;
+    rigM(A, { lean, sq: -pv * .28 });
     const floor = DUN.active && world.arena ? dunFloorY() - 6 : null;
     motes(b.x, b.y + 120, 220, 230, 14, C, t, 18, 9);
     bglow(b.x, b.y + 10, 160, C, .14);
     const tent = (i, long) => {
       const k0 = i - 3.5, n = long ? 14 : 10, len = long ? 13 : 14, key = (long ? 'L' : 'T') + i;
-      const sg = k0 < 0 ? -1 : 1, cw = .6 + .4 * Math.sin(t * .9 + i * 2.1);
-      const r = brope(A, key, n, len, bw(b, A, long ? k0 * 6 : k0 * 11, 52 + by), { g: 200, damp: .955, stiff: .03, it: 5, floor,
-        rest: j => { const u = j / n, a = k0 * (long ? .14 : .2) + sg * u * u * (long ? 1.1 : 2.2) * cw + Math.sin(t * 2.1 - j * .6 + i * 1.3) * .35 * u; return [Math.sin(a), Math.cos(a)]; }, restK: .1,
-        force: (j) => [Math.sin(t * 2.2 - j * .55 + i * 1.3) * (20 + j * 18) - A.vx * 1.2, Math.cos(t * 1.6 - j * .4 + i) * 30] });
-      if (jet) for (let j = 1; j < n; j++) { const q = A.rig[key].q[j]; q[0] -= k0 * 2.2 * (j / n) * 3; q[1] -= 7 * (j / n); }
+      const sg = k0 < 0 ? -1 : 1, cw = .6 + .4 * Math.sin(t * .35 + i * 2.1);
+      const r = brope(A, key, n, len, bw(b, A, long ? k0 * 6 : k0 * 11, 52 + by), { g: 140, damp: .93, stiff: .04, it: 5, floor,
+        rest: j => { const u = j / n, a = k0 * (long ? .14 : .2) + sg * u * u * (long ? 1.1 : 2.2) * cw + Math.sin(t * .8 - j * .45 + i * 1.3) * .22 * u; return [Math.sin(a), Math.cos(a)]; }, restK: .06,
+        force: (j) => [Math.sin(t * .9 - j * .45 + i * 1.3) * (8 + j * 7) - A.vx * .5, Math.cos(t * .7 - j * .35 + i) * 12] });
+      if (jet) for (let j = 1; j < n; j++) { const q = A.rig[key].q[j]; q[0] -= k0 * 1.6 * (j / n); q[1] -= 2.5 * (j / n); }
       return r;
     };
     const draw = (r, i, back, long) => {
@@ -3032,7 +3033,7 @@ const BOSS_DRAW = {
     for (const i of [2, 5]) draw(tent(i, true), i, false, true);
     for (const i of [1, 6, 3, 4]) draw(tent(i, false), i, false, false);
     rigFrame(b, A, () => {
-      bdraw(mantle, 0, by, Math.sin(t * 1.3) * .03, 1, .5, .62);
+      bdraw(mantle, 0, by, Math.sin(t * .6) * .025, 1, .5, .62);
       addG(() => { for (const ex of [-26, 26]) glowDot(g, ex, by + 14, 16, ov.w, .7); for (const [x, y] of [[-9, -42], [9, -30], [-15, -12], [15, -6]]) glowDot(g, x, by + y, 10, C, .45 + Math.sin(t * 3 + x) * .2 + pv * .3); });
     });
   },
