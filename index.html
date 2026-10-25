@@ -1411,7 +1411,7 @@ let warnT = 0;
 function aimTarget(p) {
   const cx = Math.floor((p.x + p.w / 2) / TS), row = Math.floor((p.y + p.h - 2) / TS);
   if (keys.down) return { tx: cx, ty: row + 1, dir: 2 };
-  if (keys.up) return { tx: cx, ty: Math.floor((p.y - 2) / TS), dir: 3 };
+  if (keys.up) return { tx: cx, ty: row - 1, dir: 3 };
   return { tx: Math.floor((p.face > 0 ? p.x + p.w + 3 : p.x - 3) / TS), ty: row, dir: 1 };
 }
 function tryDig(tx, ty, dt, dir = 1) {
@@ -1482,7 +1482,7 @@ function updatePlayer(dt) {
   let digging = false;
   const aim = aimTarget(p);
   if (keys.dig && p.ground) {
-    if (aim.dir === 2) { const tx = aim.tx * TS + TS / 2 - p.w / 2; p.x = lerp(p.x, tx, 1 - Math.pow(.0001, dt)); if (!mv) p.vx = 0; }
+    if (aim.dir !== 1) { const tx = aim.tx * TS + TS / 2 - p.w / 2; p.x = lerp(p.x, tx, 1 - Math.pow(.0001, dt)); if (!mv) p.vx = 0; }
     if (solid(tileAt(aim.tx, aim.ty))) digging = tryDig(aim.tx, aim.ty, dt, aim.dir);
   }
   // 빈 곳을 겨누고 눌러도 허공에 한 번씩 휘두른다
@@ -3394,7 +3394,9 @@ document.querySelectorAll('#digBtn, #jumpBtn').forEach(b => {
   const set = (dx, dy) => {
     const r = st.clientWidth * .38, d = Math.hypot(dx, dy), k = d > r ? r / d : 1, nx = dx * k / r, ny = dy * k / r;
     kn.style.transform = `translate(${dx * k}px,${dy * k}px)`;
-    keys.left = nx < -.38; keys.right = nx > .38; keys.down = ny > .5; keys.up = ny < -.5;
+    const mag = Math.hypot(nx, ny), deg = Math.atan2(ny, nx) * 180 / Math.PI; // 0 = 오른쪽, 90 = 아래
+    const down = mag > .45 && deg > 65 && deg < 115, up = mag > .45 && deg < -55 && deg > -125, side = mag > .3 && !down && !up;
+    keys.down = down; keys.up = up; keys.left = side && nx < 0; keys.right = side && nx > 0;
     arr('l').classList.toggle('on', keys.left); arr('r').classList.toggle('on', keys.right); arr('u').classList.toggle('on', keys.up); arr('d').classList.toggle('on', keys.down);
   };
   const end = () => { id = null; st.classList.remove('on'); set(0, 0); };
