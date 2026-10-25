@@ -3229,37 +3229,64 @@ const nearGate = () => {
   const px = (player.x + player.w / 2) / TS, py = (player.y + player.h - 2) / TS;
   return world.gates.find(gt => Math.abs(px - gt.x - .5) < 2.6 && py > gt.y - 4.5 && py < gt.y + 1) || null;
 };
-// 게이트 그림: 지층 돌로 쌓은 아치 · 빛나는 룬 · 안쪽에서 도는 소용돌이
-function drawGate(gt) {
-  const Ly = LAYERS[gt.L], ore = Ly.ore[0], X = gt.x * TS + 16, Y = (gt.y + 1) * TS, p = 4, t = time, B = BOSSES[gt.L];
-  g.save(); g.imageSmoothingEnabled = false;
-  // 소용돌이(아치 안쪽): 겹친 타원 고리를 픽셀로 찍는다
-  const iw = 30, ih = 34, cy = Y - ih * p / 2 - 6;
-  g.globalCompositeOperation = 'lighter'; glowDot(g, X, cy, 110, ore, .35 + Math.sin(t * 2) * .08); glowDot(g, X, cy, 50, B.col, .4); g.globalCompositeOperation = 'source-over';
-  g.fillStyle = 'rgba(10,6,20,.85)'; for (let y = -ih / 2; y < ih / 2; y++) { const w2 = Math.round(Math.sqrt(Math.max(0, 1 - (y / (ih / 2)) ** 2)) * iw / 2); g.fillRect(X - w2 * p, cy + y * p, w2 * 2 * p, p); }
-  for (let ring = 0; ring < 5; ring++) {
-    const rr = (ring + 1) / 5, n = 10 + ring * 5;
-    for (let k = 0; k < n; k++) {
-      const a = k / n * TAU + t * (1.4 - ring * .2) * (ring % 2 ? -1 : 1), x = Math.round(Math.cos(a) * iw / 2 * rr * .92), y = Math.round(Math.sin(a) * ih / 2 * rr * .92);
-      g.fillStyle = ring % 2 ? ore : B.col; g.globalAlpha = .35 + rr * .5; g.fillRect(X + x * p - p / 2, cy + y * p - p / 2, p, p);
-    }
+// 포탈 그림(게이트·던전 출구 공용). 타일과 같은 2px 도트로, 아치는 스프라이트 한 장, 안쪽은 색 띠로 끊은 나선 소용돌이
+const PORTAL_P = 2, PORTAL_W = 64, PORTAL_H = 80, PORTAL_C = [32, 47];
+let portalBuf = null, portalImg = null;
+// 아치 안쪽(소용돌이가 보이는 칸): 기둥 사이 사각형 + 위쪽 반원
+const portalInside = (x, y) => (x >= 17 && x <= 46 && y >= 30 && y <= 69) || ((x - 31.5) ** 2 + (y - 30) ** 2 < 15.5 * 15.5 && y < 31);
+function portalArch(key, rock, gem) {
+  const ov = { a: rock, d: mixHex(rock, '#000000', .38), y: '#d8b25a', k: '#0a0814', g: gem, s: mixHex(rock, '#000000', .15) };
+  return cspr('portal' + key, () => buildSprite(pxArt(PORTAL_W, PORTAL_H, P => {
+    // 단상: 두 칸 계단
+    P.rect(2, 74, 60, 6, 's'); P.rect(7, 70, 50, 4, 'a'); P.lineIn(2, 74, 61, 74, 'y');
+    // 기둥: 받침 · 몸 · 머리
+    for (const x0 of [5, 47]) { P.rect(x0 - 1, 62, 14, 8, 'a'); P.rect(x0, 26, 12, 36, 'a'); P.rect(x0 - 2, 22, 16, 5, 'a'); for (let y = 34; y < 62; y += 9) P.lineIn(x0, y, x0 + 11, y, 'd'); P.lineIn(x0 - 1, 66, x0 + 12, 66, 'd'); P.lineIn(x0 - 2, 26, x0 + 13, 26, 'y'); for (const y of [36, 45, 54]) P.rect(x0 + 4, y - 3, 4, 5, 'k'); }
+    // 홍예: 바깥 반지름 30, 안쪽 16
+    for (let y = 0; y <= 31; y++) for (let x = 0; x < PORTAL_W; x++) { const r = Math.hypot(x - 31.5, y - 30); if (r <= 30 && r >= 16) P.set(x, y, 'a'); }
+    for (let k = 1; k < 9; k++) { const an = Math.PI + k / 9 * Math.PI; P.lineIn(31.5 + Math.cos(an) * 17, 30 + Math.sin(an) * 17, 31.5 + Math.cos(an) * 29.5, 30 + Math.sin(an) * 29.5, 'd'); }
+    for (let k = 0; k <= 40; k++) { const an = Math.PI + k / 40 * Math.PI; P.paint(31.5 + Math.cos(an) * 16.6, 30 + Math.sin(an) * 16.6, 'y'); P.paint(31.5 + Math.cos(an) * 29.4, 30 + Math.sin(an) * 29.4, 'd'); }
+    for (const x of [17, 46]) P.lineIn(x, 30, x, 69, 'y');
+    // 쐐기돌과 보석
+    P.poly([[27, 0], [36, 0], [35, 13], [28, 13]], 'a'); P.lineIn(27, 0, 36, 0, 'y'); P.ell(31.5, 6, 2.6, 2.6, 'k'); P.ell(31.5, 6, 1.8, 1.8, 'g'); P.set(31, 5, 'G');
+  }), rock, ov));
+}
+function drawPortal(X, Y, o) {
+  const p = PORTAL_P, t = time, x0 = Math.round(X / 2) * 2 - PORTAL_W, y0 = Math.round(Y / 2) * 2 - PORTAL_H * p, col = o.col, cx = x0 + PORTAL_C[0] * p, cy = y0 + PORTAL_C[1] * p;
+  const pal = ['#0b0716', mixHex(col, '#0b0716', .72), mixHex(col, '#0b0716', .42), col, mixHex(col, '#ffffff', .45)];
+  addG(() => { glowDot(g, cx, cy, 120, col, .28 + Math.sin(t * 1.6) * .05); glowDot(g, X, Y - 4, 70, o.ore || col, .25); });
+  // 소용돌이: 칸마다 극좌표로 밝기를 구해 다섯 단계로 끊는다. 작은 캔버스에 1칸=1px로 찍고 한 번에 키워 붙여 줄 틈이 안 생긴다
+  const sp = o.spin || 1.6, VW = 37, VH2 = 70;
+  if (!portalBuf) { portalBuf = document.createElement('canvas'); portalBuf.width = VW; portalBuf.height = VH2; portalImg = portalBuf.getContext('2d').createImageData(VW, VH2); }
+  const D = portalImg.data, rgb = pal.map(hexToRgb);
+  for (let y = 0; y < VH2; y++) for (let i = 0; i < VW; i++) {
+    const x = i + 14, o4 = (y * VW + i) * 4;
+    if (!portalInside(x, y)) { D[o4 + 3] = 0; continue; }
+    const dx = x - PORTAL_C[0] + .5, dy = (y - PORTAL_C[1]) * .8, r = Math.hypot(dx, dy), an = Math.atan2(dy, dx);
+    const v = Math.sin(an * 2 - r * .42 + t * sp * 2) * .5 + .5, bri = clamp(v * .55 + (1 - r / 22) * .6 - .05, 0, 1);
+    const c = r < 2.2 ? [255, 255, 255] : rgb[Math.min(4, Math.floor(bri * 5))];
+    D[o4] = c[0]; D[o4 + 1] = c[1]; D[o4 + 2] = c[2]; D[o4 + 3] = 255;
   }
-  g.globalAlpha = 1;
-  // 돌 아치: 양쪽 기둥 + 반원 머리
-  const stone = Ly.rock, dark = shade(stone, -.35), lite = shade(stone, .25);
-  const brick = (bx, by, w2, h2) => { g.fillStyle = PX_OUT; g.fillRect(bx - 1, by - 1, w2 + 2, h2 + 2); g.fillStyle = stone; g.fillRect(bx, by, w2, h2); g.fillStyle = lite; g.fillRect(bx, by, w2, 2); g.fillStyle = dark; g.fillRect(bx, by + h2 - 3, w2, 3); };
-  for (const side of [-1, 1]) for (let k = 0; k < 6; k++) brick(X + side * (iw / 2 * p + 4) - (side < 0 ? 24 : 0), Y - (k + 1) * 24, 24, 23);
-  for (let k = 0; k <= 10; k++) { const a = Math.PI + k / 10 * Math.PI, rx = iw / 2 * p + 16, ry = ih / 2 * p + 4, bx = X + Math.cos(a) * rx, by = cy - 10 + Math.sin(a) * ry; brick(Math.round(bx - 12), Math.round(by - 11), 24, 22); }
-  // 룬: 보스 등급 색으로 천천히 숨 쉰다
-  for (const side of [-1, 1]) for (let k = 0; k < 3; k++) { const a = .5 + .5 * Math.sin(t * 2.4 + k + side); g.fillStyle = rgba(ore, .5 + a * .5); g.fillRect(X + side * (iw / 2 * p + 16) - 4, Y - 40 - k * 44, 8, 12); g.globalCompositeOperation = 'lighter'; glowDot(g, X + side * (iw / 2 * p + 16), Y - 34 - k * 44, 16, ore, .3 * a); g.globalCompositeOperation = 'source-over'; }
-  // 이마돌: 보스 문장
-  g.fillStyle = PX_OUT; g.fillRect(X - 15, cy - ih / 2 * p - 34, 30, 28); g.fillStyle = '#d2a94e'; g.fillRect(X - 13, cy - ih / 2 * p - 32, 26, 24); g.fillStyle = B.col; g.fillRect(X - 7, cy - ih / 2 * p - 26, 14, 12); g.fillStyle = '#fff'; g.fillRect(X - 3, cy - ih / 2 * p - 23, 6, 6);
-  if (Math.random() < .2) addP({ x: X + R(-50, 50), y: cy + R(-60, 60), vx: R(-10, 10), vy: R(-40, -10), life: R(.6, 1.2), size: 2, c: ore, glow: 1, grav: -10 });
+  portalBuf.getContext('2d').putImageData(portalImg, 0, 0);
+  g.drawImage(portalBuf, x0 + 14 * p, y0, VW * p, VH2 * p);
+  // 안쪽에서 떠오르는 빛 알갱이
+  addG(() => { for (let i = 0; i < 10; i++) { const k = bfr(t * .35 + i / 10), px = PORTAL_C[0] + Math.sin(i * 7.3 + t * .8) * 11, py = 68 - k * 52; if (!portalInside(Math.round(px), Math.round(py))) continue; g.globalAlpha = Math.sin(k * Math.PI) * .9; g.fillStyle = i % 2 ? '#ffffff' : pal[4]; g.fillRect(x0 + Math.round(px) * p, y0 + Math.round(py) * p, p, p); } g.globalAlpha = 1; glowDot(g, cx, cy, 34, pal[4], .5 + Math.sin(t * 3) * .1); });
+  g.drawImage(o.arch, x0 - p, y0 - p, o.arch.width * p, o.arch.height * p);
+  // 기둥 룬: 아래에서 위로 차례로 불이 들어온다
+  const GLY = [[1, 0, 1, 1, 1, 1, 0, 1, 0, 1, 1, 0, 1, 0, 1], [0, 1, 0, 1, 1, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0], [1, 1, 1, 0, 1, 0, 1, 1, 1, 0, 1, 0, 1, 1, 1]];
+  addG(() => { for (const xs of [9, 51]) [54, 45, 36].forEach((yy, k) => { const a = .35 + .65 * Math.max(0, Math.sin(t * 2.2 - k * .9 - (xs > 30 ? .45 : 0))); g.globalAlpha = a; g.fillStyle = o.ore || col; GLY[(k + (xs > 30 ? 1 : 0)) % 3].forEach((on, i) => { if (on) g.fillRect(x0 + (xs + i % 3) * p, y0 + (yy - 2 + Math.floor(i / 3)) * p, p, p); }); glowDot(g, x0 + (xs + 1.5) * p, y0 + yy * p, 12, o.ore || col, .35 * a); }); g.globalAlpha = 1; glowDot(g, x0 + 32 * p, y0 + 7 * p, 14, o.gem, .7 + Math.sin(t * 2.6) * .2); });
+  return { top: y0, cx, cy };
+}
+function mixHex(a, b, k) { const A = hexToRgb(a), B2 = hexToRgb(b); return '#' + A.map((v, i) => Math.round(lerp(v, B2[i], k)).toString(16).padStart(2, '0')).join(''); }
+// 게이트: 그 지층 돌로 쌓은 아치, 보스 색 소용돌이, 쐐기돌에 보스 색 보석
+function drawGate(gt) {
+  const Ly = LAYERS[gt.L], ore = Ly.ore[0], X = gt.x * TS + 16, Y = (gt.y + 1) * TS, B = BOSSES[gt.L];
+  g.save(); g.imageSmoothingEnabled = false;
+  const r = drawPortal(X, Y, { arch: portalArch('g' + gt.L, mixHex(Ly.rock, '#ffffff', .12), B.col), col: B.col, ore, gem: B.col });
   g.restore();
   // 가까이 가면 안내
   if (nearGate() === gt && !opening) {
     const msg = `${matchMedia('(pointer: coarse)').matches ? '🌀 버튼' : 'E'} · ${B.name}의 게이트`;
-    g.font = 'bold 12px "Gowun Dodum",sans-serif'; const w2 = g.measureText(msg).width + 20, ty = cy - ih / 2 * p - 54;
+    g.font = 'bold 12px "Gowun Dodum",sans-serif'; const w2 = g.measureText(msg).width + 20, ty = r.top - 14;
     g.fillStyle = PX_OUT; g.fillRect(X - w2 / 2 - 2, ty - 16, w2 + 4, 24); g.fillStyle = '#2a1e34'; g.fillRect(X - w2 / 2, ty - 14, w2, 20); g.fillStyle = '#ffe39a'; g.textAlign = 'center'; g.fillText(msg, X, ty);
   }
 }
@@ -3561,9 +3588,11 @@ function drawDungeon() {
     }
   }
   if (DUN.state === 'win' && DUN.exitPortal) {
-    const p = DUN.exitPortal; g.globalCompositeOperation = 'lighter'; glowDot(g, p.x, p.y, 70, '#fff3b0', .55 + Math.sin(t * 3) * .1); g.globalCompositeOperation = 'source-over';
-    for (let k = 0; k < 16; k++) { const a = k / 16 * TAU + t * 2, r = 26 + Math.sin(t * 4 + k) * 3; g.fillStyle = k % 2 ? '#fff3b0' : B.col; g.fillRect(Math.round(p.x + Math.cos(a) * r * .6) - 2, Math.round(p.y + Math.sin(a) * r) - 2, 4, 4); }
-    if (DUN.nearExit) { g.font = 'bold 12px "Gowun Dodum",sans-serif'; g.textAlign = 'center'; g.fillStyle = '#000'; g.fillText(`${matchMedia('(pointer: coarse)').matches ? '🌀 버튼' : 'E'} · 밖으로 나가기`, p.x + 1, p.y - 49); g.fillStyle = '#ffe39a'; g.fillText(`${matchMedia('(pointer: coarse)').matches ? '🌀 버튼' : 'E'} · 밖으로 나가기`, p.x, p.y - 50); }
+    // 빛의 문: 금빛 아치에 흰 금빛 소용돌이
+    const p = DUN.exitPortal; g.save(); g.imageSmoothingEnabled = false;
+    const r = drawPortal(p.x, world.arena.fy * TS, { arch: portalArch('exit', '#8a7a5a', '#fff3b0'), col: '#ffcf5a', ore: '#fff3b0', gem: '#ffffff', spin: 1.1 });
+    g.restore();
+    if (DUN.nearExit) { const msg = `${matchMedia('(pointer: coarse)').matches ? '🌀 버튼' : 'E'} · 밖으로 나가기`; g.font = 'bold 12px "Gowun Dodum",sans-serif'; const w2 = g.measureText(msg).width + 20, ty = r.top - 14; g.fillStyle = PX_OUT; g.fillRect(p.x - w2 / 2 - 2, ty - 16, w2 + 4, 24); g.fillStyle = '#2a1e34'; g.fillRect(p.x - w2 / 2, ty - 14, w2, 20); g.fillStyle = '#ffe39a'; g.textAlign = 'center'; g.fillText(msg, p.x, ty); }
   }
   // 무적 시간에는 깜빡인다
   if (DUN.inv > 0 && Math.floor(t * 20) % 2) player._blink = true; else player._blink = false;
