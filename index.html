@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="description" content="CELESTA — 하늘섬 왕국이 잠든 지층을 파 내려가며 16종의 보물 상자를 여는 2D 픽셀 아트 발굴 게임">
+<meta name="description" content="CELESTA — 하늘섬 왕국이 잠든 열 개의 지층을 파 내려가며 26종의 보물 상자를 여는 2D 픽셀 아트 발굴 게임">
 <title>셀레스타 발굴기</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -115,6 +115,36 @@ button[disabled]{opacity:.45;cursor:not-allowed;filter:none}
 @media (prefers-reduced-motion:reduce){.t-word span{opacity:1;transform:none;filter:none}}
 kbd{font-family:var(--f-body);background:#0006;border:1px solid var(--brass-d);border-bottom-width:3px;border-radius:5px;padding:1px 6px;font-size:12px;color:var(--parch)}
 #acctM{z-index:60}
+#tutM{z-index:55}
+#depthBar{position:fixed;left:auto;right:max(8px,env(safe-area-inset-right,0px));top:calc(env(safe-area-inset-top,0px) + 74px);bottom:auto;width:64px;height:calc(100vh - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px) - 150px);height:calc(100dvh - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px) - 150px);z-index:5;pointer-events:none;image-rendering:pixelated}
+#compassDial{position:fixed;inset:auto;left:max(12px,env(safe-area-inset-left,0px));top:calc(env(safe-area-inset-top,0px) + 108px);width:96px;height:122px;z-index:5;pointer-events:none}
+#trans{z-index:65;pointer-events:none}
+#stratum{position:fixed;left:50%;top:calc(env(safe-area-inset-top,0px) + 16%);transform:translateX(-50%);z-index:9;pointer-events:none;text-align:center;display:flex;flex-direction:column;gap:4px;padding:14px 34px;width:max-content;max-width:90vw;background:linear-gradient(90deg,#0000,#0b0710d8 20%,#0b0710d8 80%,#0000)}
+#stratum small{font-family:"Silkscreen",monospace;font-size:11px;letter-spacing:.35em;color:var(--c)}
+#stratum b{font-family:var(--f-display);font-weight:400;font-size:clamp(26px,5vw,42px);color:#f6ecd4;letter-spacing:.08em;text-shadow:0 3px 0 #000,0 0 24px var(--c)}
+#stratum i{font-style:normal;font-size:12px;color:#c8b8a0}
+#stratum::before,#stratum::after{content:"";position:absolute;left:10%;right:10%;height:1px;background:linear-gradient(90deg,#0000,var(--c),#0000)}
+#stratum::before{top:0}#stratum::after{bottom:0}
+#stratum.go{animation:strIn 3.2s ease forwards}
+@keyframes strIn{0%{opacity:0;letter-spacing:.3em;filter:blur(6px)}12%{opacity:1;filter:none}80%{opacity:1}100%{opacity:0;transform:translate(-50%,-10px)}}
+.sheet.tut{width:min(860px,100%)}
+.tut-head{display:flex;justify-content:space-between;align-items:center;font-family:"Silkscreen",monospace;font-size:11px;letter-spacing:.2em;color:var(--teal);margin-bottom:10px}
+.tut-head button{font-size:12px;padding:6px 10px}
+.tut-body{display:flex;gap:20px;align-items:center;flex-wrap:wrap}
+.tut-art{flex:0 1 auto;display:flex;gap:10px;align-items:center;justify-content:center;flex-wrap:wrap;min-width:0;max-width:100%}
+.tut-art canvas{position:static;width:auto;height:auto;max-width:100%;image-rendering:pixelated;border-radius:8px}
+.tut-text{flex:1 1 280px;min-width:0}
+.tut-text h2{margin:0 0 8px}
+.tut-text p{margin:0;line-height:1.8;color:#e8dcc0;font-size:14px;max-width:62ch}
+.tut-nav button{white-space:nowrap}
+.tut-nav{display:flex;justify-content:space-between;align-items:center;margin-top:18px;gap:10px}
+.tut-dots{display:flex;gap:6px}.tut-dots i{width:8px;height:8px;background:#0006;border:1px solid var(--brass-d);transform:rotate(45deg)}.tut-dots i.on{background:var(--brass)}
+.rar-ladder{display:grid;grid-template-columns:repeat(2,minmax(120px,1fr));gap:6px}
+.rar-ladder span{display:flex;justify-content:space-between;gap:10px;padding:6px 10px;border:1px solid var(--c);border-radius:6px;background:#0005;color:var(--c);font-size:13px}
+.rar-ladder small{font-family:"Silkscreen",monospace;font-size:9px;opacity:.8;align-self:center}
+.rar-ladder span.prism{background:linear-gradient(90deg,#ff5a5a33,#ffd36b33,#5aff9a33,#5ac8ff33,#c85aff33)}
+.rar-ladder span.heart{grid-column:1/-1;background:linear-gradient(90deg,#ff8fc833,#ffd36b33);font-weight:700}
+@media (max-width:640px){.btns .bl{display:none}.btns{max-width:none;gap:6px}.btns button{padding:9px 11px}#depthBar{width:48px;height:calc(100dvh - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px) - 240px)}#compassDial{width:78px;height:99px;top:calc(env(safe-area-inset-top,0px) + 100px)}}
 .acct-form{display:grid;gap:6px;margin-top:6px}
 .acct-form label{font-size:12px;color:var(--muted);letter-spacing:.04em;margin-top:6px}
 .acct-form input,.acct-srv input{font:15px var(--f-body);color:var(--parch);background:#0007;border:2px solid var(--brass-d);border-radius:8px;padding:10px 12px;min-width:0;width:100%;box-sizing:border-box;user-select:text;-webkit-user-select:text}
@@ -135,6 +165,10 @@ kbd{font-family:var(--f-body);background:#0006;border:1px solid var(--brass-d);b
 <canvas id="game"></canvas>
 <canvas id="fx"></canvas>
 
+<canvas id="depthBar" hidden aria-label="지층 위치 바"></canvas>
+<canvas id="compassDial" hidden aria-label="보물 나침반"></canvas>
+<div id="stratum" hidden></div>
+<canvas id="trans" hidden></canvas>
 <div class="hud" id="hud" hidden>
   <div class="left plate">
     <div class="layer-name" id="layerName">들풀 표토</div>
@@ -144,10 +178,11 @@ kbd{font-family:var(--f-body);background:#0006;border:1px solid var(--brass-d);b
   <div class="plate gold" id="gold">0 <small>셀라</small></div>
 </div>
 <div class="btns" id="btns" hidden>
-  <button id="bCamp" type="button">⛺ 야영지</button>
-  <button id="bReturn" type="button">↑ 귀환 (R)</button>
-  <button id="bCodex" type="button">📖 도감 (C)</button>
-  <button id="bAcct" type="button">☁ 로그인</button>
+  <button id="bCamp" type="button" aria-label="야영지">⛺<span class="bl"> 야영지</span></button>
+  <button id="bReturn" type="button" aria-label="귀환">↑<span class="bl"> 귀환 (R)</span></button>
+  <button id="bCodex" type="button" aria-label="도감">📖<span class="bl"> 도감 (C)</span></button>
+  <button id="bAcct" type="button" aria-label="계정">☁<span class="bl"> 로그인</span></button>
+  <button id="bHelp" type="button" aria-label="도움말">❔<span class="bl"> 도움말 (H)</span></button>
   <button id="bSound" type="button">🔊</button>
 </div>
 <div class="pad" id="pad">
@@ -185,6 +220,7 @@ kbd{font-family:var(--f-body);background:#0006;border:1px solid var(--brass-d);b
 
 <div class="modal" id="campM" hidden><div class="sheet" id="campS"></div></div>
 <div class="modal" id="codexM" hidden><div class="sheet" id="codexS"></div></div>
+<div class="modal" id="tutM" hidden><div class="sheet tut" id="tutS"></div></div>
 <div class="modal" id="acctM" hidden><div class="sheet" id="acctS" style="width:min(520px,100%)"></div></div>
 <script>
 "use strict";
@@ -268,11 +304,11 @@ const Sound = (() => {
     sparkle: (n = 6) => { for (let i = 0; i < n; i++) tone(N(84 + RI(0, 14)), .25, 'sine', .04, 1, i * .05); },
     unlock: () => { tone(900, .05, 'square', .06); tone(600, .08, 'square', .06, 1, .07); noise(.06, 2000, .1, 2, .07); },
     fanfare: r => {
-      const scales = [[60, 64, 67], [60, 64, 67, 72], [62, 66, 69, 74, 78], [57, 64, 69, 72, 76, 81], [60, 67, 72, 76, 79, 84, 88], [60, 64, 67, 71, 74, 79, 83, 86, 91]];
-      const s = scales[r] || scales[0];
+      const scales = [[60, 64, 67], [60, 64, 67, 72], [62, 66, 69, 74, 78], [57, 64, 69, 72, 76, 81], [60, 67, 72, 76, 79, 84, 88], [57, 60, 64, 69, 72, 76, 81, 84], [55, 62, 67, 71, 74, 79, 83, 86], [60, 64, 67, 72, 76, 79, 84, 88, 91], [59, 63, 66, 71, 75, 78, 83, 87, 90], [60, 62, 64, 67, 69, 72, 74, 76, 79, 81, 84], [60, 64, 67, 71, 74, 79, 83, 86, 91]];
+      const s = scales[Math.min(r, scales.length - 1)] || scales[0];
       s.forEach((n, i) => { tone(N(n), .5 + r * .1, 'triangle', .09, 1, i * .07); tone(N(n + 12), .4, 'sine', .04, 1, i * .07 + .02); });
       if (r >= 3) s.forEach((n, i) => tone(N(n - 12), 1.4, 'sawtooth', .025, 1, .5 + i * .01));
-      if (r >= 4) sfx.sparkle(12);
+      if (r >= 4) sfx.sparkle(12 + Math.max(0, r - 4) * 3);
     },
     reveal: r => { tone(N(72 + r * 3), .25, 'triangle', .07); tone(N(79 + r * 3), .3, 'sine', .05, 1, .06); if (r >= 3) tone(N(91 + r), .5, 'sine', .04, 1, .12); },
     buy: () => { tone(N(76), .1, 'square', .05); tone(N(83), .2, 'square', .05, 1, .08); tone(N(88), .3, 'triangle', .05, 1, .16); },
@@ -459,8 +495,44 @@ const Sound = (() => {
       if (st === 0) tr.lead = Math.floor(s / 64) % 2 ? genLead(tr, scaleOf(42, [0, 2, 3, 5, 7, 9, 10], 66, 85), ch, Math.floor(s / 16), [[16], [8, 8], [12, 4]], 66, 85) : [];
       for (const [p, m, l] of tr.lead || []) if (p === st) INST.bell(tr, m, t, sp * l, .035);
     } },
+    // 가라앉은 하늘바다: 물결 패드, 하프, 거품 같은 종소리
+    L6: { bpm: 68, prog: [chord(46, [0, 4, 7, 11]), chord(48, [0, 4, 7, 14]), chord(43, [0, 3, 7, 10, 14]), chord(51, [0, 4, 7, 11, 18])], play(tr, s, t, sp) {
+      const bar = Math.floor(s / 16) % 4, st = s % 16, ch = this.prog[bar];
+      if (st === 0) { INST.pad(tr, ch.p, t, sp * 16 + .5, .028, 900 + (bar % 2) * 600); INST.bass(tr, ch.b, t, sp * 14, .06); }
+      if (st % 2 === 0) INST.harp(tr, [ch.p[0], ch.p[2], ch.p[1], ch.p[3], ch.p[2] + 12, ch.p[3], ch.p[1], ch.p[2]][(st >> 1)] + 12, t, sp * 2, .03);
+      if (hash2(s, 2, 61) > .9) INST.bell(tr, ch.tones[Math.floor(hash2(s, 3, 61) * ch.tones.length)] + 36, t, .6, .016);
+      if (st === 0) tr.lead = genLead(tr, scaleOf(46, [0, 2, 4, 6, 7, 9, 11], 70, 87), ch, Math.floor(s / 16), [[8, 8], [6, 2, 8], [12, 4], [4, 4, 8]], 70, 87);
+      for (const [p, m, l] of tr.lead || []) if (p === st) (Math.floor(s / 64) % 2 ? INST.flute : INST.bell)(tr, m, t, sp * l * .95, .04);
+    } },
+    // 태초의 숲: 마림바와 플루트가 뛰노는 밝은 숲
+    L7: { bpm: 86, prog: [chord(38, [0, 4, 7, 14]), chord(48, [0, 4, 7, 14]), chord(43, [0, 4, 7, 11]), chord(45, [0, 5, 7, 12])], play(tr, s, t, sp) {
+      const bar = Math.floor(s / 16) % 4, st = s % 16, ch = this.prog[bar];
+      if (st === 0) INST.pad(tr, ch.p, t, sp * 16 + .2, .02, 1500);
+      if (st % 8 === 0) INST.bass(tr, ch.b, t, sp * 3, .07); if (st % 8 === 6) INST.bass(tr, ch.b + 12, t, sp * 1.5, .05);
+      if (st % 2 === 0) INST.marimba(tr, [ch.p[0], ch.p[2], ch.p[3], ch.p[2], ch.p[1], ch.p[2], ch.p[3] + 12, ch.p[2]][(st >> 1)] + 12, t, sp, .05);
+      if (st % 2 === 1) INST.shaker(tr, t, .013); if (st === 4 || st === 12) INST.tick(tr, t, .02); if (st === 0) INST.kick(tr, t, .05);
+      if (st === 0) tr.lead = Math.floor(s / 64) % 2 ? genLead(tr, scaleOf(38, [0, 2, 4, 5, 7, 9, 10], 69, 88), ch, Math.floor(s / 16), [[2, 2, 4, 4, 4], [4, 2, 2, 8], [6, 2, 4, 4]], 69, 88) : [];
+      for (const [p, m, l] of tr.lead || []) if (p === st) INST.flute(tr, m, t, sp * l * .9, .042);
+    } },
+    // 공허의 경계: 온음 화음, 길게 휘는 소리, 드문 종소리
+    L8: { bpm: 56, prog: [chord(37, [0, 4, 8, 14]), chord(39, [0, 4, 8, 10]), chord(41, [0, 4, 8, 14]), chord(36, [0, 6, 10, 16])], play(tr, s, t, sp) {
+      const bar = Math.floor(s / 16) % 4, st = s % 16, ch = this.prog[bar];
+      if (st === 0) { INST.pad(tr, ch.p.map(x => x - 12), t, sp * 16 + .8, .03, 800); INST.choir(tr, [ch.p[0], ch.p[2]], t, sp * 16, .014); INST.bass(tr, ch.b, t, sp * 15, .05); }
+      if (bar % 2 === 1 && st === 0) INST.glide(tr, ch.tones[1] + 12, t, sp * 20, .02);
+      if (hash2(s, 5, 71) > .9) INST.bell(tr, ch.tones[Math.floor(hash2(s, 6, 71) * ch.tones.length)] + 24 + (hash2(s, 7, 71) > .5 ? 1 : 0), t, 1, .016);
+      if (st === 8 && bar === 3) INST.tick(tr, t, .03);
+    } },
+    // 왕좌의 금고: 합창과 하프, 팀파니 — 가장 장엄하게
+    L9: { bpm: 64, prog: [chord(39, [0, 4, 7, 14]), chord(36, [0, 3, 7, 10]), chord(44, [0, 4, 7, 11]), chord(46, [0, 4, 7, 9])], play(tr, s, t, sp) {
+      const bar = Math.floor(s / 16) % 4, st = s % 16, ch = this.prog[bar];
+      if (st === 0) { INST.choir(tr, ch.p, t, sp * 16 + .3, .032); INST.pad(tr, ch.p.map(x => x + 12), t, sp * 16, .012, 1800); INST.bass(tr, ch.b, t, sp * 15, .085); INST.taiko(tr, t, .12); }
+      if (st === 8) INST.taiko(tr, t, bar === 3 ? .1 : .06);
+      if (st % 2 === 0) INST.harp(tr, [ch.p[0], ch.p[1], ch.p[2], ch.p[3], ch.p[2] + 12, ch.p[3] + 12, ch.p[2], ch.p[1]][(st >> 1)] + 12, t, sp * 2, .034);
+      if (st === 0) tr.lead = genLead(tr, scaleOf(39, [0, 2, 4, 5, 7, 9, 11], 67, 87), ch, Math.floor(s / 16), [[6, 2, 8], [4, 4, 8], [8, 4, 4], [12, 4]], 67, 87);
+      for (const [p, m, l] of tr.lead || []) if (p === st) INST.flute(tr, m, t, sp * l * .95, .05);
+    } },
   };
-  function setDrone(layer) { setMusic(layer < 0 ? 'surface' : 'L' + Math.min(5, layer)); }
+  function setDrone(layer) { setMusic(layer < 0 ? 'surface' : 'L' + Math.min(9, layer)); }
   function duck(d) { ducked = d; if (bus) bus.gain.setTargetAtTime(d ? .16 : .62, ac.currentTime, d ? .25 : 1.2); }
   return {
     init, sfx, setDrone, setMusic, duck,
@@ -472,25 +544,39 @@ const Sound = (() => {
 const S = Sound.sfx;
 
 // ───────────── 세계관 데이터 ─────────────
+// 등급: 전설 뒤로 다섯 단계, 그리고 셀레스타의 심장만을 위한 '셀레스타' 등급
 const RARITY = [
-  { name: '일반', c: '#c9c4b8' }, { name: '고급', c: '#6fd36a' }, { name: '희귀', c: '#4fa6ff' },
-  { name: '영웅', c: '#b56cff' }, { name: '전설', c: '#ffad33' }, { name: '신화', c: '#ff5f8f' },
+  { name: '일반', en: 'COMMON', c: '#c9c4b8' }, { name: '고급', en: 'UNCOMMON', c: '#6fd36a' }, { name: '희귀', en: 'RARE', c: '#4fa6ff' },
+  { name: '영웅', en: 'EPIC', c: '#b56cff' }, { name: '전설', en: 'LEGENDARY', c: '#ffad33' }, { name: '신화', en: 'MYTHIC', c: '#ff4d5e' },
+  { name: '고대', en: 'ANCIENT', c: '#36e0b8' }, { name: '천상', en: 'CELESTIAL', c: '#fff3b0' }, { name: '성좌', en: 'ASTRAL', c: '#8c7dff' },
+  { name: '태초', en: 'PRIMORDIAL', c: '#ffffff', prism: 1 }, { name: '셀레스타', en: 'CELESTA', c: '#ff8fc8', heart: 1 },
 ];
-const TS = 32, W = 44, H = 212, SURF = 6;
+const TOP_TIER = 9, HEART_TIER = 10;
+const rarCol = (r, t = time) => RARITY[r].prism ? hsl((t * 90) % 360, 90, 78) : RARITY[r].c;
+const TS = 32, W = 52, H = 340, SURF = 6;
 const LAYERS = [
-  { name: '들풀 표토', from: SURF, to: 26, pick: 1, hard: .32, dirt: '#7b5434', dark: '#4e321e', rock: '#6d6458', bg: '#2a1b12', ore: ['#c98a4b', '#d9d2c4'],
+  { name: '들풀 표토', en: 'TOPSOIL', from: SURF, to: 28, pick: 1, hard: .32, dirt: '#7b5434', dark: '#4e321e', rock: '#6d6458', bg: '#2a1b12', ore: ['#c98a4b', '#d9d2c4'],
     lore: '개척민의 발자국이 남은 얕은 흙. 대낙하 뒤 처음 이 땅을 일군 사람들의 잃어버린 물건이 묻혀 있다.' },
-  { name: '뼈의 지층', from: 26, to: 58, pick: 1, hard: .45, dirt: '#9c835e', dark: '#62513a', rock: '#857a68', bg: '#2b2318', ore: ['#d9d2c4', '#ffd66b'],
+  { name: '뼈의 지층', en: 'OSSUARY', from: 28, to: 60, pick: 1, hard: .45, dirt: '#9c835e', dark: '#62513a', rock: '#857a68', bg: '#2b2318', ore: ['#d9d2c4', '#ffd66b'],
     lore: '하늘고래와 고대 짐승의 뼈가 켜켜이 쌓인 층. 가끔 아직 깨지지 않은 화석 알이 발견된다.' },
-  { name: '울림 수정굴', from: 58, to: 94, pick: 2, hard: .6, dirt: '#4a5675', dark: '#2c3450', rock: '#5f6b8a', bg: '#141a2c', ore: ['#8fe3ff', '#ffd66b'],
+  { name: '울림 수정굴', en: 'ECHO CRYSTAL', from: 60, to: 94, pick: 2, hard: .6, dirt: '#4a5675', dark: '#2c3450', rock: '#5f6b8a', bg: '#141a2c', ore: ['#8fe3ff', '#ffd66b'],
     lore: '바람이 지나가면 수정이 노래하는 동굴. 북방 금고지기 히엠 가문의 얼음 상자가 이곳에 숨겨졌다.' },
-  { name: '잿불 심층', from: 94, to: 130, pick: 3, hard: .78, dirt: '#5e2c22', dark: '#3a1712', rock: '#4a3a36', bg: '#1d0b08', ore: ['#ff6a3a', '#ffd66b'],
+  { name: '잿불 심층', en: 'EMBER DEEP', from: 94, to: 128, pick: 3, hard: .78, dirt: '#5e2c22', dark: '#3a1712', rock: '#4a3a36', bg: '#1d0b08', ore: ['#ff6a3a', '#ffd66b'],
     lore: '땅의 심장이 가까워 공기가 뜨겁다. 대장장이 가문 이그나가 용암 속에서 상자를 벼렸다는 전설이 있다.' },
-  { name: '셀레스타 유적층', from: 130, to: 170, pick: 4, hard: .95, dirt: '#7a6440', dark: '#4b3c24', rock: '#8f7f62', bg: '#211a10', ore: ['#ffd66b', '#7de0c0'],
+  { name: '셀레스타 유적층', en: 'SKY RUINS', from: 128, to: 164, pick: 4, hard: .95, dirt: '#7a6440', dark: '#4b3c24', rock: '#8f7f62', bg: '#211a10', ore: ['#ffd66b', '#7de0c0'],
     lore: '떨어진 하늘섬의 도시가 그대로 묻힌 층. 무너진 회랑과 왕실 공방의 금고가 잠들어 있다.' },
-  { name: '별이 잠든 심연', from: 170, to: H - 3, pick: 5, hard: 1.15, dirt: '#2f2550', dark: '#1a1433', rock: '#3c3366', bg: '#0b0818', ore: ['#c7a8ff', '#fff4b0'],
-    lore: '하늘섬이 끌고 내려온 밤하늘이 굳어 버린 곳. 셀레스타의 심장이 맨 밑바닥 왕좌의 금고에서 기다린다.' },
+  { name: '별이 잠든 심연', en: 'STARLIT ABYSS', from: 164, to: 200, pick: 5, hard: 1.15, dirt: '#2f2550', dark: '#1a1433', rock: '#3c3366', bg: '#0b0818', ore: ['#c7a8ff', '#fff4b0'],
+    lore: '하늘섬이 끌고 내려온 밤하늘이 굳어 버린 곳. 별을 읽던 사제들의 성물함이 흩어져 있다.' },
+  { name: '가라앉은 하늘바다', en: 'SUNKEN SKYSEA', from: 200, to: 238, pick: 6, hard: 1.35, dirt: '#2f6f7a', dark: '#1a4450', rock: '#4a8a94', bg: '#0a2630', ore: ['#7fffe0', '#ffd0f0'],
+    lore: '대낙하 때 함께 떨어진 하늘의 바다가 땅속에 고였다. 산호가 자라고 해파리 불빛이 떠다닌다.' },
+  { name: '태초의 숲', en: 'PRIMORDIAL GROVE', from: 238, to: 276, pick: 7, hard: 1.55, dirt: '#3e5a2a', dark: '#24361a', rock: '#5a6e44', bg: '#0e1a0a', ore: ['#b8ff6a', '#ffe08a'],
+    lore: '세계수의 뿌리가 내려온 숲. 포자가 반딧불처럼 빛나고, 호박 속에 태초의 생명이 잠들어 있다.' },
+  { name: '공허의 경계', en: 'VOID RIM', from: 276, to: 312, pick: 8, hard: 1.8, dirt: '#2a1636', dark: '#140a1c', rock: '#3e2650', bg: '#07030c', ore: ['#ff5af0', '#9af0ff'],
+    lore: '빛이 끝나는 곳. 공허의 함이 남긴 균열이 지층을 조금씩 갉아먹고 있다.' },
+  { name: '왕좌의 금고', en: 'THRONE VAULT', from: 312, to: H - 3, pick: 9, hard: 2.1, dirt: '#6a3a4a', dark: '#40202c', rock: '#8a5a6a', bg: '#1a0a12', ore: ['#ffc0e0', '#fff0b0'],
+    lore: '셀레스타 왕좌가 가라앉은 마지막 지층. 일곱 봉인에 둘러싸인 심장이 맨 밑에서 기다린다.' },
 ];
+const LAST_L = LAYERS.length - 1;
 const layerAt = row => { for (let i = LAYERS.length - 1; i >= 0; i--) if (row >= LAYERS[i].from) return i; return -1; };
 
 // 상자 16종: tier는 기본 등급, style은 그리는 방법, fx는 개봉 연출
@@ -503,7 +589,7 @@ const CHESTS = {
     lore: '숲의 금고지기 베르데 가문의 상자. 살아 있는 덩굴이 열쇠 대신 뚜껑을 붙들고 있다.' },
   egg:    { name: '하늘고래 화석알', tier: 1, layers: [1], w: 6, body: '#d8c8a2', trim: '#9c8a62', metal: '#efe2c0', glow: '#fff1c4',
     lore: '하늘을 헤엄치던 고래의 알이 돌처럼 굳었다. 무엇이 들어 있는지는 깨 봐야 안다.' },
-  pirate: { name: '두더지 선단 금화궤', tier: 2, layers: [0, 1, 2, 3], w: 4, body: '#6a2e22', trim: '#3a1a12', metal: '#e8b84a', glow: '#ffd66b',
+  pirate: { name: '두더지 선단 금화궤', tier: 2, layers: [0, 1, 2, 3, 6], w: 4, body: '#6a2e22', trim: '#3a1a12', metal: '#e8b84a', glow: '#ffd66b',
     lore: '지하 강을 따라 금을 빼돌리던 밀수꾼 ‘두더지 선단’의 금고. 뚜껑을 열면 금화가 쏟아진다.' },
   crystal:{ name: '울림 수정함', tier: 2, layers: [2], w: 6, body: '#6fd0ff', trim: '#2a6a9a', metal: '#e6fbff', glow: '#9ff0ff',
     lore: '노래하는 수정을 깎아 만든 상자. 정확한 음이 울리면 스스로 산산조각 난다.' },
@@ -517,18 +603,39 @@ const CHESTS = {
     lore: '대장장이 가문 이그나가 용암 속에서 벼린 상자. 뜨거워질수록 스스로 열린다.' },
   clock:  { name: '크로노스 태엽금고', tier: 3, layers: [4], w: 5, body: '#5a4a32', trim: '#2a2216', metal: '#d8b25a', glow: '#ffe7a0',
     lore: '왕실 기술자 크로노스 공방의 금고. 열세 개의 톱니가 정확히 맞물려야 문이 열린다.' },
-  mimic:  { name: '미믹', tier: 2, layers: [0, 1, 2, 3, 4, 5], w: 0, body: '#8a5a32', trim: '#5a3a1e', metal: '#9a9a9a', glow: '#ff6a6a',
+  mimic:  { name: '미믹', tier: 2, layers: [0, 1, 2, 3, 4, 5, 6, 7, 8], w: 0, body: '#8a5a32', trim: '#5a3a1e', metal: '#9a9a9a', glow: '#ff6a6a',
     lore: '상자인 척 숨어 있는 생물. 화나게 만들면 물지만, 잘 달래면 삼킨 보물을 토해 낸다.' },
-  royal:  { name: '왕가의 황금관', tier: 4, layers: [4, 5], w: 3, body: '#b8862e', trim: '#5a3a10', metal: '#fff0b0', glow: '#ffd36b',
+  royal:  { name: '왕가의 황금관', tier: 4, layers: [4, 5, 9], w: 3, body: '#b8862e', trim: '#5a3a10', metal: '#fff0b0', glow: '#ffd36b',
     lore: '셀레스타 왕가의 보물을 담은 관. 도둑을 막으려 일곱 겹 사슬로 묶어 두었다.' },
   star:   { name: '별빛 성물함', tier: 4, layers: [5], w: 4, body: '#24305e', trim: '#0e1430', metal: '#e6d7ff', glow: '#bfd0ff',
     lore: '별을 읽던 사제들이 하늘의 조각을 담아 둔 성물함. 열면 별자리가 다시 그려진다.' },
-  void:   { name: '공허의 함', tier: 4, layers: [5], w: 3, body: '#120c1e', trim: '#05030a', metal: '#9a5cff', glow: '#c08aff',
+  void:   { name: '공허의 함', tier: 4, layers: [5, 8], w: 3, body: '#120c1e', trim: '#05030a', metal: '#9a5cff', glow: '#c08aff',
     lore: '대낙하의 원인이라 전해지는 금지된 함. 열리는 순간 주변의 빛을 모조리 삼킨다.' },
-  heart:  { name: '셀레스타의 심장', tier: 5, layers: [], w: 0, body: '#ff5f8f', trim: '#7a1a3a', metal: '#fff', glow: '#ffc0d8',
+  coral:  { name: '산호 보물단지', tier: 3, layers: [6], w: 6, body: '#ff8a8a', trim: '#7a2a3a', metal: '#ffe0d0', glow: '#ffc8d8',
+    lore: '하늘바다 바닥에서 산호가 감싸 자란 단지. 왕비의 시녀들이 진주를 숨겨 두던 곳이다.' },
+  anchor: { name: '하늘선 닻궤', tier: 4, layers: [6], w: 4, body: '#2a4a5a', trim: '#12242c', metal: '#d8b25a', glow: '#9ae8ff',
+    lore: '대낙하 때 침몰한 하늘선의 선장 금고. 쇠사슬에 묶인 닻이 아직도 상자를 붙잡고 있다.' },
+  jelly:  { name: '해파리 등불함', tier: 5, layers: [6, 7], w: 3, body: '#7fffe0', trim: '#2a7a8a', metal: '#e0fff8', glow: '#9afff0',
+    lore: '빛나는 해파리가 보물을 품은 채 굳어 버렸다. 맥박처럼 깜박이는 동안만 열 수 있다.' },
+  amber:  { name: '태초 호박 봉인석', tier: 4, layers: [7], w: 5, body: '#e8a030', trim: '#7a4a10', metal: '#fff0b0', glow: '#ffd27a',
+    lore: '세계수의 수액이 굳은 거대한 호박. 그 안에 상자 하나가 통째로 갇혀 있다.' },
+  bloom:  { name: '포자 꽃봉오리', tier: 5, layers: [7], w: 4, body: '#d86ab8', trim: '#5a2a5a', metal: '#b8ff6a', glow: '#ffb8f0',
+    lore: '삼백 년에 한 번 피는 꽃. 봉오리가 열리면 꽃잎 사이에서 보물이 떠오른다.' },
+  seed:   { name: '세계수의 씨앗함', tier: 6, layers: [7, 8], w: 2, body: '#6a8a3a', trim: '#2a3a14', metal: '#d8ffa0', glow: '#c8ff8a',
+    lore: '베르데 가문이 마지막까지 지킨 세계수의 씨앗. 땅에 뿌리를 내리며 스스로 갈라진다.' },
+  rift:   { name: '균열의 함', tier: 6, layers: [8], w: 3, body: '#2a1438', trim: '#0a0410', metal: '#ff5af0', glow: '#ff9af8',
+    lore: '공허에 반쯤 먹힌 상자. 여기에 있는 것 같기도, 없는 것 같기도 하다.' },
+  eclipse:{ name: '일식의 성궤', tier: 7, layers: [8, 9], w: 2, body: '#1a1420', trim: '#080608', metal: '#ffd36b', glow: '#fff3b0',
+    lore: '해와 달이 겹치는 순간에만 열리도록 만든 왕실 성궤. 검은 원 뒤에서 금빛 코로나가 타오른다.' },
+  astral: { name: '성좌의 방주', tier: 8, layers: [9], w: 2, body: '#1c1a4a', trim: '#0a0820', metal: '#c8c0ff', glow: '#a89cff',
+    lore: '하늘섬 사제들이 별자리째 옮겨 담았다는 방주. 열면 선이 이어지며 성좌가 깨어난다.' },
+  genesis:{ name: '태초의 알', tier: 9, layers: [9], w: 1, body: '#fff8e8', trim: '#c8b8a0', metal: '#ffffff', glow: '#ffffff',
+    lore: '세상이 생기기 전부터 있었다는 알. 빛의 일곱 빛깔이 껍질 안에서 소용돌이친다.' },
+  heart:  { name: '셀레스타의 심장', tier: 10, layers: [], w: 0, body: '#ff5f8f', trim: '#7a1a3a', metal: '#fff', glow: '#ffc0d8',
     lore: '일곱 금고지기 가문이 저마다 봉인을 하나씩 걸어 둔 왕국의 심장. 이것이 다시 뛰면 셀레스타가 떠오른다고 한다.' },
 };
 const CHEST_ORDER = Object.keys(CHESTS);
+CHESTS.forge = { name: '운명의 모루', tier: 0, layers: [], w: 0, body: '#4a4a58', trim: '#1a1a22', metal: '#ffd36b', glow: '#ffb35a', lore: '황동 나침반 조합의 대장간에 있는 모루. 무엇이 벼려질지는 망치만이 안다.' };
 
 // 보물: [이름, 등급, 가치, 아이콘, 색, 설명]
 const TREASURES = [
@@ -569,17 +676,66 @@ const TREASURES = [
   ['하늘섬 항해 나침반', 4, 760, 'compass', '#ffd66b', '셀레스타를 하늘에 띄워 몰던 키의 나침반. 바늘이 위를 가리킨다.'],
   ['일곱 가문 인장반지', 4, 850, 'ring', '#ff9f4a', '일곱 금고지기의 문장이 둘러진 반지. 심장의 봉인과 공명한다.'],
   ['대사제의 성배', 4, 680, 'chalice', '#ffe7a0', '별빛을 받아 마시던 잔. 바닥에 성좌가 새겨져 있다.'],
-  ['셀레스타의 심장석', 5, 5000, 'heart', '#ff5f8f', '왕국을 하늘에 띄우던 심장. 손바닥 위에서 천천히 다시 뛰기 시작한다.'],
-  ['하늘 왕좌의 홀', 5, 4000, 'scepter', '#ffd6f0', '왕좌의 금고에서만 나오는 홀. 하늘섬의 주인을 증명한다.'],
+  ['셀레스타의 심장석', 10, 30000, 'heart', '#ff5f8f', '왕국을 하늘에 띄우던 심장. 손바닥 위에서 천천히 다시 뛰기 시작한다.'],
+  ['하늘 왕좌의 홀', 10, 24000, 'scepter', '#ffd6f0', '왕좌의 금고에서만 나오는 홀. 하늘섬의 주인을 증명한다.'],
+  ['하늘바다 산호관', 3, 380, 'crown', '#ff8fa8', '산호가 스스로 왕관 모양으로 자랐다. 바닷물에 닿으면 노래한다.'],
+  ['해파리 등불', 4, 820, 'orb', '#7fffe0', '해파리의 빛을 가둔 등불. 기름 없이도 영원히 빛난다.'],
+  ['세계수의 잎', 3, 360, 'scale', '#9adf5a', '시들지 않는 잎. 손에 쥐면 숲 냄새가 난다.'],
+  ['태초 호박', 4, 880, 'gem', '#ffb030', '세상 첫 번째 날벌레가 갇힌 호박. 아직 날갯짓을 한다.'],
+  ['하늘고래의 노래 조개', 5, 1600, 'spiral', '#ffd0f0', '귀에 대면 하늘고래의 노래가 들린다. 마지막 고래의 것이다.'],
+  ['이그나의 원시 불씨', 5, 1800, 'orb', '#ff4a2a', '이그나 가문이 처음 피운 불. 삼백 년째 꺼지지 않았다.'],
+  ['베르데의 세계수 씨앗', 5, 1700, 'orb', '#8aff6a', '심으면 하늘까지 자란다는 씨앗. 땅이 아직 준비되지 않았다.'],
+  ['대낙하 이전의 지도', 6, 2600, 'scroll', '#36e0b8', '셀레스타가 아직 하늘에 있을 때의 지도. 섬의 항로가 그려져 있다.'],
+  ['고대 금고지기의 가면', 6, 2900, 'mask', '#36e0b8', '일곱 가문이 생기기 전, 첫 금고지기가 쓰던 가면.'],
+  ['천사장의 깃털', 7, 4200, 'feather', '#fff3b0', '하늘섬을 지키던 수호자의 깃털. 떨어뜨리면 천천히 위로 오른다.'],
+  ['천상의 모래시계', 7, 4600, 'hourglass', '#ffe7a0', '모래가 위로 흐른다. 대낙하 이전의 시간이 담겨 있다.'],
+  ['성좌판', 8, 7000, 'tablet', '#8c7dff', '사제들이 별의 움직임을 새긴 석판. 밤마다 새 별이 새겨진다.'],
+  ['별을 낚는 바늘', 8, 7600, 'dagger', '#c8c0ff', '하늘에서 별을 꿰어 내리던 바늘. 끝이 아직 뜨겁다.'],
+  ['태초의 빛', 9, 12000, 'star', '#ffffff', '세상에 처음 생긴 빛의 조각. 모든 색이 그 안에 있다.'],
+  ['창세의 가면', 9, 13500, 'mask', '#fff8e0', '세상을 만든 이의 얼굴이라 전해진다. 들여다보면 내 얼굴이 보인다.'],
 ];
-const ORES = [['구리 원석', 3], ['은 원석', 7], ['금 원석', 14], ['수정 원석', 22], ['불꽃석', 32], ['성운석', 48]];
+const ORES = [['구리 원석', 3], ['은 원석', 7], ['금 원석', 14], ['수정 원석', 22], ['불꽃석', 32], ['성운석', 48], ['하늘진주', 64], ['세계수 호박', 82], ['공허 결정', 105], ['왕좌석', 130]];
 
+// 강화는 수치만 올린다. 곡괭이 종류는 '운명의 모루' 뽑기로 얻는다.
 const UPG = {
-  pick:    { name: '곡괭이', max: 6, cost: [0, 140, 450, 1200, 2800, 6200], desc: l => `파는 속도 ×${(1 + (l - 1) * .45).toFixed(2)}. ${['', '들풀·뼈 지층', '수정굴', '잿불 심층', '유적층', '심연', '심연(최고 속도)'][l]}까지 팔 수 있어요.` },
-  lantern: { name: '랜턴', max: 6, cost: [0, 110, 380, 950, 2200, 4800], desc: l => `기름 ${[0, 100, 150, 215, 290, 380, 480][l]} · 빛 반경 ${[0, 5, 6, 7, 8, 9, 10][l]}칸` },
+  pick:    { name: '곡괭이 강화', max: 10, cost: [0, 140, 450, 1200, 2800, 6200, 11000, 18000, 28000, 42000], desc: l => `기본 파는 힘 ×${(1 + (l - 1) * .45).toFixed(2)} · ${LAYERS.filter(x => x.pick <= l).slice(-1)[0].name}까지 팔 수 있어요.` },
+  lantern: { name: '랜턴', max: 8, cost: [0, 110, 380, 950, 2200, 4800, 9000, 16000], desc: l => `기름 ${[0, 100, 150, 215, 290, 380, 480, 600, 740][l]} · 빛 반경 ${[0, 5, 6, 7, 8, 9, 10, 11, 12][l]}칸` },
   luck:    { name: '행운 부적', max: 5, cost: [160, 520, 1400, 3200, 7000], desc: l => `상자 속 보물이 한 등급 오를 확률 +${l * 5}%` },
-  compass: { name: '보물 나침반', max: 3, cost: [220, 950, 3200], desc: l => l ? `반경 ${[0, 14, 24, 40][l]}칸 안의 상자를 화면 가장자리에 표시` : '근처 상자의 방향을 알려 줘요' },
+  compass: { name: '보물 나침반', max: 3, cost: [220, 950, 3200], desc: l => l ? ['', '반경 14칸 · 가장 가까운 상자 방향', '반경 24칸 · 거리와 등급까지 표시', '반경 40칸 · 다음 후보 2개와 봉인된 금고 표시'][l] : 'HUD 다이얼로 근처 상자를 가리켜요' },
 };
+
+// 곡괭이 24종 — shape는 머리 모양, spd는 파는 속도 배율, luck은 등급 상승 확률, oil은 기름 소모 배율, ore는 원석 값 배율
+const PICKS = [
+  ['rusty', '녹슨 곡괭이', 0, 'pick', '#8a8f9a', '#6a4a2a', { spd: 1 }, '조합에서 빌려준 첫 곡괭이. 손때가 묻어 정이 든다.'],
+  ['stone', '돌 곡괭이', 0, 'pick', '#9a8a78', '#7a5a32', { spd: 1.05, oil: .97 }, '개척민들이 처음 만든 곡괭이. 무겁지만 튼튼하다.'],
+  ['guild', '견습 조합 곡괭이', 0, 'hammer', '#b8bcc8', '#8a5a32', { spd: 1.08 }, '황동 나침반 조합의 정식 지급품. 손잡이에 조합 인장이 있다.'],
+  ['copper', '구리 곡괭이', 1, 'pick', '#d08a4a', '#5a3a1e', { spd: 1.15, ore: 1.1 }, '원석 냄새를 잘 맡는다는 구리 곡괭이.'],
+  ['steel', '강철 쌍날 곡괭이', 1, 'double', '#c8d0dc', '#4a3a2a', { spd: 1.22 }, '양쪽에 날이 달려 쉬지 않고 휘두를 수 있다.'],
+  ['pioneer', '개척자의 곡괭이', 1, 'hammer', '#a0a8b0', '#7a5a32', { spd: 1.15, oil: .9 }, '첫 개척민 대장의 곡괭이. 휘두를 때 숨이 덜 찬다.'],
+  ['silver', '은빛 곡괭이', 2, 'pick', '#e8eef8', '#3a3a52', { spd: 1.3, luck: .02 }, '달빛에 벼린 은 곡괭이. 상자 앞에서 가볍게 떨린다.'],
+  ['crystal', '수정 곡괭이', 2, 'crystal', '#8fe3ff', '#2a4a6a', { spd: 1.35, luck: .03 }, '울림 수정을 깎아 만든 날. 칠 때마다 맑은 소리가 난다.'],
+  ['bone', '하늘고래 뼈 곡괭이', 2, 'double', '#efe2c0', '#6a5a42', { spd: 1.3, oil: .85 }, '고래 뼈는 가볍고 단단하다. 오래 파도 지치지 않는다.'],
+  ['magma', '용암 곡괭이', 3, 'pick', '#ff6a2a', '#3a1a10', { spd: 1.5, ore: 1.25 }, '날이 늘 달아올라 있어 원석을 깨끗하게 떼어 낸다.'],
+  ['storm', '폭풍 드릴 곡괭이', 3, 'drill', '#8ab4ff', '#2a3354', { spd: 1.6 }, '뇌력 엔진 부품을 개조했다. 회전하는 날이 바위를 뚫는다.'],
+  ['frost', '서리 곡괭이', 3, 'crystal', '#cfe8ff', '#22344a', { spd: 1.45, oil: .8 }, '날 주변이 얼어붙어 랜턴 열기를 아껴 준다.'],
+  ['igna', '이그나의 대곡괭이', 4, 'hammer', '#ff8a3a', '#2a1208', { spd: 1.8, ore: 1.35 }, '이그나 가문의 가주만 쓰던 대곡괭이.'],
+  ['chrono', '크로노스 태엽 곡괭이', 4, 'drill', '#d8b25a', '#4a3a22', { spd: 1.9, oil: .8 }, '태엽이 감기는 동안 시간이 느리게 흐르는 것 같다.'],
+  ['royalp', '왕가의 황금 곡괭이', 4, 'pick', '#ffd36b', '#7a1a2a', { spd: 1.75, luck: .06 }, '왕이 의식 때 들던 곡괭이. 보물이 먼저 알아본다.'],
+  ['whale', '하늘고래의 이빨', 5, 'scythe', '#fff0f6', '#8a6a7a', { spd: 2.1, luck: .07 }, '마지막 하늘고래가 남긴 이빨을 그대로 벼렸다.'],
+  ['meteor', '별똥 곡괭이', 5, 'star', '#ff5a5a', '#3a1a2a', { spd: 2.2, ore: 1.4 }, '떨어진 별똥을 날로 썼다. 원석이 스스로 튀어나온다.'],
+  ['fall', '대낙하의 파편', 6, 'crystal', '#36e0b8', '#1a3a3a', { spd: 2.5, luck: .08, oil: .75 }, '셀레스타가 떨어질 때 부서진 하늘의 조각.'],
+  ['keeper', '금고지기의 열쇠도끼', 6, 'double', '#5affd0', '#2a4a3a', { spd: 2.4, luck: .1 }, '첫 금고지기가 쓰던 열쇠 겸 도끼. 어떤 봉인도 머뭇거린다.'],
+  ['seraph', '천상의 깃 곡괭이', 7, 'wing', '#fff3b0', '#c8a860', { spd: 2.9, oil: .6 }, '깃털처럼 가벼워 휘두르는 손이 지치지 않는다.'],
+  ['halo', '후광 곡괭이', 7, 'scythe', '#ffe7a0', '#fff8e0', { spd: 3, luck: .1 }, '날이 아니라 빛으로 판다. 지나간 자리에 금빛이 남는다.'],
+  ['astralp', '성좌 낫곡괭이', 8, 'scythe', '#8c7dff', '#1c1a4a', { spd: 3.4, luck: .12 }, '별자리 하나를 통째로 벼려 만든 낫.'],
+  ['nebula', '성운 드릴', 8, 'drill', '#b89cff', '#2a1a4a', { spd: 3.6, ore: 1.6 }, '성운을 감아 돌리는 드릴. 원석이 별처럼 쏟아진다.'],
+  ['genesisp', '태초의 곡괭이', 9, 'star', '#ffffff', '#c8b8a0', { spd: 4.2, luck: .15, oil: .5, ore: 1.8 }, '세상을 처음 판 곡괭이. 모든 색의 빛이 날 끝에서 흐른다.'],
+].map(([id, name, tier, shape, head, grip, st, lore]) => ({ id, name, tier, shape, head, grip, spd: st.spd || 1, luck: st.luck || 0, oil: st.oil || 1, ore: st.ore || 1, lore }));
+const PICK_BY = Object.fromEntries(PICKS.map(p => [p.id, p]));
+const GACHA_RATE = [40, 27, 16, 9, 4.5, 2, .9, .4, .15, .05];
+const GACHA_COST = [500, 4500];
+const DUPE_REFUND = [60, 90, 140, 220, 420, 800, 1500, 3000, 6000, 12000];
+function pickPerk(pk) { const a = [`속도 ×${pk.spd.toFixed(2)}`]; if (pk.luck) a.push(`행운 +${Math.round(pk.luck * 100)}%`); if (pk.oil < 1) a.push(`기름 −${Math.round((1 - pk.oil) * 100)}%`); if (pk.ore > 1) a.push(`원석 ×${pk.ore.toFixed(2)}`); return a.join(' · '); }
 
 // ───────────── 월드 생성 ─────────────
 const T = { AIR: 0, DIRT: 1, STONE: 2, ORE: 3, CHEST: 4, BRICK: 5, BED: 6, GOLDBRICK: 7 };
@@ -627,7 +783,7 @@ function genWorld(seed) {
     }
     torches.push([x0 + 1, y0 + 1], [x0 + w - 2, y0 + 1]);
     const cx = x0 + (w >> 1), cy = y0 + h - 2;
-    t[idx(cx, cy)] = T.CHEST;
+    t[idx(cx, cy)] = T.CHEST; ores.delete(idx(cx, cy));
     chests.set(idx(cx, cy), { type, vault: boost, L });
     // 양 옆 기둥 장식
     t[idx(cx - 2, cy)] = brick; t[idx(cx + 2, cy)] = brick;
@@ -645,7 +801,7 @@ function genWorld(seed) {
   });
   // 왕좌의 금고
   const tw = 19, th = 9, tx = (W - tw) >> 1, ty = H - 3 - th;
-  room(tx, ty, tw, th, T.GOLDBRICK, 5, 2, 'heart');
+  room(tx, ty, tw, th, T.GOLDBRICK, LAST_L, 2, 'heart');
   torches.push([tx + 5, ty + 2], [tx + tw - 6, ty + 2]);
   // 흩어진 상자
   for (let y = SURF + 2; y < H - 16; y++) {
@@ -655,13 +811,13 @@ function genWorld(seed) {
       if (t[i] === T.DIRT || t[i] === T.STONE || (t[i] === T.AIR && tileAt(x, y + 1) !== T.AIR)) {
         let type = rollChestType(L, r), disguise = null;
         if (r() < .06 && y > SURF + 12) { disguise = pick(['wood', 'iron', 'pirate']); type = 'mimic'; }
-        t[i] = T.CHEST; chests.set(i, { type, disguise, L });
+        t[i] = T.CHEST; ores.delete(i); chests.set(i, { type, disguise, L });
       }
     }
   }
   // 시작 지점 근처 보장 상자
   [[W / 2 + 3, SURF + 3, 'wood'], [W / 2 - 5, SURF + 5, 'wood'], [W / 2 + 7, SURF + 8, 'iron'], [W / 2 - 2, SURF + 11, 'vine']].forEach(([x, y, k]) => {
-    x = Math.floor(x); t[idx(x, y)] = T.CHEST; chests.set(idx(x, y), { type: k, L: 0 });
+    x = Math.floor(x); t[idx(x, y)] = T.CHEST; ores.delete(idx(x, y)); chests.set(idx(x, y), { type: k, L: 0 });
   });
   for (let x = 1; x < W - 1; x++) if (t[idx(x, SURF)] === T.AIR) t[idx(x, SURF)] = T.DIRT;
 }
@@ -697,7 +853,7 @@ function cobble(set, rr, ramp, n, dim = 0) {
 function bakeTiles() {
   LAYERS.forEach((Ly, L) => {
     const set = { dirt: [], stone: [], brick: [], bg: [], gold: [] }, dr = pxRamp(Ly.dirt), rk = pxRamp(Ly.rock), bgR = pxRamp(Ly.bg);
-    const brR = pxRamp(L === 4 ? '#8f7a52' : hexShift(Ly.rock, -6)), gdR = pxRamp('#a87a2a');
+    const brR = pxRamp(L === 4 ? '#8f7a52' : L === 9 ? '#9a6a3a' : hexShift(Ly.rock, -6)), gdR = pxRamp('#a87a2a');
     for (let v = 0; v < 4; v++) {
       let rr = mulberry(L * 100 + v * 7 + 1);
       set.dirt.push(pxTex(s => {
@@ -708,6 +864,10 @@ function bakeTiles() {
         if (L === 3 && rr() < .6) { let px = Math.floor(rr() * 16); for (let y = 0; y < 16; y++) { s(px, y, y % 5 === 2 ? '#ffd24a' : '#ff6a2a'); if (rr() < .4) px += rr() < .5 ? -1 : 1; } }
         if (L === 4 && rr() < .5) for (let k = 0; k < 3; k++) s(Math.floor(rr() * 16), Math.floor(rr() * 16), '#ffe08a');
         if (L === 5) for (let k = 0; k < 3; k++) { const px = Math.floor(rr() * 16), py = Math.floor(rr() * 16); s(px, py, k ? '#c7b8ff' : '#fff4d0'); }
+        if (L === 6) { if (rr() < .55) { const bx = 3 + Math.floor(rr() * 10), by = 6 + Math.floor(rr() * 8); for (let k = 0; k < 4; k++) s(bx, by - k, '#ff8aa0'); s(bx - 1, by - 2, '#ff8aa0'); s(bx + 1, by - 3, '#ffb0c0'); s(bx - 1, by - 3, '#ffb0c0'); } if (rr() < .6) s(Math.floor(rr() * 16), Math.floor(rr() * 16), '#fff0f8'); }
+        if (L === 7) { if (rr() < .6) { let px = Math.floor(rr() * 16); for (let y = 0; y < 16; y++) { s(px, y, '#5a3e22'); if (rr() < .35) px += rr() < .5 ? -1 : 1; } } for (let k = 0; k < 2; k++) s(Math.floor(rr() * 16), Math.floor(rr() * 16), '#c8ff7a'); }
+        if (L === 8) { if (rr() < .65) { let px = Math.floor(rr() * 16), py = 0; for (let k = 0; k < 12; k++) { s(px, py, k % 4 ? '#ff5af0' : '#ffb0f8'); px += rr() < .5 ? 1 : 0; py += 1; } } if (rr() < .5) s(Math.floor(rr() * 16), Math.floor(rr() * 16), '#9af0ff'); }
+        if (L === 9) { for (let k = 0; k < 3; k++) s(Math.floor(rr() * 16), Math.floor(rr() * 16), k ? '#ffe08a' : '#ffc0e0'); if (rr() < .4) { const bx = 4 + Math.floor(rr() * 8), by = 4 + Math.floor(rr() * 8); s(bx, by, '#ff8fb0'); s(bx + 1, by, '#ff8fb0'); s(bx, by + 1, '#c85a7a'); } }
       }));
       rr = mulberry(L * 200 + v * 13 + 3);
       set.stone.push(pxTex(s => cobble(s, rr, rk, 3 + (v % 2))));
@@ -787,6 +947,11 @@ function boxSet(type) {
       case 'royal': body[0] = body[6] = lid[4] = half[2] = Z; stamp(body, 1, 1, ['d', 'd', 'd', 'd', 'd']); stamp(body, 14, 1, ['d', 'd', 'd', 'd', 'd']); stamp(body, 5, 2, ['z.zz.z', 'zzzzzz', 'ZZZZZZ']); stamp(body, 3, 3, ['r']); stamp(body, 12, 3, ['r']); stamp(lid, 7, 2, ['bB']); stamp(lid, 2, 3, ['z']); stamp(lid, 13, 3, ['z']); break;
       case 'star': dots(body, [[2, 2], [4, 4], [12, 2], [13, 5], [3, 5], [11, 4]], 'w'); stamp(body, 6, 2, ['.zz.', 'zZZz', '.zz.']); dots(lid, [[3, 2], [6, 1], [9, 3], [12, 2]], 'w'); break;
       case 'void': dots(body, [[2, 2], [3, 3], [2, 4], [13, 2], [12, 3], [13, 4]], 'j'); stamp(body, 6, 2, ['.jj.', 'jkkj', '.jj.']); lid[4] = half[2] = 'jjjjjjjjjjjjjjjj'; break;
+      case 'coral': body[0] = lid[4] = half[2] = Z; stamp(body, 1, 1, ['z.z', 'zzz', '.z.']); stamp(body, 12, 2, ['z.z', 'zzz', '.z.']); dots(body, [[6, 3], [9, 4], [7, 5], [4, 4]], 'w'); dots(lid, [[4, 2], [10, 3], [7, 1], [12, 2]], 'w'); break;
+      case 'anchor': band([2, 3, 12, 13]); body[0] = body[6] = Z; stamp(body, 6, 1, ['.zz.', 'zzzz', '.zz.', 'z.zz'.replace('z.zz', 'z..z'), '.zz.']); dots(lid, [[2, 2], [13, 2]], 'Z'); break;
+      case 'amber': body[3] = '1111111111111111'; stamp(lid, 7, 3, ['zz', 'zz']); stamp(half, 7, 1, ['zz', 'zz']); break;
+      case 'eclipse': body[0] = body[6] = lid[4] = half[2] = Z; stamp(body, 6, 1, ['.zz.', 'zkkz', 'zkkz', '.zz.']); dots(lid, [[3, 2], [5, 1], [10, 1], [12, 2], [7, 0], [8, 0]], 'z'); dots(body, [[2, 3], [13, 3]], 'Z'); break;
+      case 'astral': body[0] = lid[4] = half[2] = Z; dots(body, [[2, 2], [4, 4], [11, 2], [13, 4], [3, 5], [12, 5]], 'w'); stamp(body, 6, 1, ['..Z.', '.ZZZ', 'ZZZZ', '.ZZZ', '..Z.'].map(r => r.slice(0, 4))); dots(lid, [[3, 3], [5, 1], [8, 2], [11, 1], [13, 3]], 'w'); break;
     }
     const ov = chestOv(type);
     return { body: buildSprite(body, ov.a, ov), lid: buildSprite(lid, ov.a, ov), half: buildSprite(half, ov.a, ov), open: buildSprite(open, ov.a, ov),
@@ -801,6 +966,74 @@ const ICE_SPR = () => cspr('ice', () => buildSprite(['....iiiiiiiiii......', '..
 const CHAIN_SPR = () => cspr('chain', () => buildSprite(['.ss..ss..ss..ss..ss..', 's..SS..ss..SS..ss..s.', '.ss..ss..ss..ss..ss..'], '#fff'));
 const EYE_SPR = () => cspr('meye', () => buildSprite(['.yyy.', 'yykyy', 'yykyy', '.yyy.'], '#fff', { y: '#ffe04a' }));
 
+const AMBER_SPR = () => cspr('amber', () => buildSprite(['....iiiiiiiiii......', '..iiIIiiiiiiiiii....', '.iIIiiiiiiiiiiiiii..', 'iIIiiiiiiiiiiiiiiii.', 'iIiiiiiikkiiiiiiiiii', 'iIiiiiikkkkiiiiiiiii', 'iiiiiiiikkiiiiiiiiii', 'iiiiiiiiiiiiiiiiiiii', 'iiiiiiiiiiiiiiiiiiii', 'iiiiiiiiiiiiiiiiiiii', 'iiiiiiiiiiiiiiiiiiii', 'iiiiiiiiiiiiiiiiiiii', 'iiiiiiiiiiiiiiiiiiii', '.iiiiiiiiiiiiiiiiii.', '..iiiiiiiiiiiiiiii..'], '#fff', { i: '#ffb030', k: '#5a3a10' }));
+const JELLY_PX = ['....aaaaaaaa....', '..aaAAAaaaaaaa..', '.aAAaaaaaaaaaaa.', 'aAAaaaaaaaaaaaaa', 'aAaaaaaaaaaaaaa1', 'aaaaaaaaaaaaaa11', 'a1a1a1a1a1a1a1a1'];
+const PETAL_PX = ['..aa..', '.aAAa.', 'aAAaaa', 'aAaaaa', 'aAaaaa', 'aaaaaa', '.aaaa1', '.aaa1.', '..a1..', '..a...'];
+const SEED_PX = ['.....aaaaaa.....', '...aaAAaazaaa...', '..aAAaazaaaaaa..', '.aAaaazaaaazaaa.', '.aAaazaaaazaaaa.', 'aAaaazaaaazaaaa1', 'aaaaazaaaazaaa11', 'aaaazaaaazaaaa11', '.aaazaaaazaaa11.', '.aaaaaaaaaaaa11.', '..aaaaaaaaaa11..', '....aaaaaa11....'];
+function drawJelly(g, C, st, t) {
+  const ov = chestOv('jelly'), lift = (st.lid || 0) * 5, pulse = .55 + .45 * Math.sin(t * (st.beat || 2.5));
+  glowDot(g, 0, -2, 22, C.glow, .35 + pulse * .35);
+  for (let i = 0; i < 6; i++) { const x0 = -6 + i * 2.4; for (let k = 0; k < 7; k++) pxPix(g, Math.round(x0 + Math.sin(t * 2.2 + i + k * .6) * 1.2), 1 + k - lift * .3, k % 2 ? '#4ad8c0' : '#9afff0'); }
+  if (lift > 0) { glowDot(g, 0, 0, 12, '#ffffff', Math.min(1, lift / 6)); blit(g, cspr('jellyCore', () => buildSprite(['.ww.', 'wWww', 'wwww', '.ww.'], '#fff', { w: '#e0fff8' })), -2, -2); }
+  g.save(); g.globalAlpha = .82 + pulse * .18; blit(g, cspr('jelly', () => buildSprite(JELLY_PX, ov.a, ov)), -8, -8 - lift); g.restore();
+  for (const [x, y] of [[-4, -6], [2, -7], [5, -5], [-1, -4]]) pxPix(g, x, y - lift, rgba('#ffffff', .5 + pulse * .5));
+}
+function drawBloom(g, C, st, t) {
+  const ov = chestOv('bloom'), o = st.open || 0, sw = 1 + (st.swell || 0) * .08 * Math.sin(t * 9), petal = cspr('petal', () => buildSprite(PETAL_PX, ov.a, ov));
+  blit(g, cspr('stem', () => buildSprite(['..gg..', '.gGgg.', 'gGg.gg', '..g...', '..g...'], '#4ec05a', { g: '#4ec05a' })), -3, 5);
+  for (const sd of [-1, 1]) { g.save(); g.translate(sd * 4 * CP, 7 * CP); g.scale(sd, 1); blit(g, cspr('leaf', () => buildSprite(['.ggg..', 'gGggg.', '.gggg1'], '#4ec05a')), 0, -2); g.restore(); }
+  if (o > 0) { glowDot(g, 0, -2, 12 + o * 8, C.glow, o); blit(g, cspr('pollen', () => buildSprite(['.yy.', 'yYyy', 'yyyy', '.yy.'], '#fff', { y: '#ffe04a' })), -2, -4); }
+  g.save(); g.scale(sw, sw);
+  for (let i = 0; i < 5; i++) { const a = (i - 2) * (.18 + o * .55); g.save(); g.translate(0, 4 * CP); g.rotate(a); blit(g, petal, -3, -12 - o * 2); g.restore(); }
+  g.restore();
+}
+function drawSeed(g, C, st, t) {
+  const ov = chestOv('seed'), rt = st.roots || 0, sp = st.split || 0;
+  for (let i = 0; i < 5; i++) { const ang = (i - 2) * .5, len = Math.round(rt * (8 + i % 2 * 4)); for (let k = 0; k < len; k++) pxPix(g, Math.round(Math.sin(ang) * k * .9 + Math.sin(k * .8 + i) * .8), 5 + Math.round(Math.cos(ang) * k * .5), k % 3 ? '#5a3e22' : '#7a5a32'); }
+  const spr = cspr('seed', () => buildSprite(SEED_PX, ov.a, ov));
+  if (sp > 0) {
+    glowDot(g, 0, -2, 16 + sp * 8, C.glow, Math.min(1, sp * 1.4));
+    for (const sd of [-1, 1]) { g.save(); g.translate(sd * sp * 9 * CP, -sp * 2 * CP); g.rotate(sd * sp * .5); g.beginPath(); g.rect(sd < 0 ? -9 * CP : 0, -12 * CP, 9 * CP, 20 * CP); g.clip(); blit(g, spr, -8, -7); g.restore(); }
+    return;
+  }
+  blit(g, spr, -8, -7);
+  if (rt > .5) for (const [x, y] of [[-3, -8], [3, -8]]) pxPix(g, x, y - Math.round(rt * 2), '#b8ff6a');
+}
+function drawRift(g, C, st, t) {
+  const ov = chestOv('rift'), gl = st.glitch || 0, sep = st.sep || 0, frag = cspr('riftF', () => buildSprite(['zzzzzzz', 'zaaaaaa', 'zaAaaaa', 'zaaaaaa', 'zaaaaa1', 'zaaaa11', 'zaaa111'], ov.a, ov));
+  glowDot(g, 0, -1, 18, C.glow, .3 + gl * .5 + sep * .5);
+  if (sep > 0 || gl > .2) blit(g, cspr('riftC', () => buildSprite(['.zz.', 'zZZz', 'zZZz', '.zz.'], ov.a, ov)), -2, -3);
+  [[-1, -1], [1, -1], [-1, 1], [1, 1]].forEach(([dx, dy], i) => {
+    const j = gl ? Math.round((hash2(i, Math.floor(t * 14), 5) - .5) * 4 * gl) : 0, ox = dx * (sep * 7 + 1) + j, oy = dy * (sep * 5 + 1) + Math.sin(t * 2 + i) * .6;
+    g.save(); g.translate((ox + dx * 3.5) * CP, (oy - 1 + dy * 3.5) * CP); g.scale(dx, dy); g.rotate(sep * (i % 2 ? .6 : -.6)); blit(g, frag, -3, -3); g.restore();
+  });
+}
+function drawGenesis(g, C, st, t) {
+  const ov = { a: '#fff8e8', d: '#e8d8b8', j: '#ffffff' }, cr = st.crack || 0, h = st.split || 0;
+  for (let i = 0; i < 16; i++) { const a = i / 16 * TAU + t * .8, r = 13 + Math.sin(t * 3 + i) * .6; pxPix(g, Math.round(Math.cos(a) * r), Math.round(-1 + Math.sin(a) * r * .9), hsl((i * 22 + t * 120) % 360, 90, 75)); }
+  glowDot(g, 0, -1, 20, '#ffffff', .4 + cr * .4);
+  if (h > 0) {
+    glowDot(g, 0, 0, 22, '#ffffff', 1);
+    blit(g, cspr('genB', () => buildSprite(eggPart(false), ov.a, ov)), -7, -9);
+    g.save(); g.translate(h * 9, -h * 22); g.rotate(h * 1.5); blit(g, cspr('genT', () => buildSprite(eggPart(true), ov.a, ov)), -7, -9); g.restore();
+    return;
+  }
+  blit(g, cspr('gen', () => buildSprite(EGG_PX.map(r => r.replace(/d/g, 'a')), ov.a, ov)), -7, -9);
+  if (cr > 0) { const k = Math.min(5, Math.ceil(cr * 5)); g.save(); g.globalCompositeOperation = 'lighter'; blit(g, crackSpr('gen' + k, 14, 16, k * 2, 21, 'x'), -7, -9); glowDot(g, 0, -1, 10, hsl((t * 200) % 360, 90, 70), cr * .7); g.restore(); }
+}
+const ANVIL_PX = ['aaaaaaaaaaaaaaaaaaa.', '.aAAAAAAAAAAAAAAAAaa', '..aaaaaaaaaaaaaaaa1.', '......aaaaaaaa1.....', '.......aaaaaa1......', '......aaaaaaaa1.....', '....aaaaaaaaaaaa1...', '....aaaaaaaaaaa11...'];
+function drawForge(g, C, st, t) {
+  const heat = st.heat || 0, hint = st.hintTier || 0;
+  g.translate(0, 3 * CP); g.scale(.72, .72);
+  glowDot(g, 0, -6, 22, rarCol(hint, t), .25 + heat * .45);
+  blit(g, cspr('anvil', () => buildSprite(ANVIL_PX, '#4a4a58')), -10, -2);
+  // 모루 위에서 달궈지는 곡괭이 실루엣 (등급 예고 색으로 빛난다)
+  const sil = cspr('sil' + hint, () => buildSprite(PICK_SHAPES.pick, RARITY[hint].c === '#ffffff' ? '#f4f4ff' : RARITY[hint].c));
+  g.save(); g.translate(0, -5 * CP - (st.rise || 0) * 5 * CP); g.rotate(Math.PI / 2 - .1 + (st.rise || 0) * .9); g.globalAlpha = 1 - (st.rise || 0) * .6; blitC(g, sil); g.restore();
+  // 망치
+  const a = st.hammer ?? .9; g.save(); g.translate(9 * CP, -11 * CP); g.rotate(a);
+  blit(g, cspr('fhammer', () => buildSprite(['zzzzzz', 'zZzzzz', 'zzzzz1', '..nn..', '..nn..', '..nn..', '..nN..', '..nn..'], '#4a4a58', { z: '#8a8f9a', n: '#6a4a2a' })), -3, -2); g.restore();
+}
 function drawChest(g, type, cx, cy, s, st = {}) {
   const C = CHESTS[type], t = st.t || 0;
   g.save(); g.translate(cx + (st.shake ? (Math.random() - .5) * st.shake * s : 0), cy + (st.shake ? (Math.random() - .5) * st.shake * s * .5 : 0)); g.scale(s, s);
@@ -808,7 +1041,7 @@ function drawChest(g, type, cx, cy, s, st = {}) {
   g.imageSmoothingEnabled = false;
   g.fillStyle = 'rgba(0,0,0,.35)'; g.fillRect(-14, 10.5, 28, 1.75); g.fillRect(-11.5, 12.25, 23, 1);
   if (st.glow) glowDot(g, 0, 0, 30, C.glow, .35 * st.glow);
-  const special = { egg: drawEgg, crystal: drawCrystal, shell: drawShell, clock: drawClock, heart: drawHeart }[type];
+  const special = { egg: drawEgg, crystal: drawCrystal, shell: drawShell, clock: drawClock, heart: drawHeart, jelly: drawJelly, bloom: drawBloom, seed: drawSeed, rift: drawRift, genesis: drawGenesis, forge: drawForge }[type];
   if (special) special(g, C, st, t); else drawBox(g, type, C, st, t);
   g.restore();
 }
@@ -841,6 +1074,7 @@ function drawBox(g, type, C, st, t) {
     g.restore();
   }
   if (st.vines) { const v = VINE_SPR(), vis = Math.round(st.vines * 13); if (vis > 0) g.drawImage(v, 0, v.height - vis, v.width, vis, -9 * CP, (5 + 2 - vis) * CP, v.width * CP, vis * CP); }
+  if (st.amber) { g.save(); g.globalAlpha = st.amber * .7; blit(g, AMBER_SPR(), -10, -10); g.globalAlpha = st.amber; if (st.crack) blit(g, crackSpr('amb' + Math.ceil(st.crack * 5), 20, 15, Math.ceil(st.crack * 5) * 2, 9, 'x'), -10, -10); g.restore(); }
   if (st.ice) { g.save(); g.globalAlpha = st.ice * .62; blit(g, ICE_SPR(), -10, -10); g.globalAlpha = st.ice; if (st.crack) blit(g, crackSpr('ice' + Math.ceil(st.crack * 5), 20, 15, Math.ceil(st.crack * 5) * 2, 5, 'x'), -10, -10); g.restore(); }
   if (st.chains) { const rows = [[-9, -6, .35], [9, -6, -.35], [-9, 4, -.3], [9, 4, .3], [0, -4, 0], [0, 3, 0], [0, 7.5, 0]], ch = CHAIN_SPR(); for (let i = 0; i < Math.min(7, st.chains); i++) { const [x, y, a] = rows[i]; g.save(); g.translate(x * .2, y); g.rotate(a); blitC(g, ch); g.restore(); } }
   if (st.heat > 0) { g.globalCompositeOperation = 'lighter'; glowDot(g, 0, 2, 22, '#ff5a1a', st.heat * .5); g.globalCompositeOperation = 'source-over'; }
@@ -1039,28 +1273,48 @@ function heroSprite(face = 'open', legs = 'stand', tail = 0) {
   if (tail) { fc[0] = '.' + fc[0].slice(1); fc[2] = 'h' + fc[2].slice(1); }
   return heroCache[key] = buildSprite([...HERO_HEAD, ...fc, ...HERO_LOW, ...HERO_BODY, HERO_LEGS[legs]]);
 }
-const PICK_PX = ['.aaaaaaaaa.', 'aAAAaaaaaaa', 'aa...n...aa', 'a....n....a', '.....n.....', '.....n.....', '.....n.....', '.....n.....', '.....N.....'];
-const PICK_COL = ['#a8aebb', '#a8aebb', '#7ec8ff', '#ff8a4a', '#ffd66b', '#c7a8ff', '#e8f4ff'];
+// 곡괭이 머리 모양 8가지 (손잡이는 5번 열, 10줄, 손 위치는 8.5줄)
+const PICK_SHAPES = {
+  pick:    ['.aaaaaaaaa.', 'aAAAaaaaaaa', 'aa...n...aa', 'a....n....a', '.....n.....', '.....n.....', '.....n.....', '.....n.....', '.....n.....', '.....N.....'],
+  double:  ['aaaaaaaaaaa', 'AAAAAaaaaa1', 'z....n....z', '.....n.....', '.....n.....', '.....n.....', '.....n.....', '.....n.....', '.....n.....', '.....N.....'],
+  hammer:  ['zzz.aaaaaa.', 'zZzaAAaaaaa', 'zzz..n...aa', '.....n....a', '.....n.....', '.....n.....', '.....n.....', '.....n.....', '.....n.....', '.....N.....'],
+  drill:   ['.....a.....', '....aAa....', '....aza....', '...aAaza...', '...azaAa...', '..aAazaa1..', '..zzzzzzz..', '.....n.....', '.....n.....', '.....N.....'],
+  scythe:  ['.aaaaaa....', 'aAAAAaaaa..', 'aa...naaaa.', 'a....n..aa1', '.....n...1a', '.....n.....', '.....n.....', '.....n.....', '.....n.....', '.....N.....'],
+  crystal: ['.....a.....', '....aAa....', '..aaAAaa1..', 'aaAAaaaa11a', '.a...z...a.', '.....n.....', '.....n.....', '.....n.....', '.....n.....', '.....N.....'],
+  star:    ['.....a.....', '....aAa....', 'aaaaAAaaaaa', '.aaAAaaa1a.', '..aaz.zaa..', '.a...n...a.', '.....n.....', '.....n.....', '.....n.....', '.....N.....'],
+  wing:    ['.a.......a.', 'aAa.....aaa', 'aAAa.z.aaaa', '.aAAazaaaa.', '..aaanaaa..', '.....n.....', '.....n.....', '.....n.....', '.....n.....', '.....N.....'],
+};
 const pickCache = {};
-const pickSprite = lv => pickCache[lv] || (pickCache[lv] = buildSprite(PICK_PX, PICK_COL[lv]));
+const pickSprite = id => { const pk = PICK_BY[id] || PICKS[0]; return pickCache[pk.id] || (pickCache[pk.id] = buildSprite(PICK_SHAPES[pk.shape], pk.head, { n: pk.grip, z: pk.tier >= 4 ? '#ffd36b' : hexShift(pk.head, 18) })); };
 
 // ───────────── 게임 상태 · 저장 ─────────────
-const G = { gold: 0, bag: [], foundT: {}, foundC: {}, upg: { pick: 1, lantern: 1, luck: 0, compass: 0 }, oil: 100, opened: 0, heart: false, deepest: 0 };
-const maxOil = () => [0, 100, 150, 215, 290, 380, 480][G.upg.lantern];
-const lightR = () => [0, 5, 6, 7, 8, 9, 10][G.upg.lantern];
-const pickSpd = () => 1 + (G.upg.pick - 1) * .45;
+const G = { gold: 0, bag: [], foundT: {}, foundC: {}, upg: { pick: 1, lantern: 1, luck: 0, compass: 0 }, oil: 100, opened: 0, heart: false, deepest: 0, picks: { rusty: 1 }, pickEq: 'rusty', pity: 0, pulls: 0, seen: [] };
+const curPick = () => PICK_BY[G.pickEq] || PICKS[0];
+function fixG() { G.upg = Object.assign({ pick: 1, lantern: 1, luck: 0, compass: 0 }, G.upg); G.picks = G.picks || { rusty: 1 }; if (!G.picks.rusty) G.picks.rusty = 1; if (!PICK_BY[G.pickEq]) G.pickEq = 'rusty'; G.pity = G.pity || 0; G.pulls = G.pulls || 0; G.seen = G.seen || []; }
+const maxOil = () => [0, 100, 150, 215, 290, 380, 480, 600, 740][G.upg.lantern];
+const lightR = () => [0, 5, 6, 7, 8, 9, 10, 11, 12][G.upg.lantern];
+const pickSpd = () => (1 + (G.upg.pick - 1) * .45) * curPick().spd;
 function save() {
   if (!world) return;
-  store.set('celesta-save-v1', saveObj());
+  store.set('celesta-save-v2', saveObj());
   cloudSaveSoon();
 }
+// 저장 v2: 타일 두 칸을 한 글자에, 원석은 숫자 한 글자씩, 상자는 번호 배열로 줄여 클라우드 셀 한도 안에 넣는다
+function packTiles() { let b = ''; for (let i = 0; i < world.t.length; i += 2) b += String.fromCharCode(world.t[i] | ((world.t[i + 1] || 0) << 4)); return btoa(b); }
+function unpackTiles(s64) { const b = atob(s64); for (let i = 0; i < b.length; i++) { const c = b.charCodeAt(i); world.t[2 * i] = c & 15; if (2 * i + 1 < world.t.length) world.t[2 * i + 1] = c >> 4; } }
+let migrated = false;
 function load() {
-  const d = store.get('celesta-save-v1'); if (!d || !d.t) return false;
+  const d = store.get('celesta-save-v2');
+  if (!d || !d.t) {
+    const old = store.get('celesta-save-v1');
+    if (old && old.G) { Object.assign(G, old.G, { deepest: 0, seen: [], heart: false }); fixG(); genWorld(Math.floor(Math.random() * 1e9)); spawn(); G.oil = maxOil(); migrated = true; return true; }
+    return false;
+  }
   try {
-    genWorld(d.seed);
-    const bin = atob(d.t); for (let i = 0; i < bin.length; i++) world.t[i] = bin.charCodeAt(i);
-    world.chests = new Map(d.chests); world.ores = new Map(d.ores);
-    Object.assign(G, d.G); G.upg = Object.assign({ pick: 1, lantern: 1, luck: 0, compass: 0 }, d.G.upg);
+    genWorld(d.seed); unpackTiles(d.t);
+    world.ores = new Map(); let k = 0; for (let i = 0; i < world.t.length; i++) if (world.t[i] === T.ORE) world.ores.set(i, +(d.o[k++] || 0));
+    world.chests = new Map(d.c.map(([i, ti, di, vault, L]) => [i, { type: CHEST_ORDER[ti], disguise: di >= 0 ? CHEST_ORDER[di] : null, vault: vault || 0, L }]));
+    Object.assign(G, d.G); fixG();
     player.x = d.px; player.y = d.py; return true;
   } catch (e) { return false; }
 }
@@ -1106,10 +1360,10 @@ function tryDig(tx, ty, dt) {
 }
 function breakTile(tx, ty, L, v) {
   setTile(tx, ty, T.AIR); player.dig = null; S.break(); debris(tx, ty, 12, L, v); hitStop = .055; shakeA = Math.max(shakeA, 3.5); kick(-.12);
-  G.oil = Math.max(0, G.oil - (1 + L * .25));
+  G.oil = Math.max(0, G.oil - (1 + L * .2) * curPick().oil);
   if (v === T.ORE) {
-    const k = world.ores.get(idx(tx, ty)) ?? L, [nm, val] = ORES[k]; world.ores.delete(idx(tx, ty));
-    G.gold += val; S.coin(); floatText(tx * TS + TS / 2, ty * TS, `+${val} ${nm}`, LAYERS[Math.min(L, 5)].ore[0]);
+    const k = world.ores.get(idx(tx, ty)) ?? L, [nm, val0] = ORES[k], val = Math.round(val0 * curPick().ore); world.ores.delete(idx(tx, ty));
+    G.gold += val; S.coin(); floatText(tx * TS + TS / 2, ty * TS, `+${val} ${nm}`, LAYERS[Math.min(L, LAST_L)].ore[0]);
     sparks(tx * TS + 16, ty * TS + 16, LAYERS[L].ore[0], 10); updHUD();
   }
 }
@@ -1164,15 +1418,21 @@ function updatePlayer(dt) {
   const depthRow = Math.floor(p.y / TS);
   if (depthRow > G.deepest) G.deepest = depthRow;
   if (depthRow <= SURF) { G.oil = Math.min(maxOil(), G.oil + 60 * dt); }
-  else G.oil = Math.max(0, G.oil - dt * .45);
-  if (G.oil <= 0 && depthRow > SURF) { p.faint = 1.8; toast('랜턴 기름이 다 떨어졌어요… 눈앞이 깜깜해져요.'); S.deny(); }
+  else G.oil = Math.max(0, G.oil - dt * .45 * curPick().oil);
+  if (G.oil <= 0 && depthRow > SURF && !transBusy) { p.faint = 1.8; toast('랜턴 기름이 다 떨어졌어요… 눈앞이 깜깜해져요.'); S.deny(); }
 }
 function rescue() {
   const fee = Math.floor(G.gold * .15);
-  G.gold -= fee; spawn(); G.oil = maxOil(); updHUD(); save();
+  G.oil = maxOil(); player.faint = 0;
+  transition('dirt', () => { G.gold -= fee; spawn(); G.oil = maxOil(); camUpdate(0, true); updHUD(); save(); });
   toast(fee ? `조합 구조대가 끌어올려 줬어요. 구조비 ${fee} 셀라를 냈어요.` : '조합 구조대가 끌어올려 줬어요. 다음엔 기름을 꼭 확인하세요!');
 }
-function recall() { if (opening || player.faint > 0) return; if (Math.floor(player.y / TS) <= SURF) { openCamp(); return; } S.whoosh(.8); for (let i = 0; i < 30; i++) addP({ x: player.x + 9, y: player.y + 13, vx: R(-80, 80), vy: R(-200, -40), life: R(.5, 1), size: R(2, 4), c: '#ffe6a0', glow: 1 }); spawn(); G.oil = maxOil(); save(); updHUD(); toast('귀환 두루마리를 펼쳐 야영지로 돌아왔어요.'); }
+function recall() {
+  if (opening || player.faint > 0 || transBusy) return;
+  if (Math.floor(player.y / TS) <= SURF) { openCamp(); return; }
+  S.whoosh(.8);
+  transition('keyhole', () => { spawn(); player.vx = player.vy = 0; G.oil = maxOil(); camUpdate(0, true); save(); updHUD(); }, [(player.x + 9 - cam.x) * zoom, (player.y + 13 - cam.y) * zoom]).then(() => toast('귀환 두루마리를 펼쳐 야영지로 돌아왔어요.'));
+}
 
 // ───────────── 파티클 · 텍스트 ─────────────
 const parts = [], floats = [];
@@ -1222,7 +1482,11 @@ const bl = f => (SURF * TS - lerp(f, 1, .62) * cam.y) / 2;
 const sx0 = f => f * cam.x / 2;
 function fr(x, y, w, h, c) { bgx.fillStyle = c; bgx.fillRect(Math.round(x), Math.round(y), Math.round(w), Math.round(h)); }
 
+let skyKey = '';
 function skyPixels(BW, BH, hz, sunX, sunY) {
+  // 카메라가 거의 그대로면 지난 하늘을 다시 쓴다 (별은 1/4초마다 반짝임 갱신)
+  const key = `${BW}|${Math.round(hz)}|${Math.round(bl(.1))}|${sunX}|${sunY}|${Math.floor(sx0(.03))}|${Math.floor(time * 4)}`;
+  if (key === skyKey) { bgx.putImageData(bgImg, 0, 0); return; } skyKey = key;
   const d = bgImg.data, top = Math.min(BH, Math.max(0, Math.ceil(hz) + 1)), base = bl(.1), sxs = Math.floor(sx0(.03));
   for (let y = 0; y < top; y++) {
     const u = clamp((base - y + 10) / 150, 0, 1) * (SKY.length - 1), i = Math.min(Math.floor(u), SKY.length - 2), f = u - i, a = SKY[i], b = SKY[i + 1];
@@ -1348,18 +1612,22 @@ function drawFireflies(hz) {
 function drawUnder(BW, BH, hz) {
   const y0 = Math.max(0, Math.floor(hz)), f = .5, ox = sx0(f), oy = (f * cam.y) / 2;
   bgx.save(); bgx.beginPath(); bgx.rect(0, y0, BW, BH - y0); bgx.clip();
-  for (let y = y0; y < BH; y += 2) { const L = clamp(layerAt(Math.floor((cam.y + y * 2) / TS)), 0, 5); fr(0, y, BW, 2, hexShift(LAYERS[L].bg, -3)); }
+  for (let y = y0; y < BH; y += 2) { const L = clamp(layerAt(Math.floor((cam.y + y * 2) / TS)), 0, LAST_L); fr(0, y, BW, 2, hexShift(LAYERS[L].bg, -3)); }
   const C = 46, cx0 = Math.floor(ox / C) - 1, cx1 = Math.floor((ox + BW) / C) + 1, cy0 = Math.floor((oy + y0) / C) - 1, cy1 = Math.floor((oy + BH) / C) + 1;
   for (let cy = cy0; cy <= cy1; cy++) for (let cx = cx0; cx <= cx1; cx++) {
     const hsh = hash2(cx, cy, 808); if (hsh < .35) continue;
     const X = Math.round(cx * C + hash2(cx, cy, 1) * C * .6 - ox), Y = Math.round(cy * C + hash2(cx, cy, 2) * C * .6 - oy);
     if (Y < y0 - 60) continue;
-    const L = clamp(layerAt(Math.floor((cam.y + Y * 2) / TS)), 0, 5), bg = LAYERS[L].bg, lt = hexShift(bg, 7), lt2 = hexShift(bg, 12), k = hash2(cx, cy, 3);
+    const L = clamp(layerAt(Math.floor((cam.y + Y * 2) / TS)), 0, LAST_L), bg = LAYERS[L].bg, lt = hexShift(bg, 7), lt2 = hexShift(bg, 12), k = hash2(cx, cy, 3);
     if (L === 0) { let x = X; for (let y = 0; y < 18 + k * 26; y++) { fr(x, Y + y, 1, 1, lt); if (hash2(cx, y, 5) > .7) x += hash2(y, cx, 6) > .5 ? 1 : -1; } }
     else if (L === 1) { const R = 18 + k * 14; for (let a = -1.2; a < 1.2; a += .04) { const x = X + Math.sin(a) * R, y = Y + (1 - Math.cos(a)) * R * 1.4; fr(x, y, 2, 2, lt2); } fr(X - 2, Y - 3, 5, 3, lt2); }
     else if (L === 2) { const h = Math.round(20 + k * 34), w = 4 + Math.round(k * 4); for (let y = 0; y < h; y++) { const ww = Math.max(1, Math.round(w * Math.min(1, y / 5))); fr(X - ww / 2, Y - h + y, ww, 1, y < 3 ? '#6fd0ff' : (y % 9 < 1 ? lt2 : lt)); } bgLights.push([X, Y - h, '#6fd0ff', 26]); }
     else if (L === 3) { if (k > .55) { for (let y = 0; y < 70; y++) { const ph = ((y + Math.floor(time * 20)) >> 2) & 1; fr(X - 1, Y + y, 5, 1, ph ? '#d8481a' : '#ff7a2a'); fr(X + 1, Y + y, 1, 1, ph ? '#ffb33a' : '#ffe08a'); } fr(X - 4, Y + 70, 11, 2, '#ff7a2a'); fr(X - 2, Y + 69, 7, 1, '#ffd24a'); bgLights.push([X + 1, Y + 35, '#ff7a2a', 44]); } else { fr(X - 3, Y, 6, 40, hexShift(bg, -4)); fr(X - 3, Y, 1, 40, lt); } }
     else if (L === 4) { if (k > .5) { fr(X - 3, Y - 30, 7, 34, lt); fr(X - 5, Y - 33, 11, 3, lt2); fr(X + 3, Y - 30, 1, 34, hexShift(bg, 3)); } else { for (let a = 0; a <= Math.PI; a += .05) fr(X + Math.cos(a) * 12, Y - 20 - Math.sin(a) * 12, 2, 2, lt); fr(X - 13, Y - 20, 3, 24, lt); fr(X + 11, Y - 20, 3, 24, lt); if (k < .25) { fr(X - 1, Y - 12, 2, 3, '#ffcf7a'); bgLights.push([X, Y - 11, '#ffcf7a', 16]); } } }
+    else if (L === 6) { if (k > .6) { const pulse = Math.sin(time * 1.6 + cx) * 2; fr(X - 5, Y - 4 + pulse, 10, 5, '#7fffe0'); fr(X - 4, Y - 6 + pulse, 8, 2, '#c8fff4'); for (let i = 0; i < 4; i++) fr(X - 4 + i * 3, Y + 1 + pulse, 1, 8 + Math.round(Math.sin(time * 2 + i) * 2), '#4ad8c0'); bgLights.push([X, Y + pulse, '#7fffe0', 20]); } else { for (let i = 0; i < 5; i++) { const a = -Math.PI / 2 + (i - 2) * .35; for (let r = 0; r < 14 + k * 10; r += 1.5) fr(X + Math.cos(a) * r, Y + 20 + Math.sin(a) * r, 2, 2, i % 2 ? lt2 : '#c86a80'); } } if (hash2(cx, cy, 11) > .7) fr(X + 8, Y - ((time * 12 + cx * 9) % 50), 2, 2, '#c8fff4'); }
+    else if (L === 7) { if (k > .55) { for (let y = 0; y < 60; y++) fr(X + Math.round(Math.sin(y * .12 + cx) * 4), Y - 30 + y, 4, 1, y % 7 ? lt : lt2); } else { fr(X - 1, Y, 2, 8, lt); fr(X - 5, Y - 3, 10, 3, '#b8ff6a'); fr(X - 3, Y - 5, 6, 2, '#e0ffa8'); bgLights.push([X, Y - 3, '#b8ff6a', 16]); } if (hash2(cx, cy, 12) > .6) { const sx = X + Math.sin(time * .7 + cx) * 14, sy = Y - 20 + Math.cos(time * .5 + cy) * 10; fr(sx, sy, 1, 1, '#e0ffa8'); } }
+    else if (L === 8) { const g2 = Math.floor(time * 8 + cx) % 13 === 0 ? 2 : 0; fr(X - 6 + g2, Y - 6, 12, 12, hexShift(bg, 5)); fr(X - 6 + g2, Y - 6, 12, 1, '#ff5af0'); fr(X - 4 - g2, Y - 2, 3, 3, '#9af0ff'); if (k > .7) { for (let i = 0; i < 18; i++) fr(X + Math.round((hash2(i, cx, 3) - .5) * 30), Y + i * 2, 1, 2, i % 3 ? '#ff5af0' : '#ffd0fa'); bgLights.push([X, Y + 14, '#ff5af0', 22]); } }
+    else if (L === 9) { fr(X - 4, Y - 40, 9, 44, lt); fr(X - 6, Y - 43, 13, 3, '#d8a860'); fr(X + 4, Y - 40, 1, 44, hexShift(bg, 2)); if (k > .6) { fr(X - 3, Y - 30, 7, 16, '#a83a5a'); fr(X - 3, Y - 14, 2, 2, '#a83a5a'); fr(X + 2, Y - 14, 2, 2, '#a83a5a'); fr(X - 1, Y - 25, 3, 3, '#ffd36b'); } if (k < .2) { fr(X - 1, Y - 48, 3, 3, '#ffc0e0'); bgLights.push([X, Y - 47, '#ff8fc8', 26]); } }
     else { for (let i = 0; i < 6; i++) { const a = hash2(cx, i, 7) * TAU, r = hash2(i, cy, 8) * 22; bgx.globalAlpha = .18; fr(X + Math.cos(a) * r - 6, Y + Math.sin(a) * r * .6 - 3, 12, 6, i % 2 ? '#6a3aa0' : '#3a4aa0'); } bgx.globalAlpha = 1; for (let i = 0; i < 4; i++) { const tw = Math.sin(time * 2 + i + cx) > 0; fr(X + hash2(cx, i, 9) * 40 - 20, Y + hash2(i, cy, 9) * 30 - 15, 1, 1, tw ? '#fff4d0' : '#9a8ac8'); } if (k > .8) { fr(X - 6, Y + 8, 12, 4, lt2); fr(X - 4, Y + 12, 8, 2, lt); bgLights.push([X, Y, '#c7a8ff', 22]); } }
   }
   bgx.restore();
@@ -1444,7 +1712,7 @@ function drawPlayer() {
   const off = p.swing > 0 ? swingCurve(1 - p.swing / .2) : 0;
   let ang = .6 + Math.sin(p.walk * Math.PI / 2) * (moving ? .14 : 0) + Math.sin(time * 3.2) * .04 + (p.ground ? 0 : -.35 - p.vy * .0006) + off;
   if (keys.down && p.dig) ang = 1.6 + off * .9; if (keys.up && p.dig) ang = -1.1 - off * .7;
-  const pk = pickSprite(G.upg.pick), hx = -sw / 2 + 14.5 * PS, hy = -sh + bob + 15.5 * PS;
+  const pk = pickSprite(G.pickEq), hx = -sw / 2 + 14.5 * PS, hy = -sh + bob + 15.5 * PS;
   g.translate(hx, hy); g.rotate(ang); g.drawImage(pk, -6.5 * PS, -9 * PS, pk.width * PS, pk.height * PS);
   g.restore();
 }
@@ -1467,7 +1735,7 @@ function drawWorld() {
     else if (v === T.GOLDBRICK) g.drawImage(tx.gold[vi], px, py);
     else if (v === T.BED) g.drawImage(TEX.bed[vi], px, py);
     if (v === T.ORE) {
-      const k = world.ores.get(idx(x, y)) ?? L, oc = LAYERS[Math.min(k, 5)].ore[(k + x) % 2];
+      const k = world.ores.get(idx(x, y)) ?? L, oc = LAYERS[Math.min(k, LAST_L)].ore[(k + x) % 2];
       g.drawImage(oreSpr(oc, vi), px + 3, py + 4, 26, 18 + (vi % 3 === 1 ? 0 : 2));
       if (hash2(x, y, Math.floor(time * 2)) > .85) pxSpark(g, px + 8 + Math.floor(hash2(x, 1) * 8) * 2, py + 8 + Math.floor(hash2(y, 2) * 8) * 2, 2, '#fff');
     }
@@ -1500,7 +1768,6 @@ function drawWorld() {
   g.textAlign = 'center'; g.font = 'bold 12px "Gowun Dodum",sans-serif';
   for (const f of floats) { g.globalAlpha = clamp(f.life, 0, 1); g.fillStyle = '#000'; g.fillText(f.s, f.x + 1, f.y + 1); g.fillStyle = f.c; g.fillText(f.s, f.x, f.y); }
   g.globalAlpha = 1;
-  drawCompass();
 }
 function drawLighting(x0, x1, y0, y1, chestsVis) {
   const k = .5, ox = cam.x, oy = cam.y, z = zoom * k;
@@ -1525,51 +1792,66 @@ function drawLighting(x0, x1, y0, y1, chestsVis) {
   for (const [bx, by, bc, br] of bgLights) glowDot(g, bx, by, br * 2, bc, .14 + .05 * Math.sin(time * 2 + bx));
   g.globalCompositeOperation = 'source-over';
 }
-function drawCompass() {
-  if (!G.upg.compass) return;
-  const rad = [0, 14, 24, 40][G.upg.compass], pcx = Math.floor((player.x + 9) / TS), pcy = Math.floor((player.y + 13) / TS);
-  g.setTransform(DPR, 0, 0, DPR, 0, 0);
-  for (const [i, c] of world.chests) {
-    const x = i % W, y = Math.floor(i / W), dx = x - pcx, dy = y - pcy, d = Math.hypot(dx, dy);
-    if (d > rad || d < 4) continue;
-    const a = Math.atan2(dy, dx), cx = VW / 2, cy = VH / 2.2, ex = Math.min(VW / 2 - 30, VH / 2.2 - 30);
-    const sx = cx + Math.cos(a) * ex, sy = cy + Math.sin(a) * ex * .9, col = RARITY[CHESTS[c.disguise || c.type].tier].c;
-    g.save(); g.translate(sx, sy); g.rotate(a); g.globalAlpha = .55 + .35 * Math.sin(time * 4);
-    g.fillStyle = col; g.beginPath(); g.moveTo(10, 0); g.lineTo(-6, -7); g.lineTo(-3, 0); g.lineTo(-6, 7); g.closePath(); g.fill(); g.restore();
-  }
-  g.globalAlpha = 1;
-}
 
 // ───────────── 보상 굴리기 ─────────────
 function treasureIdx(r) {
-  const pool = TREASURES.map((t, i) => [t, i]).filter(([t]) => t[1] === r).map(([, i]) => i);
+  let pool = [];
+  for (let rr = r; rr >= 0 && !pool.length; rr--) pool = TREASURES.map((t, i) => [t, i]).filter(([t]) => t[1] === rr).map(([, i]) => i);
   const fresh = pool.filter(i => !G.foundT[i]);
   return (fresh.length && Math.random() < .6) ? pick(fresh) : pick(pool);
 }
 function rollLoot(type, boost = 0) {
   const C = CHESTS[type];
-  if (type === 'heart') return [37, 38, treasureIdx(4), treasureIdx(4), treasureIdx(4), treasureIdx(4)];
-  const n = [RI(1, 2), RI(2, 3), RI(2, 4), RI(3, 4), RI(3, 5)][C.tier] + (boost ? 1 : 0);
-  const luck = G.upg.luck * .05, out = [];
+  if (type === 'heart') return [37, 38, treasureIdx(9), treasureIdx(8), treasureIdx(7), treasureIdx(7)];
+  const n = [RI(1, 2), RI(2, 3), RI(2, 4), RI(3, 4), RI(3, 5), RI(3, 5), RI(4, 5), RI(4, 6), RI(4, 6), RI(5, 6)][C.tier] + (boost ? 1 : 0);
+  const luck = G.upg.luck * .05 + curPick().luck, out = [];
   for (let i = 0; i < n; i++) {
     let r = C.tier;
     if (r > 0 && Math.random() < .28 - boost * .1) r--;
     if (Math.random() < .16 + luck + boost * .16) r++;
     if (Math.random() < .035 + luck * .5 + boost * .05) r++;
-    out.push(treasureIdx(clamp(r, 0, 4)));
+    out.push(treasureIdx(clamp(r, 0, TOP_TIER)));
   }
   return out.sort((a, b) => TREASURES[a][1] - TREASURES[b][1]);
 }
 
+// ───────────── 운명의 모루 (곡괭이 뽑기) ─────────────
+function rollPickTier(minTier = 0) {
+  const w = GACHA_RATE.map((x, i) => i >= minTier ? x : 0), tot = w.reduce((a, b) => a + b, 0); let x = Math.random() * tot;
+  for (let i = 0; i < w.length; i++) { x -= w[i]; if (x <= 0) return i; } return minTier;
+}
+function rollPicks(n) {
+  const out = [];
+  for (let i = 0; i < n; i++) {
+    G.pulls++; G.pity++;
+    let tier = rollPickTier(G.pity >= 60 ? 4 : 0);
+    if (tier >= 4) G.pity = 0;
+    const pool = PICKS.filter(p => p.tier === tier && p.id !== 'rusty');
+    out.push(pick(pool.length ? pool : PICKS.filter(p => p.tier === tier)).id);
+  }
+  if (n >= 10 && !out.some(id => PICK_BY[id].tier >= 3)) { const t = rollPickTier(3); out[out.length - 1] = pick(PICKS.filter(p => p.tier === t)).id; if (t >= 4) G.pity = 0; }
+  return out.sort((a, b) => PICK_BY[a].tier - PICK_BY[b].tier);
+}
+function startForge(n) {
+  const cost = GACHA_COST[n >= 10 ? 1 : 0];
+  if (G.gold < cost || opening) { S.deny(); return; }
+  G.gold -= cost; updHUD();
+  const ids = rollPicks(n), maxR = Math.max(...ids.map(id => PICK_BY[id].tier));
+  closeModals();
+  startOpening({ type: 'forge', L: 0 }, 0, 0, { loot: ids.map(pk => ({ pk })), maxR, forge: true });
+  opening.sx = VW / 2; opening.sy = VH * .5; FX.forge.charge = n >= 10 ? 3 : 2.2;
+}
+
 // ───────────── 개봉 연출 엔진 ─────────────
 let opening = null;
-function startOpening(c, tx, ty) {
+function startOpening(c, tx, ty, forced) {
   if (opening) return;
   const actual = c.type, shown = c.disguise || c.type;
-  const loot = actual === 'mimic' ? [] : rollLoot(actual, c.vault || 0);
-  const maxR = loot.length ? Math.max(...loot.map(i => TREASURES[i][1])) : 2;
+  const loot = forced ? forced.loot : actual === 'mimic' ? [] : rollLoot(actual, c.vault || 0);
+  const maxR = forced ? forced.maxR : loot.length ? Math.max(...loot.map(i => TREASURES[i][1])) : 2;
   const sx = (tx * TS + 16 - cam.x) * zoom, sy = (ty * TS + 17 - cam.y) * zoom;
   opening = { c, tx, ty, actual, type: shown, loot, maxR, base: CHESTS[shown].tier, hint: CHESTS[shown].tier, t: 0, pt: 0, bt: -1, phase: 'intro', sx, sy, s0: zoom, fx: [], rays: 0, flash: 0, flashC: '#fff', shake: 0, cards: [], caption: '', taps: 0, meter: 0, gold: 0, st: {}, lastTick: 0, step: 0 };
+  if (forced) opening.forge = !!forced.forge;
   opening.cx = VW / 2; opening.cy = VH * .36; opening.s = Math.min(VW * .42, VH * .42, 300) / 28; opening.dt = 0;
   if (actual === 'pirate') opening.gold = RI(25, 60) * (1 + c.L);
   fxc.classList.add('on'); S.creak(); Sound.duck(1);
@@ -1652,6 +1934,56 @@ const FX = {
     burst() { const o = O(); flash('#ffffff', 1.3); S.boom(1); S.rise(2, 300); shakeIt(40); o.prism = 1; for (let i = 0; i < 6; i++) ring(hsl(i * 60, 100, 70), 700 + i * 220, 10, 1.4); for (let i = 0; i < 80; i++) { const a = R(0, TAU), v = R(150, 600); P({ k: 'petal', x: o.cx, y: o.cy, vx: Math.cos(a) * v, vy: Math.sin(a) * v, life: R(2, 4), size: R(8, 14), c: pick(['#ffd0e0', '#ffffff', '#ffe7a0', '#ff8fb8']), grav: 40, vr: R(-4, 4), drag: .975 }); } burstSparks(120, '#ffffff', 1400, 3); o.confT = 4; },
     each(dt) { const o = O(); if (o.confT > 0) { o.confT -= dt; P({ k: 'conf', x: R(0, VW), y: -20, vx: R(-40, 40), vy: R(120, 260), life: 5, size: R(5, 9), c: hsl(R(0, 360), 90, 70), vr: R(-8, 8), sway: R(1, 3) }); } },
     st() { const o = O(); return { seals: 0, cage: 0, beat: 1.4, dy: -ease.outCubic(seg(o.bt, 0, 1.5)) * 18 }; } },
+  coral: { charge: 1.8,
+    ch(k, dt) { const o = O(); o.st.shake = .3 + k * .4; if (Math.random() < dt * (8 + k * 24)) { P({ k: 'bubble', x: o.cx + R(-14, 14) * U(), y: o.cy + R(0, 8) * U(), vx: R(-20, 20), vy: R(-180, -60), life: R(1.4, 2.4), size: R(4, 11), c: '#fff', sway: R(1, 3) }); if (Math.random() < .3) S.bubble(); } },
+    burst() { const o = O(); S.sparkle(10); S.whoosh(.7); o.pearlT = 1.5; ring('#ffc8d8', 900, 8); for (let i = 0; i < 30; i++) P({ k: 'bubble', x: o.cx, y: o.cy, vx: R(-300, 300), vy: R(-500, -100), life: R(1, 2.4), size: R(4, 14), c: '#fff', drag: .97, sway: 2 }); },
+    each(dt) { const o = O(); if (o.pearlT > 0) { o.pearlT -= dt; for (let i = 0; i < 3; i++) P({ k: 'pearl', x: o.cx + R(-8, 8) * U(), y: o.cy - 3 * U(), vx: R(-360, 360), vy: R(-1000, -560), life: R(1.6, 2.4), size: R(4, 7), c: '#fff4fa', grav: 1700, floor: o.cy + 11 * U() }); if (Math.random() < .4) S.clink(); } },
+    st() { return { lid: ease.outBack(seg(O().bt, 0, .6)), inner: '#ffe0ec' }; } },
+  anchor: { charge: 2.1,
+    ch(k, dt) { const o = O(); const left = 3 - Math.floor(k * 3.6); if (o.st.chains == null) o.st.chains = 3; if (left < o.st.chains) { o.st.chains = Math.max(0, left); S.chain(); S.clunk(); shakeIt(9); for (let i = 0; i < 8; i++) P({ k: 'link', x: o.cx + R(-12, 12) * U(), y: o.cy + R(-6, 6) * U(), vx: R(-500, 500), vy: R(-600, -100), life: 1.2, size: R(6, 10), c: '#c9ced8', grav: 1500, vr: R(-10, 10) }); } if (Math.random() < dt * 14) P({ k: 'drop', x: o.cx + R(-14, 14) * U(), y: o.cy + 9 * U(), vx: 0, vy: R(40, 120), life: .8, size: 3, c: '#9ae8ff', grav: 900 }); },
+    burst() { const o = O(); S.boom(.45); S.whoosh(1); flash('#dff6ff', .7); for (let i = 0; i < 60; i++) { const a = R(-Math.PI * .95, -Math.PI * .05), v = R(300, 1000); P({ k: 'drop', x: o.cx, y: o.cy - 2 * U(), vx: Math.cos(a) * v, vy: Math.sin(a) * v, life: R(1, 1.8), size: R(3, 7), c: pick(['#9ae8ff', '#e0fbff', '#5ac8e8']), grav: 1600 }); } o.coinT = .8; ring('#9ae8ff', 1100, 12); },
+    each(dt) { const o = O(); if (o.coinT > 0) { o.coinT -= dt; for (let i = 0; i < 3; i++) P({ k: 'coin', x: o.cx + R(-10, 10) * U(), y: o.cy - 3 * U(), vx: R(-380, 380), vy: R(-1000, -560), life: 2, size: R(7, 10), c: '#ffd66b', grav: 1800, vr: R(5, 14), floor: o.cy + 11 * U() }); } },
+    st() { return { lid: ease.outElastic(seg(O().bt, 0, .9)), chains: 0, inner: '#9ae8ff' }; } },
+  jelly: { charge: 2.3,
+    ch(k, dt) { const o = O(); o.st.beat = 2.5 + k * 9; o.st.shake = k * .5; if (Math.random() < dt * (6 + k * 20)) P({ k: 'spore', x: o.cx + R(-12, 12) * U(), y: o.cy + R(-4, 8) * U(), vx: R(-20, 20), vy: R(-80, -30), life: R(1.5, 2.5), size: R(2, 4), c: pick(['#7fffe0', '#c8fff4', '#9ae8ff']), sway: R(1, 2) }); if (o.pt - o.lastTick > .5 - k * .35) { o.lastTick = o.pt; S.hum(220 + k * 200, .3); } },
+    burst() { const o = O(); S.sparkle(14); S.rise(1.2, 400); flash('#c8fff4', .6); for (let i = 0; i < 90; i++) { const a = R(0, TAU), v = R(60, 380); P({ k: 'spore', x: o.cx, y: o.cy - 4 * U(), vx: Math.cos(a) * v, vy: Math.sin(a) * v - 60, life: R(2, 4), size: R(2, 5), c: pick(['#7fffe0', '#c8fff4', '#ffffff', '#9ae8ff']), drag: .96, sway: R(1, 3) }); } ring('#7fffe0', 800, 10, 1.2); ring('#ffffff', 1200, 3, .7); },
+    each(dt) { const o = O(); if (Math.random() < dt * 14) P({ k: 'spore', x: R(0, VW), y: VH + 10, vx: R(-10, 10), vy: R(-90, -40), life: 6, size: R(2, 4), c: '#7fffe0', sway: 2 }); },
+    st() { return { lid: ease.outBack(seg(O().bt, 0, 1)), beat: 3 }; } },
+  amber: { charge: 2.1,
+    ch(k) { const o = O(); o.st.amber = 1; o.st.crack = k; const step = Math.floor(k * 6); if (step > o.step) { o.step = step; S.crack(); shakeIt(4); } o.st.shake = k * .5; },
+    burst() { const o = O(); S.shatter(); S.boom(.3); flash('#ffe0a0', .8); for (let i = 0; i < 44; i++) { const a = R(0, TAU), v = R(300, 1000); P({ k: 'shard', x: o.cx + R(-12, 12) * U(), y: o.cy + R(-10, 8) * U(), vx: Math.cos(a) * v, vy: Math.sin(a) * v - 200, life: R(1, 1.8), size: R(10, 24), c: pick(['#ffb030', '#ffd27a', '#e88a10']), grav: 1300, vr: R(-8, 8), glass: 1 }); } ring('#ffd27a', 1000, 12); },
+    st() { return { lid: ease.outBack(seg(O().bt, .15, .8)), amber: 0, inner: '#ffd27a' }; } },
+  bloom: { charge: 2.4,
+    ch(k, dt) { const o = O(); o.st.swell = k; o.st.open = seg(k, .85, 1) * .15; if (Math.random() < dt * (5 + k * 18)) P({ k: 'spore', x: o.cx + R(-10, 10) * U(), y: o.cy + R(-6, 4) * U(), vx: R(-30, 30), vy: R(-60, -20), life: R(1, 2), size: R(2, 3), c: '#ffe04a', sway: 2 }); },
+    burst() { const o = O(); S.sparkle(16); S.whoosh(1); flash('#ffd8f4', .6); for (let i = 0; i < 70; i++) { const a = R(0, TAU), v = R(150, 600); P({ k: 'petal', x: o.cx, y: o.cy - 3 * U(), vx: Math.cos(a) * v, vy: Math.sin(a) * v, life: R(2, 3.5), size: R(8, 14), c: pick(['#ff9ad8', '#ffd0f0', '#d86ab8', '#ffffff']), grav: 60, vr: R(-5, 5), drag: .975 }); } for (let i = 0; i < 40; i++) P({ k: 'spore', x: o.cx, y: o.cy - 3 * U(), vx: R(-200, 200), vy: R(-300, -50), life: R(2, 3), size: R(2, 4), c: '#ffe04a', drag: .97, sway: 2 }); ring('#ffb8f0', 900, 10, 1); },
+    st() { return { open: ease.outBack(seg(O().bt, 0, 1)), swell: 0 }; } },
+  seed: { charge: 2.6,
+    ch(k, dt) { const o = O(); o.st.roots = ease.outCubic(k); o.st.shake = k * .8; if (o.pt - o.lastTick > .55) { o.lastTick = o.pt; S.hum(50, .5); shakeIt(3); } if (Math.random() < dt * 10) P({ k: 'leaf', x: R(0, VW), y: -10, vx: R(-30, 30), vy: R(60, 140), life: 5, size: R(6, 10), c: pick(['#6fd36a', '#b8ff6a', '#3f8a35']), vr: R(-3, 3), sway: 2 }); },
+    burst() { const o = O(); S.boom(.5); S.crack(); S.rise(1.4, 300); flash('#e0ffc0', .8); shakeIt(22); for (let i = 0; i < 80; i++) { const a = R(0, TAU), v = R(200, 900); P({ k: 'leaf', x: o.cx, y: o.cy, vx: Math.cos(a) * v, vy: Math.sin(a) * v, life: R(1.5, 3), size: R(8, 14), c: pick(['#6fd36a', '#b8ff6a', '#3f8a35', '#e0ffa8']), grav: 120, vr: R(-8, 8), drag: .96 }); } ring('#c8ff8a', 1000, 14); ring('#ffffff', 1400, 4, .6); },
+    st() { return { split: ease.outCubic(seg(O().bt, 0, .9)), roots: 1 }; } },
+  rift: { charge: 2.4,
+    ch(k, dt) { const o = O(); o.st.glitch = k; o.glitch = k * .9; if (Math.random() < dt * (2 + k * 10)) { S.zap(); for (let i = 0; i < 4; i++) P({ k: 'sqp', x: o.cx + R(-30, 30) * U(), y: o.cy + R(-20, 20) * U(), vx: 0, vy: 0, life: R(.1, .3), size: R(4, 14), c: pick(['#ff5af0', '#9af0ff', '#ffffff']) }); } },
+    burst() { const o = O(); o.invert = .35; o.glitch = 0; S.boom(.6); S.shatter(); shakeIt(26); for (let i = 0; i < 60; i++) { const a = R(0, TAU), v = R(200, 1100); P({ k: 'sqp', x: o.cx, y: o.cy, vx: Math.cos(a) * v, vy: Math.sin(a) * v, life: R(.8, 1.6), size: R(4, 12), c: pick(['#ff5af0', '#9af0ff', '#2a1438', '#ffffff']), drag: .94 }); } ring('#ff5af0', 1200, 10); ring('#9af0ff', 900, 6, .9); },
+    st() { return { sep: ease.outCubic(seg(O().bt, 0, 1)), glitch: 0 }; } },
+  eclipse: { charge: 2.9,
+    ch(k) { const o = O(); o.eclipse = k; o.st.shake = seg(k, .8, 1) * .6; if (o.pt - o.lastTick > .6) { o.lastTick = o.pt; S.hum(80 + k * 60, .7); } },
+    burst() { const o = O(); o.eclipse = 1.01; flash('#ffffff', 1.2); S.boom(.7); S.rise(1.6, 500); S.sparkle(16); shakeIt(30); ring('#ffd36b', 1500, 18, 1); ring('#fff3b0', 900, 6, 1.2); burstSparks(90, '#fff3b0', 1300, 3); o.confT = 2.5; },
+    each(dt) { const o = O(); if (o.confT > 0) { o.confT -= dt; P({ k: 'conf', x: R(0, VW), y: -20, vx: R(-30, 30), vy: R(120, 240), life: 5, size: R(5, 8), c: pick(['#ffd36b', '#fff3b0', '#ffffff']), vr: R(-8, 8), sway: 2 }); } },
+    st() { return { lid: ease.outBack(seg(O().bt, .1, .8)), inner: '#fff3b0' }; } },
+  astral: { charge: 2.9,
+    ch(k, dt) { const o = O(); o.constel2 = k; o.st.dy = -ease.inOut(k) * 24; o.starfield = k; if (Math.random() < dt * 12) { const a = R(0, TAU); P({ k: 'orbit', x: o.cx, y: o.cy, a, rad: R(50, 120), va: R(1.5, 3), vrad: -R(5, 20), life: R(1, 2), size: R(2, 4), c: pick(['#c8c0ff', '#ffffff', '#a89cff']) }); } if (o.pt - o.lastTick > .3) { o.lastTick = o.pt; Sound.sfx.hum(196 * Math.pow(2, Math.floor(k * 10) / 12), .4); } },
+    burst() { const o = O(); flash('#e6e8ff', 1); S.boom(.45); S.rise(1.8, 350); S.sparkle(18); for (let i = 0; i < 140; i++) { const a = R(0, TAU); P({ k: 'orbit', x: o.cx, y: o.cy, a, rad: R(4, 30), va: R(1, 2.2) * (i % 2 ? 1 : -1) + 0, vrad: R(80, 320), life: R(1.5, 3), size: R(2, 4), c: pick(['#c8c0ff', '#ffffff', '#8c7dff', '#fff4d0']) }); } ring('#a89cff', 1200, 12); },
+    st() { const o = O(); return { lid: ease.outBack(seg(o.bt, .1, .8)), dy: -24 + ease.inOut(seg(o.bt, 0, 1.4)) * 18 }; } },
+  genesis: { charge: 4.2,
+    ch(k, dt) { const o = O(); o.st.crack = Math.floor(seg(k, .2, .95) * 5) / 5; const step = Math.floor(seg(k, .2, .95) * 5); if (step > o.step) { o.step = step; S.crack(); shakeIt(8); const c = hsl(step * 60, 90, 70); flash(c, .3); ring(c, 900, 8, .8); } o.prismAura = k; if (o.pt - o.lastTick > Math.max(.2, .8 - k * .6)) { o.lastTick = o.pt; S.hum(60, .25); } },
+    burst() { const o = O(); flash('#ffffff', 1.4); S.boom(1); S.rise(2.2, 300); shakeIt(40); o.prism = 1; for (let i = 0; i < 7; i++) ring(hsl(i * 51, 100, 72), 600 + i * 200, 10, 1.4); for (let i = 0; i < 90; i++) { const a = R(0, TAU), v = R(150, 700); P({ k: 'petal', x: o.cx, y: o.cy, vx: Math.cos(a) * v, vy: Math.sin(a) * v, life: R(2, 4), size: R(8, 14), c: hsl(R(0, 360), 90, 85), grav: 40, vr: R(-4, 4), drag: .975 }); } burstSparks(120, '#ffffff', 1400, 3); o.confT = 4; },
+    each(dt) { const o = O(); if (o.confT > 0) { o.confT -= dt; P({ k: 'conf', x: R(0, VW), y: -20, vx: R(-40, 40), vy: R(120, 260), life: 5, size: R(5, 9), c: hsl(R(0, 360), 90, 75), vr: R(-8, 8), sway: R(1, 3) }); } },
+    st() { return { split: ease.outCubic(seg(O().bt, 0, .9)) }; } },
+  forge: { charge: 2.4,
+    ch(k) { const o = O(); o.st.hintTier = o.hint; o.st.heat = k; const n = Math.floor(Math.pow(k, .8) * 9); const ph = (Math.pow(k, .8) * 9) % 1; o.st.hammer = ph < .7 ? lerp(.9, -.9, ease.inOut(ph / .7)) : lerp(-.9, .9, ease.outBack((ph - .7) / .3));
+      if (n > o.step) { o.step = n; S.clunk(); S.clink(); shakeIt(6 + k * 6); for (let i = 0; i < 14; i++) { const a = R(-Math.PI, 0), v = R(200, 700); P({ k: 'spark', x: o.cx + R(-4, 4) * U(), y: o.cy - 5 * U(), vx: Math.cos(a) * v, vy: Math.sin(a) * v, life: R(.3, .8), size: R(1.5, 3), c: pick(['#ffd36b', '#ffb35a', '#fff0c0']), drag: .92 }); } } },
+    burst() { const o = O(); S.boom(.4); S.shatter(); flash(rarCol(o.maxR), .9); ring(rarCol(o.maxR), 1200, 12); burstSparks(80, '#ffd36b', 1100, 3); },
+    st() { const o = O(); return { rise: ease.outBack(seg(o.bt, 0, .8)), heat: 1, hammer: .9, hintTier: o.maxR }; } },
   mimic: { charge: 1.3,
     ch(k) { const o = O(); o.st.shake = k * .5; },
     burst() { }, st() { return {}; } },
@@ -1705,7 +2037,7 @@ function updateOpening(dt) {
       const lt = o.lt - c.t0;
       if (lt < 0) { all = false; continue; }
       if (!c.flying) { c.flying = 1; S.whoosh(.3); }
-      if (lt > .55 && !c.rev) { c.rev = 1; const r = TREASURES[c.i][1]; S.reveal(r); if (r >= 3) { S.fanfare(Math.min(r, 5)); } c.pop = 1; o.caption = `${TREASURES[c.i][0]} — ${TREASURES[c.i][5]}`; for (let k = 0; k < 10 + r * 8; k++) { const a = R(0, TAU), v = R(100, 300 + r * 80); P({ k: 'spark', x: c.x, y: c.y, vx: Math.cos(a) * v, vy: Math.sin(a) * v, life: R(.4, .9), size: R(1.5, 3.5), c: RARITY[r].c, drag: .9 }); } if (r >= 4) { flash(RARITY[r].c, .3); shakeIt(10); } }
+      if (lt > .55 && !c.rev) { c.rev = 1; const it = itemOf(c), r = it.r; S.reveal(Math.min(r, 6)); if (r >= 3) { S.fanfare(r); } c.pop = 1; o.caption = `${it.name} — ${it.lore}`; for (let k = 0; k < 10 + r * 8; k++) { const a = R(0, TAU), v = R(100, 300 + r * 80); P({ k: 'spark', x: c.x, y: c.y, vx: Math.cos(a) * v, vy: Math.sin(a) * v, life: R(.4, .9), size: R(1.5, 3.5), c: RARITY[r].c, drag: .9 }); } if (r >= 4) { flash(RARITY[r].c, .3); shakeIt(10); } }
       if (lt < 1) all = false;
       c.pop = Math.max(0, (c.pop || 0) - dt * 3);
     }
@@ -1720,6 +2052,7 @@ function updateOpening(dt) {
     const p = o.fx[i]; p.life -= dt; if (p.life <= 0) { o.fx.splice(i, 1); continue; }
     if (p.k === 'ring') { p.rad += p.vrad * dt; p.vrad *= Math.pow(.2, dt); continue; }
     if (p.k === 'suck' || p.k === 'bolt') continue;
+    if (p.k === 'orbit') { p.a += p.va * dt; p.rad = Math.max(2, p.rad + p.vrad * dt); continue; }
     const dr = Math.pow(p.drag, dt * 60); p.vx *= dr; p.vy *= dr; p.vy += p.grav * dt; p.x += p.vx * dt; p.y += p.vy * dt; p.r += p.vr * dt;
     if (p.sway) p.x += Math.sin(o.t * p.sway + p.max * 10) * 40 * dt;
     if (p.floor && p.y > p.floor) { p.y = p.floor; p.vy *= -.42; p.vx *= .7; if (Math.abs(p.vy) > 120 && Math.random() < .2) S.clink(); }
@@ -1739,7 +2072,7 @@ function doBurst() {
 function startLoot() {
   const o = opening; o.phase = 'loot'; o.lt = 0;
   const L = layoutCards(o.loot.length); let t0 = 0;
-  o.cards = o.loot.map((i, j) => { const r = TREASURES[i][1]; if (r >= 3) t0 += .3; const c = { i, ...L[j], t0, isNew: !G.foundT[i] }; t0 += .38; return c; });
+  o.cards = o.loot.map((x, j) => { const base = typeof x === 'number' ? { i: x } : x, r = itemOf(base).r; if (r >= 3) t0 += .3; const c = { ...base, ...L[j], t0, isNew: base.pk ? !G.picks[base.pk] : !G.foundT[base.i] }; t0 += .38; return c; });
 }
 function openingTap() {
   const o = opening; if (!o) return;
@@ -1753,6 +2086,15 @@ function openingTap() {
 function finishOpening() {
   const o = opening, i = idx(o.tx, o.ty);
   if (o.preview) { opening = null; fxc.classList.remove('on'); fg.setTransform(1, 0, 0, 1, 0, 0); fg.clearRect(0, 0, fxc.width, fxc.height); Sound.duck(0); return; }
+  if (o.forge) {
+    let refund = 0, fresh = 0;
+    for (const c of o.cards) { if (G.picks[c.pk]) { refund += DUPE_REFUND[PICK_BY[c.pk].tier]; G.picks[c.pk]++; } else { G.picks[c.pk] = 1; fresh++; } }
+    G.gold += refund;
+    opening = null; fxc.classList.remove('on'); fg.setTransform(1, 0, 0, 1, 0, 0); fg.clearRect(0, 0, fxc.width, fxc.height);
+    updHUD(); save(); Sound.duck(0);
+    toast(`새 곡괭이 ${fresh}개${refund ? ` · 중복은 녹여서 ${refund.toLocaleString()} 셀라를 돌려받았어요` : ''}`);
+    campTab = 'forge'; openCamp(); return;
+  }
   for (const c of o.cards) { G.bag.push(c.i); G.foundT[c.i] = (G.foundT[c.i] || 0) + 1; }
   if (o.actual !== 'mimic' || o.cards.length) { G.foundC[o.actual] = (G.foundC[o.actual] || 0) + 1; G.opened++; }
   setTile(o.tx, o.ty, T.AIR); world.chests.delete(i);
@@ -1765,8 +2107,28 @@ function finishOpening() {
 
 // ───────────── 개봉 연출 그리기 ─────────────
 function wrapText(c, s, maxW) { const words = s.split(' '), lines = []; let cur = ''; for (const w of words) { const t = cur ? cur + ' ' + w : w; if (c.measureText(t).width > maxW && cur) { lines.push(cur); cur = w; } else cur = t; } if (cur) lines.push(cur); return lines; }
+function itemOf(card) {
+  if (card.pk) { const p = PICK_BY[card.pk]; return { name: p.name, r: p.tier, sub: `${RARITY[p.tier].name} 곡괭이`, lore: `${pickPerk(p)} — ${p.lore}`, icon: (c, x, y, sz, t) => drawPickIcon(c, p.id, x, y, sz, t) }; }
+  const T0 = TREASURES[card.i]; return { name: T0[0], r: T0[1], sub: `${RARITY[T0[1]].name} · ${T0[2].toLocaleString()} 셀라`, lore: T0[5], icon: (c, x, y, sz, t) => drawIcon(c, T0[3], T0[4], x, y, sz, t) };
+}
+function drawPickIcon(c, id, x, y, size, t = 0) {
+  const spr = pickSprite(id), k = Math.max(1, Math.round(size / spr.height)), pk = PICK_BY[id];
+  if (pk.tier >= 5) glowDot(c, x, y, size * .7, rarCol(pk.tier, t), .4);
+  c.save(); c.imageSmoothingEnabled = false; c.translate(Math.round(x), Math.round(y + Math.sin(t * 2.4) * k * .5)); c.rotate(-.62);
+  c.drawImage(spr, -spr.width * k / 2, -spr.height * k / 2, spr.width * k, spr.height * k); c.restore();
+}
+// 신화 이상 등급의 카드 테두리
+function tierFrame(c, r, w, h, t) {
+  const col = rarCol(r, t);
+  if (r === 5) { for (let i = 0; i < 9; i++) { const fx = -w / 2 + (i + .5) * w / 9, fh = (6 + Math.sin(t * 9 + i * 1.7) * 4) * w / 100; c.fillStyle = i % 2 ? '#ffb33a' : '#ff4d5e'; c.fillRect(fx - w * .03, h / 2 - fh - 2, w * .06, fh); } }
+  if (r === 6) { c.strokeStyle = rgba('#36e0b8', .6); c.lineWidth = 1.5; rr(c, -w / 2 + 6, -h / 2 + 6, w - 12, h - 12, w * .05); c.stroke(); for (const [sx, sy] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) { c.fillStyle = '#36e0b8'; c.fillRect(sx * (w / 2 - 10) - 3, sy * (h / 2 - 10) - 3, 6, 6); c.fillStyle = '#c8fff0'; c.fillRect(sx * (w / 2 - 10) - 1, sy * (h / 2 - 10) - 1, 2, 2); } }
+  if (r === 7) { c.strokeStyle = rgba('#fff3b0', .55 + .3 * Math.sin(t * 3)); c.lineWidth = 2; c.beginPath(); c.ellipse(0, -h * .38, w * .26, w * .07, 0, 0, TAU); c.stroke(); }
+  if (r === 8) { for (let i = 0; i < 14; i++) { const x = (hash2(i, 1, 88) - .5) * w * .85, y = (hash2(i, 2, 88) - .5) * h * .85; c.fillStyle = rgba('#e6e0ff', .3 + .5 * Math.abs(Math.sin(t * 2 + i))); c.fillRect(x, y, 2, 2); } }
+  if (r === 9) { const q = c.createLinearGradient(-w / 2, -h / 2, w / 2, h / 2); for (let i = 0; i <= 6; i++) q.addColorStop(i / 6, hsl((i * 60 + t * 120) % 360, 95, 70)); c.strokeStyle = q; c.lineWidth = 5; rr(c, -w / 2, -h / 2, w, h, w * .08); c.stroke(); }
+  if (r === 10) { const pulse = .6 + .4 * Math.sin(t * 4); c.strokeStyle = rgba('#ffd36b', pulse); c.lineWidth = 2; rr(c, -w / 2 + 5, -h / 2 + 5, w - 10, h - 10, w * .06); c.stroke(); for (const [sx, sy] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) { const x = sx * (w / 2 - 11), y = sy * (h / 2 - 11), k = w / 60; c.fillStyle = '#ff8fc8'; c.fillRect(x - 2 * k, y - k, 2 * k, 2 * k); c.fillRect(x, y - k, 2 * k, 2 * k); c.fillRect(x - k, y + k, 2 * k, k); } }
+}
 function drawCard(c, card, o) {
-  const T0 = TREASURES[card.i], r = T0[1], col = RARITY[r].c, lt = o.lt - card.t0;
+  const it = itemOf(card), r = it.r, col = rarCol(r, o.t), lt = o.lt - card.t0;
   if (lt < 0) return;
   let x = card.x, y = card.y, sc = 1, alpha = 1;
   if (lt < .55) { const k = ease.outCubic(lt / .55); x = lerp(o.cx, card.x, k); y = lerp(o.cy, card.y, k) - Math.sin(k * Math.PI) * 120; sc = lerp(.2, 1, k); }
@@ -1782,13 +2144,13 @@ function drawCard(c, card, o) {
     c.strokeStyle = '#d2a94e'; c.lineWidth = 2; c.beginPath(); c.arc(0, 0, w * .22, 0, TAU); c.stroke(); star4(c, 0, 0, w * .16, '#d2a94e');
   } else {
     c.fillStyle = grad(c, -h / 2, h / 2, shade(col, -.62), '#120d0a'); c.fill();
-    c.lineWidth = r >= 4 ? 4 : 3; c.strokeStyle = r === 5 ? hsl((o.t * 120) % 360, 90, 70) : col; c.stroke();
+    c.lineWidth = r >= 4 ? 4 : 3; c.strokeStyle = col; c.stroke(); tierFrame(c, r, w, h, o.t);
     c.save(); rr(c, -w / 2, -h / 2, w, h, w * .08); c.clip(); c.fillStyle = 'rgba(255,255,255,.06)'; c.fillRect(-w / 2, -h / 2, w, h * .08);
-    const sh = ((o.t * .8 + card.i * .13) % 2) - .5; c.fillStyle = 'rgba(255,255,255,.08)'; c.beginPath(); c.moveTo(-w / 2 + sh * w * 2, -h / 2); c.lineTo(-w / 2 + sh * w * 2 + w * .3, -h / 2); c.lineTo(-w / 2 + sh * w * 2 - w * .2, h / 2); c.lineTo(-w / 2 + sh * w * 2 - w * .5, h / 2); c.fill(); c.restore();
-    drawIcon(c, T0[3], T0[4], 0, -h * .14, w * .55, o.t);
+    const sh = ((o.t * .8 + (card.i || card.x * .01) * .13) % 2) - .5; c.fillStyle = 'rgba(255,255,255,.08)'; c.beginPath(); c.moveTo(-w / 2 + sh * w * 2, -h / 2); c.lineTo(-w / 2 + sh * w * 2 + w * .3, -h / 2); c.lineTo(-w / 2 + sh * w * 2 - w * .2, h / 2); c.lineTo(-w / 2 + sh * w * 2 - w * .5, h / 2); c.fill(); c.restore();
+    it.icon(c, 0, -h * .14, w * .55, o.t);
     c.textAlign = 'center'; c.fillStyle = '#f6ecd4'; const fs = Math.max(10, w * .11); c.font = `${fs}px "Song Myung","Nanum Myeongjo",serif`;
-    const lines = wrapText(c, T0[0], w * .88).slice(0, 2); lines.forEach((ln, k) => c.fillText(ln, 0, h * .22 + k * fs * 1.15));
-    c.font = `${Math.max(9, w * .085)}px "Gowun Dodum",sans-serif`; c.fillStyle = col; c.fillText(`${RARITY[r].name} · ${T0[2]} 셀라`, 0, h * .44);
+    const lines = wrapText(c, it.name, w * .88).slice(0, 2); lines.forEach((ln, k) => c.fillText(ln, 0, h * .22 + k * fs * 1.15));
+    c.font = `${Math.max(9, w * .085)}px "Gowun Dodum",sans-serif`; c.fillStyle = col; c.fillText(it.sub, 0, h * .44);
     if (card.isNew) { c.save(); c.translate(w / 2 - w * .1, -h / 2 + w * .1); c.rotate(.5); c.fillStyle = '#e0604a'; c.fillRect(-w * .26, -w * .065, w * .52, w * .13); c.fillStyle = '#fff'; c.font = `bold ${Math.max(8, w * .085)}px "Gowun Dodum",sans-serif`; c.fillText('NEW', 0, w * .03); c.restore(); }
   }
   c.restore();
@@ -1806,6 +2168,11 @@ function drawFxP(c, p, o) {
     case 'coin': { const cs2 = cspr('fxcoin' + (Math.abs(Math.cos(p.r)) > .45 ? 0 : 1), () => buildSprite(Math.abs(Math.cos(p.r)) > .45 ? ['.yy.', 'yYyy', 'yyyy', 'yyy1'.replace('1', 'y'), '.yy.'] : ['y', 'Y', 'y', 'y', 'y'], '#fff', { y: '#f2b83a' })); const k = Math.max(2, Math.round(p.size / 3)); c.save(); c.imageSmoothingEnabled = false; c.globalAlpha = Math.min(1, a * 3); c.drawImage(cs2, Math.round(p.x - cs2.width * k / 2), Math.round(p.y - cs2.height * k / 2), cs2.width * k, cs2.height * k); c.restore(); break; }
     case 'shard': c.save(); c.translate(p.x, p.y); c.rotate(p.r); c.globalAlpha = Math.min(1, a * 2) * (p.glass ? .85 : 1); c.fillStyle = p.c; c.beginPath(); c.moveTo(0, -p.size * .6); c.lineTo(p.size * .4, p.size * .4); c.lineTo(-p.size * .45, p.size * .3); c.closePath(); c.fill(); if (p.glass) { c.strokeStyle = '#fff'; c.lineWidth = 1; c.stroke(); } c.restore(); c.globalAlpha = 1; break;
     case 'leaf': case 'petal': c.save(); c.translate(p.x, p.y); c.rotate(p.r); c.globalAlpha = Math.min(1, a * 2); c.fillStyle = p.c; c.beginPath(); c.ellipse(0, 0, p.size * .55, p.size * .28 * (p.k === 'petal' ? Math.abs(Math.cos(p.r)) + .3 : 1), 0, 0, TAU); c.fill(); c.restore(); c.globalAlpha = 1; break;
+    case 'pearl': c.fillStyle = rgba('#e8d8f0', Math.min(1, a * 3)); c.fillRect(Math.round(p.x - p.size / 2), Math.round(p.y - p.size / 2), p.size, p.size); c.fillStyle = rgba('#ffffff', Math.min(1, a * 3)); c.fillRect(Math.round(p.x - p.size / 2), Math.round(p.y - p.size / 2), p.size / 2, p.size / 2); break;
+    case 'drop': c.fillStyle = rgba(p.c, Math.min(1, a * 2)); c.fillRect(Math.round(p.x), Math.round(p.y), p.size * .7, p.size * 1.4); break;
+    case 'spore': c.globalCompositeOperation = 'lighter'; glowDot(c, p.x, p.y, p.size * 3, p.c, a * .6); c.fillStyle = rgba('#ffffff', a); c.fillRect(Math.round(p.x), Math.round(p.y), Math.ceil(p.size / 2), Math.ceil(p.size / 2)); c.globalCompositeOperation = 'source-over'; break;
+    case 'sqp': c.fillStyle = rgba(p.c, Math.min(1, a * 2)); c.fillRect(Math.round(p.x), Math.round(p.y), p.size, p.size * .5); break;
+    case 'orbit': { const x = o.cx + Math.cos(p.a) * p.rad, y = o.cy + Math.sin(p.a) * p.rad * .55; c.globalCompositeOperation = 'lighter'; glowDot(c, x, y, p.size * 3, p.c, a * .6); c.fillStyle = rgba('#ffffff', a); c.fillRect(Math.round(x), Math.round(y), p.size, p.size); c.globalCompositeOperation = 'source-over'; break; }
     case 'snow': c.fillStyle = rgba('#ffffff', Math.min(1, a * 2) * .9); c.beginPath(); c.arc(p.x, p.y, p.size, 0, TAU); c.fill(); break;
     case 'bubble': c.strokeStyle = rgba('#ffffff', a * .8); c.lineWidth = 1.5; c.beginPath(); c.arc(p.x, p.y, p.size, 0, TAU); c.stroke(); c.fillStyle = rgba('#ffffff', a * .6); c.beginPath(); c.arc(p.x - p.size * .35, p.y - p.size * .35, p.size * .25, 0, TAU); c.fill(); break;
     case 'steam': c.fillStyle = rgba(p.c, a * .22); c.beginPath(); c.arc(p.x, p.y, p.size, 0, TAU); c.fill(); break;
@@ -1828,6 +2195,18 @@ function drawOpening() {
   bg.addColorStop(0, rgba(col, .3)); bg.addColorStop(.5, rgba(col, .08)); bg.addColorStop(1, rgba(col, 0));
   c.fillStyle = bg; c.fillRect(-50, -50, VW + 100, VH + 100);
   if (o.voidK) { c.fillStyle = `rgba(0,0,0,${o.voidK * .7})`; c.fillRect(-50, -50, VW + 100, VH + 100); }
+  // 일식: 검은 원이 금빛 코로나를 가리며 다가온다
+  if (o.eclipse) {
+    const k = Math.min(1, o.eclipse), r = 26 * U(), ey = o.cy - 6 * U();
+    c.fillStyle = `rgba(0,0,0,${k * .5 * (o.bt >= 0 ? Math.max(0, 1 - o.bt) : 1)})`; c.fillRect(-50, -50, VW + 100, VH + 100);
+    c.globalCompositeOperation = 'lighter'; for (let i = 0; i < 3; i++) glowDot(c, o.cx, ey, r * (1.15 + i * .5) * (.5 + k * .5), '#fff3b0', .32 * k); c.globalCompositeOperation = 'source-over';
+    if (o.bt < 0) { c.fillStyle = '#060408'; c.beginPath(); c.arc(o.cx + (1 - k) * r * 1.6, ey, r * .92, 0, TAU); c.fill(); }
+    else if (o.bt < .5) { const f = 1 - o.bt / .5; c.globalCompositeOperation = 'lighter'; glowDot(c, o.cx + r * .7, ey - r * .6, r * 1.4 * f + 10, '#ffffff', f); c.fillStyle = rgba('#ffffff', f); c.fillRect(o.cx + r * .7 - r * 2 * f, ey - r * .6 - 1.5, r * 4 * f, 3); c.fillRect(o.cx + r * .7 - 1.5, ey - r * .6 - r * 2 * f, 3, r * 4 * f); c.globalCompositeOperation = 'source-over'; }
+  }
+  // 태초의 오라: 일곱 빛깔이 돌아간다
+  if (o.prismAura) { c.globalCompositeOperation = 'lighter'; for (let i = 0; i < 7; i++) { const a = i / 7 * TAU + o.t * 1.4; glowDot(c, o.cx + Math.cos(a) * 18 * U(), o.cy + Math.sin(a) * 13 * U(), 14 * U() * (.4 + o.prismAura * .6), hsl(i * 51, 95, 65), .35 * o.prismAura); } c.globalCompositeOperation = 'source-over'; }
+  // 성좌의 방주: 주변 별들이 선으로 이어진다
+  if (o.constel2) { const k = o.bt >= 0 ? 1 : o.constel2, pts = Array.from({ length: 9 }, (_, i) => { const a = i / 9 * TAU + .3, r2 = (30 + hash2(i, 4, 7) * 12) * U(); return [o.cx + Math.cos(a) * r2, o.cy - 4 * U() + Math.sin(a) * r2 * .6]; }); c.strokeStyle = 'rgba(200,192,255,.55)'; c.lineWidth = 1.5; c.beginPath(); pts.forEach(([x, y], i) => { if (i / 9 <= k) i ? c.lineTo(x, y) : c.moveTo(x, y); }); if (k >= 1) c.closePath(); c.stroke(); pts.forEach(([x, y], i) => { if (i / 9 <= k) { glowDot(c, x, y, 10, '#c8c0ff', .8); pxSpark(c, x, y, 2, '#fff'); } }); }
   if (o.flicker > 0 && Math.random() < .5) { c.fillStyle = 'rgba(200,220,255,.12)'; c.fillRect(0, 0, VW, VH); }
   // 별밭 (별빛 성물함 · 심장)
   const sf = o.starfield || (o.type === 'star' && o.bt >= 0 ? 1 : 0) || (o.type === 'heart' ? .6 : 0);
@@ -1857,10 +2236,14 @@ function drawOpening() {
   if (o.type === 'vine' && st.vines == null) st.vines = 1;
   if (o.type === 'frost' && st.ice == null) st.ice = 1;
   if (o.type === 'royal' && st.chains == null) st.chains = 7;
+  if (o.type === 'anchor' && st.chains == null) st.chains = 3;
+  if (o.type === 'amber' && st.amber == null) st.amber = 1;
   if (!st.hidden) { c.save(); c.translate(pos.x, cy2); if (st.rot) c.rotate(st.rot); drawChest(c, o.type, 0, 0, sc, st); c.restore(); }
   else if (o.prism) { c.globalCompositeOperation = 'lighter'; glowDot(c, o.cx, o.cy - 4 * U(), 10 * U(), '#ffffff', .8 * Math.max(0, 1 - o.bt * .4) + .3); c.globalCompositeOperation = 'source-over'; }
   // 파티클
   for (const p of o.fx) drawFxP(c, p, o);
+  // 균열: 화면을 가로로 잘라 어긋나게 한다
+  if (o.glitch > .05) { for (let i = 0; i < 2 + Math.floor(o.glitch * 6); i++) { const y = R(0, VH), h = R(4, 30), dx = R(-1, 1) * 40 * o.glitch; c.drawImage(fxc, 0, y * DPR, fxc.width, h * DPR, dx, y, VW, h); c.fillStyle = rgba(Math.random() < .5 ? '#ff5af0' : '#9af0ff', .12 * o.glitch); c.fillRect(0, y, VW, h); } }
   if (o.invert > 0) { c.globalCompositeOperation = 'difference'; c.fillStyle = `rgba(255,255,255,${o.invert * 1.6})`; c.fillRect(0, 0, VW, VH); c.globalCompositeOperation = 'source-over'; }
   // 카드
   for (const card of o.cards) drawCard(c, card, o);
@@ -1872,7 +2255,7 @@ function drawOpening() {
   const nameY = Math.max(56, o.cy - 22 * U() - 30);
   const C = CHESTS[o.type];
   c.font = `${Math.min(34, VW * .07)}px "Song Myung","Nanum Myeongjo",serif`; c.fillStyle = '#000'; c.fillText(o.type === 'mimic' ? '미믹이다!' : C.name, VW / 2 + 2, nameY + 2); c.fillStyle = '#f6ecd4'; c.fillText(o.type === 'mimic' ? '미믹이다!' : C.name, VW / 2, nameY);
-  if (o.type !== 'mimic') { c.font = `14px "Gowun Dodum",sans-serif`; c.fillStyle = col; const up = o.hint > o.base ? '  ▲'.repeat(o.hint - o.base) : ''; c.fillText(`${RARITY[o.hint].name}${up}${o.c.vault ? ' · 봉인된 금고' : ''}`, VW / 2, nameY + 24); }
+  if (o.type !== 'mimic') { c.font = `14px "Gowun Dodum",sans-serif`; c.fillStyle = col; const up = o.hint > o.base ? `  ▲ ${o.hint - o.base}단계 상승` : ''; c.fillText(`${RARITY[o.hint].name}${up}${o.c.vault ? ' · 봉인된 금고' : ''}`, VW / 2, nameY + 24); }
   if (o.phase === 'mimic') {
     const w = Math.min(320, VW * .7), x = VW / 2 - w / 2, y = o.cy + 20 * U();
     c.font = `${Math.min(22, VW * .05)}px "Black Han Sans","Gowun Dodum",sans-serif`; c.fillStyle = '#ffd0a0'; c.fillText('화면을 연타해서 배를 문질러 주세요!', VW / 2, y - 14);
@@ -1912,8 +2295,9 @@ async function api(action, payload = {}) {
   return j;
 }
 function saveObj() {
-  let bin = ''; for (let i = 0; i < world.t.length; i++) bin += String.fromCharCode(world.t[i]);
-  return { G, seed: world.seed, t: btoa(bin), chests: [...world.chests], ores: [...world.ores], px: player.x, py: player.y, at: Date.now() };
+  let o = ''; for (let i = 0; i < world.t.length; i++) if (world.t[i] === T.ORE) o += world.ores.get(i) ?? 0;
+  const c = [...world.chests].map(([i, ch]) => [i, CHEST_ORDER.indexOf(ch.type), ch.disguise ? CHEST_ORDER.indexOf(ch.disguise) : -1, ch.vault || 0, ch.L]);
+  return { v: 2, G, seed: world.seed, t: packTiles(), o, c, px: player.x, py: player.y, at: Date.now() };
 }
 function setSession(user, token) {
   ACCT.user = user; ACCT.token = token;
@@ -1925,7 +2309,7 @@ function refreshAcctUI() {
   $('#bAccL').textContent = on ? ACCT.user.toUpperCase() : 'SIGN IN';
   $('#bAccK').textContent = on ? '계정 · 클라우드 저장 관리' : '로그인 · 회원가입 · 클라우드 저장';
   $('#tUser').textContent = on ? `☁ SIGNED IN AS ${ACCT.user} · CLOUD SAVE ON` : '';
-  const b = $('#bAcct'); if (b) b.textContent = on ? `☁ ${ACCT.user}` : '☁ 로그인';
+  const b = $('#bAcct'); if (b) b.innerHTML = `☁<span class="bl"> ${on ? ACCT.user : '로그인'}</span>`;
 }
 // 게임이 저장될 때마다 호출된다. 45초에 한 번만 실제로 올린다.
 function cloudSaveSoon(force) {
@@ -1943,7 +2327,7 @@ addEventListener('pagehide', () => {
   try { navigator.sendBeacon(ACCT.api, new Blob([JSON.stringify({ action: 'save', username: ACCT.user, token: ACCT.token, data: JSON.stringify(saveObj()), meta: { gold: G.gold, opened: G.opened } })], { type: 'text/plain;charset=utf-8' })); } catch (e) { }
 });
 function applyCloud(obj) {
-  store.set('celesta-save-v1', obj);
+  if (obj.v === 2) store.set('celesta-save-v2', obj); else { store.set('celesta-save-v2', null); store.set('celesta-save-v1', obj); }
   if (load()) { G.oil = maxOil(); camUpdate(0, true); updHUD(); buildTitleLabels(); toast(`클라우드 기록을 불러왔어요 · ${G.gold.toLocaleString()} 셀라 · 상자 ${G.opened}개`); }
 }
 function buildTitleLabels() {
@@ -2014,6 +2398,213 @@ function renderAcct(choice) {
 }
 function closeAcct() { $('#acctM').hidden = true; }
 
+// ───────────── 오른쪽 위치 바 ─────────────
+// 다른 플레이어 위치는 온라인 기능이 붙으면 CELESTA_ONLINE.setPlayers([{ name, depth: 행 번호, color }])로 넘기면 된다.
+let OTHER_PLAYERS = [];
+window.CELESTA_ONLINE = { setPlayers(list) { OTHER_PLAYERS = Array.isArray(list) ? list.slice(0, 40) : []; } };
+const ROMAN = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X'];
+let barY = 0;
+function headSprite() { return cspr('heroHead', () => { const h = heroSprite(), c = mkCanvas(h.width, 14); c.getContext('2d').drawImage(h, 0, 0, h.width, 14, 0, 0, h.width, 14); return c; }); }
+function drawDepthBar(x, w, h, o = {}) {
+  const top = 30, bot = h - 30, shX = 10, shW = 18, rows = H - 3 - SURF, rowY = r => top + clamp((r - SURF) / rows, 0, 1) * (bot - top);
+  x.clearRect(0, 0, w, h); x.imageSmoothingEnabled = false;
+  // 지층 띠
+  LAYERS.forEach((Ly, i) => {
+    const y0 = Math.round(rowY(Ly.from)), y1 = Math.round(rowY(Ly.to)), on = o.cur === i, seen = o.seen ? o.seen.includes(i) || i === 0 : true;
+    x.fillStyle = seen ? (on ? hexShift(Ly.dirt, 12) : Ly.dirt) : '#2a2430'; x.fillRect(shX, y0, shW, y1 - y0);
+    x.fillStyle = 'rgba(255,255,255,.12)'; x.fillRect(shX, y0, 3, y1 - y0);
+    x.fillStyle = PX_OUT; x.fillRect(shX, y0, shW, 1);
+    if (y1 - y0 > 14) { x.font = '8px Silkscreen, monospace'; x.textAlign = 'center'; x.fillStyle = on ? '#fff6dc' : 'rgba(255,240,220,.55)'; x.fillText(ROMAN[i], shX + shW / 2, (y0 + y1) / 2 + 3); }
+    if (on) { x.fillStyle = '#ffd36b'; x.fillRect(shX - 4, y0, 2, y1 - y0); x.fillRect(shX - 4, y0, 4, 2); x.fillRect(shX - 4, y1 - 2, 4, 2); }
+  });
+  x.strokeStyle = PX_OUT; x.lineWidth = 2; x.strokeRect(shX - 1, top - 1, shW + 2, bot - top + 2);
+  // 위: 야영지 천막, 아래: 심장
+  x.fillStyle = '#c8463a'; for (let k = 0; k < 7; k++) x.fillRect(shX + shW / 2 - k, top - 14 + k * 1.6, k * 2 + 1, 2); x.fillStyle = '#2a120e'; x.fillRect(shX + shW / 2 - 1, top - 6, 3, 4);
+  const hb = 1 + Math.max(0, Math.sin((o.t || 0) * 5)) * .15, hy = bot + 13;
+  x.save(); x.translate(shX + shW / 2, hy); x.scale(hb, hb); x.fillStyle = o.heart ? '#ffd36b' : '#ff5f8f'; [[-4, -3, 3, 3], [1, -3, 3, 3], [-4, 0, 8, 2], [-3, 2, 6, 2], [-1, 4, 2, 1]].forEach(([a, b, c, d]) => x.fillRect(a, b, c, d)); x.restore();
+  // 최고 도달 깊이
+  if (o.deepest > SURF) { const y = Math.round(rowY(o.deepest)); x.fillStyle = '#fff6dc'; for (let k = 0; k < shW; k += 4) x.fillRect(shX + k, y, 2, 1); x.fillRect(shX + shW + 1, y, 4, 1); }
+  // 다른 플레이어
+  (o.others || []).forEach((p, i) => { const y = Math.round(rowY(p.depth)), xx = shX + shW + 4 + (i % 3) * 7; x.fillStyle = PX_OUT; x.fillRect(xx - 1, y - 3, 7, 7); x.fillStyle = p.color || '#9fe6d8'; x.fillRect(xx, y - 2, 5, 5); });
+  // 나
+  if (o.me != null) {
+    const y = Math.round(o.me), hs = headSprite(), k = 1.4;
+    x.fillStyle = '#ffd36b'; x.fillRect(shX + shW + 1, y - 1, 5, 3);
+    x.drawImage(hs, shX + shW + 5, y - hs.height * k / 2, hs.width * k, hs.height * k);
+  }
+}
+function updDepthBar(dt) {
+  const c = $('#depthBar'); if (!c || c.hidden) return;
+  const w = 64, h = Math.round(c.clientHeight || 400);
+  if (c.width !== w * DPR || c.height !== h * DPR) { c.width = w * DPR; c.height = h * DPR; }
+  const x = c.getContext('2d'); x.setTransform(DPR, 0, 0, DPR, 0, 0);
+  const top = 30, bot = h - 30, row = (player.y + player.h - 2) / TS, ty = top + clamp((row - SURF) / (H - 3 - SURF), 0, 1) * (bot - top);
+  barY = barY ? lerp(barY, ty, 1 - Math.pow(.001, dt)) : ty;
+  const key = `${Math.round(barY)}|${h}|${G.deepest}|${(G.seen || []).length}|${OTHER_PLAYERS.length}|${Math.floor(time * 6)}`;
+  if (key === c._k) return; c._k = key;
+  drawDepthBar(x, w, h, { me: barY, cur: row <= SURF ? -1 : layerAt(Math.floor(row)), deepest: G.deepest, seen: G.seen, heart: G.heart, others: OTHER_PLAYERS, t: time });
+}
+
+// ───────────── 보물 나침반 다이얼 ─────────────
+const compass = { a: -Math.PI / 2, va: 0, target: null };
+function compassTargets() {
+  if (!G.upg.compass) return [];
+  const rad = [0, 14, 24, 40][G.upg.compass], pcx = (player.x + 9) / TS, pcy = (player.y + 13) / TS, out = [];
+  for (const [i, c] of world.chests) { const x = i % W + .5, y = Math.floor(i / W) + .5, d = Math.hypot(x - pcx, y - pcy); if (d <= rad) out.push({ a: Math.atan2(y - pcy, x - pcx), d, tier: CHESTS[c.disguise || c.type].tier, vault: !!c.vault, heart: c.type === 'heart' }); }
+  return out.sort((a, b) => a.d - b.d);
+}
+function drawCompassDial(x, w, st) {
+  const cx = w / 2, cy = 46, R = 38, lv = st.lv, tg = st.list && st.list[0];
+  x.clearRect(0, 0, w, 120);
+  // 테두리와 문자판
+  const near = tg && tg.d < 4 ? .5 + .5 * Math.sin(st.t * 8) : 0;
+  if (near) { x.fillStyle = rgba(rarCol(tg.tier, st.t), .25 * near); x.beginPath(); x.arc(cx, cy, R + 6, 0, TAU); x.fill(); }
+  x.fillStyle = PX_OUT; x.beginPath(); x.arc(cx, cy, R + 2, 0, TAU); x.fill();
+  x.fillStyle = lv ? '#c9993e' : '#5a5048'; x.beginPath(); x.arc(cx, cy, R, 0, TAU); x.fill();
+  x.fillStyle = lv ? '#f1cf78' : '#7a7068'; x.beginPath(); x.arc(cx, cy, R, Math.PI * 1.05, Math.PI * 1.7); x.lineTo(cx, cy); x.fill();
+  x.fillStyle = '#16121c'; x.beginPath(); x.arc(cx, cy, R - 6, 0, TAU); x.fill();
+  x.fillStyle = 'rgba(255,255,255,.05)'; x.beginPath(); x.arc(cx - 8, cy - 10, R - 16, 0, TAU); x.fill();
+  for (let i = 0; i < 16; i++) { const a = i / 16 * TAU, l = i % 4 ? 3 : 6; x.fillStyle = i % 4 ? '#6a5a48' : '#d2a94e'; x.save(); x.translate(cx + Math.cos(a) * (R - 9), cy + Math.sin(a) * (R - 9)); x.rotate(a); x.fillRect(-l / 2, -1, l, 2); x.restore(); }
+  x.fillStyle = '#9fe6d8'; x.fillRect(cx - 2, cy - R + 1, 4, 4);
+  if (!lv) { x.fillStyle = '#7a7068'; x.font = '10px "Gowun Dodum",sans-serif'; x.textAlign = 'center'; x.fillText('🔒', cx, cy + 4); x.fillStyle = '#b9a88a'; x.font = '11px "Gowun Dodum",sans-serif'; x.fillText('나침반 없음', cx, 104); x.font = '9px "Gowun Dodum",sans-serif'; x.fillText('야영지에서 구입', cx, 117); return; }
+  // 후보 표시 (Lv3)
+  if (lv >= 3 && st.list) st.list.slice(1, 3).forEach(t2 => { x.fillStyle = PX_OUT; x.fillRect(cx + Math.cos(t2.a) * (R - 3) - 3, cy + Math.sin(t2.a) * (R - 3) - 3, 6, 6); x.fillStyle = rarCol(t2.tier, st.t); x.fillRect(cx + Math.cos(t2.a) * (R - 3) - 2, cy + Math.sin(t2.a) * (R - 3) - 2, 4, 4); });
+  // 바늘
+  const col = tg ? rarCol(tg.tier, st.t) : '#8a8f9a';
+  x.save(); x.translate(cx, cy); x.rotate(st.a);
+  x.fillStyle = PX_OUT; x.beginPath(); x.moveTo(R - 7, 0); x.lineTo(0, -6); x.lineTo(-R + 14, 0); x.lineTo(0, 6); x.closePath(); x.fill();
+  x.fillStyle = col; x.beginPath(); x.moveTo(R - 10, 0); x.lineTo(0, -4); x.lineTo(0, 4); x.closePath(); x.fill();
+  x.fillStyle = '#5a6070'; x.beginPath(); x.moveTo(-R + 17, 0); x.lineTo(0, -4); x.lineTo(0, 4); x.closePath(); x.fill();
+  x.fillStyle = 'rgba(255,255,255,.5)'; x.fillRect(4, -2, R - 18, 1);
+  x.restore();
+  x.fillStyle = PX_OUT; x.beginPath(); x.arc(cx, cy, 6, 0, TAU); x.fill(); x.fillStyle = '#f1cf78'; x.beginPath(); x.arc(cx, cy, 4, 0, TAU); x.fill(); x.fillStyle = col; x.fillRect(cx - 1, cy - 1, 2, 2);
+  // 아래 글자
+  x.textAlign = 'center';
+  if (!tg) { x.fillStyle = '#b9a88a'; x.font = '11px "Gowun Dodum",sans-serif'; x.fillText('범위 안에 상자 없음', cx, 104); x.font = '9px "Gowun Dodum",sans-serif'; x.fillText(`탐지 반경 ${[0, 14, 24, 40][lv] * 2}m`, cx, 117); return; }
+  x.font = '12px "Gowun Dodum",sans-serif'; x.fillStyle = lv >= 2 ? col : '#f0e3c2';
+  x.fillText(tg.heart ? '셀레스타의 심장' : tg.vault && lv >= 3 ? `봉인된 금고 · ${RARITY[tg.tier].name}` : lv >= 2 ? `${RARITY[tg.tier].name} 상자` : '상자 방향', cx, 104);
+  x.font = '10px Silkscreen, monospace'; x.fillStyle = '#f0e3c2';
+  x.fillText(lv >= 2 ? `${Math.max(1, Math.round(tg.d * 2))}M` : tg.d < 6 ? 'NEAR' : tg.d < 10 ? 'MID' : 'FAR', cx, 117);
+}
+function updCompass(dt) {
+  const c = $('#compassDial'); if (!c || c.hidden) return;
+  if (c.width !== 96 * DPR) { c.width = 96 * DPR; c.height = 122 * DPR; }
+  const list = compassTargets(), tg = list[0];
+  const want = tg ? tg.a : compass.a + dt * 1.2;
+  let d = ((want - compass.a + Math.PI * 3) % TAU) - Math.PI;
+  compass.va += (d * 60 - compass.va * 9) * dt; compass.a += compass.va * dt;
+  c._f = (c._f || 0) + 1; if (c._f % 2) return;
+  const x = c.getContext('2d'); x.setTransform(DPR, 0, 0, DPR, 0, 0);
+  drawCompassDial(x, 96, { lv: G.upg.compass, list, a: compass.a + (tg ? Math.sin(time * 7) * .03 : 0), t: time });
+}
+
+// ───────────── 화면 전환 ─────────────
+// 열쇠구멍(금고 문) · 흙더미 와이프 · 지층 진입 배너
+let transBusy = false;
+function keyholePath(x, cx, cy, s) { x.beginPath(); x.arc(cx, cy - s * .35, s * .42, 0, TAU); x.moveTo(cx - s * .2, cy - s * .2); x.lineTo(cx + s * .2, cy - s * .2); x.lineTo(cx + s * .38, cy + s * .75); x.lineTo(cx - s * .38, cy + s * .75); x.closePath(); }
+function transition(kind, mid, at) {
+  if (transBusy) { mid && mid(); return Promise.resolve(); }
+  transBusy = true;
+  const c = $('#trans'), x = c.getContext('2d'); c.hidden = false; c.width = VW * DPR; c.height = VH * DPR;
+  const cx = at ? at[0] : VW / 2, cy = at ? at[1] : VH / 2, big = Math.hypot(VW, VH) * 2.2;
+  const cols = Math.ceil(VW / 28), rowsN = Math.ceil(VH / 28) + 1, pal = LAYERS.slice(0, 6).map(l => [l.dirt, l.dark, l.rock]);
+  const dur = kind === 'open' ? [0, .05, .6] : [.5, .12, .55];
+  let t0 = performance.now(), midDone = false;
+  return new Promise(res => {
+    const step = now => {
+      const t = (now - t0) / 1000; x.setTransform(DPR, 0, 0, DPR, 0, 0); x.clearRect(0, 0, VW, VH);
+      let k; // 0 = 열림, 1 = 완전히 닫힘
+      if (t < dur[0]) k = ease.inCubic(t / dur[0]); else if (t < dur[0] + dur[1]) k = 1; else k = 1 - ease.outCubic(Math.min(1, (t - dur[0] - dur[1]) / dur[2]));
+      if (!midDone && t >= dur[0]) { midDone = true; mid && mid(); S.whoosh(.4); }
+      if (kind === 'dirt') {
+        const opening2 = t >= dur[0] + dur[1];
+        for (let i = 0; i < cols; i++) {
+          const delay = hash2(i, 3, 9) * .35, kk = opening2 ? clamp((t - dur[0] - dur[1] - delay * .6) / .45, 0, 1) : clamp((t - delay * .6) / .4, 0, 1);
+          for (let j = 0; j < rowsN; j++) {
+            const yy = opening2 ? j * 28 + ease.inCubic(kk) * (VH + 60) : (j - rowsN) * 28 + ease.outCubic(kk) * rowsN * 28;
+            const p2 = pal[Math.min(5, Math.floor(j / rowsN * 6))], h0 = hash2(i, j, 4);
+            x.fillStyle = PX_OUT; x.fillRect(i * 28, yy, 28, 28); x.fillStyle = h0 > .8 ? p2[2] : p2[0]; x.fillRect(i * 28 + 1, yy + 1, 26, 26); x.fillStyle = p2[1]; x.fillRect(i * 28 + 1, yy + 22, 26, 5); x.fillStyle = 'rgba(255,255,255,.1)'; x.fillRect(i * 28 + 1, yy + 1, 26, 3);
+          }
+        }
+      } else {
+        // 열쇠구멍: 검은 금고 문이 닫혔다 열린다
+        const s = Math.max(.001, (1 - k)) * big;
+        x.fillStyle = '#07040a'; x.fillRect(0, 0, VW, VH);
+        x.globalCompositeOperation = 'destination-out'; keyholePath(x, cx, cy, s); x.fill(); x.globalCompositeOperation = 'source-over';
+        if (k > .02) { x.strokeStyle = rgba('#ffd36b', Math.min(1, k * 2)); x.lineWidth = 3; keyholePath(x, cx, cy, s); x.stroke(); x.strokeStyle = rgba('#8a6a2a', Math.min(1, k * 2)); x.lineWidth = 8; x.globalAlpha = .4; keyholePath(x, cx, cy, s + 10); x.stroke(); x.globalAlpha = 1; }
+        if (k >= .99) { x.fillStyle = '#ffd36b'; x.font = '12px Silkscreen, monospace'; x.textAlign = 'center'; x.fillText('· · ·', VW / 2, VH / 2 + 4); }
+      }
+      if (t < dur[0] + dur[1] + dur[2] + (kind === 'dirt' ? .5 : 0)) requestAnimationFrame(step);
+      else { c.hidden = true; transBusy = false; res(); }
+    };
+    requestAnimationFrame(step);
+  });
+}
+let bannerT = 0;
+function stratumBanner(L) {
+  if (performance.now() - bannerT < 2500) return; bannerT = performance.now();
+  const b = $('#stratum'), Ly = LAYERS[L];
+  b.innerHTML = `<small>STRATUM ${ROMAN[L]} · ${Ly.en}</small><b>${Ly.name}</b><i>${(Ly.from - SURF) * 2}m ~ ${(Ly.to - SURF) * 2}m · 곡괭이 강화 Lv${Ly.pick}</i>`;
+  b.style.setProperty('--c', Ly.ore[0]); b.hidden = false; b.classList.remove('go'); void b.offsetWidth; b.classList.add('go');
+  clearTimeout(b._t); b._t = setTimeout(() => { b.hidden = true; }, 3200);
+}
+
+// ───────────── 튜토리얼 ─────────────
+function drawWorldMap(cv, opt = {}) {
+  const x = cv.getContext('2d'), w = cv.width, h = cv.height, mapW = Math.round(w * .2), sy = h / (H - SURF), sx = mapW / W;
+  x.fillStyle = '#0e0b14'; x.fillRect(0, 0, w, h);
+  for (let y = SURF; y < H; y++) for (let xx = 0; xx < W; xx++) {
+    const v = world.t[idx(xx, y)], L = clamp(layerAt(y), 0, LAST_L);
+    x.fillStyle = v === T.AIR ? '#08060c' : v === T.CHEST ? '#fff' : v === T.BRICK || v === T.GOLDBRICK ? '#d8b25a' : v === T.STONE ? LAYERS[L].rock : v === T.BED ? '#16121c' : LAYERS[L].dirt;
+    x.fillRect(xx * sx, (y - SURF) * sy, Math.ceil(sx), Math.ceil(sy));
+  }
+  for (const [i, c] of world.chests) { const cxp = (i % W) * sx, cyp = (Math.floor(i / W) - SURF) * sy, col = rarCol(CHESTS[c.disguise || c.type].tier); x.fillStyle = PX_OUT; x.fillRect(cxp - 1, cyp - 1, 4, 4); x.fillStyle = col; x.fillRect(cxp, cyp, 2, 2); }
+  const py = (player.y / TS - SURF) * sy; x.fillStyle = '#ffd36b'; x.fillRect(0, py - 1, mapW, 2);
+  x.strokeStyle = '#8a6a2a'; x.lineWidth = 2; x.strokeRect(1, 1, mapW - 2, h - 2);
+  // 오른쪽: 지층 설명 띠
+  LAYERS.forEach((Ly, i) => {
+    const y0 = (Ly.from - SURF) * sy, y1 = (Ly.to - SURF) * sy, hl = opt.hl === i;
+    x.fillStyle = hl ? rgba(Ly.ore[0], .22) : i % 2 ? 'rgba(255,255,255,.03)' : 'rgba(255,255,255,.06)'; x.fillRect(mapW + 8, y0, w - mapW - 8, y1 - y0);
+    x.fillStyle = Ly.dirt; x.fillRect(mapW + 8, y0, 6, y1 - y0);
+    x.fillStyle = '#f0e3c2'; x.font = `${Math.min(13, (y1 - y0) * .5)}px "Song Myung",serif`; x.textAlign = 'left'; x.fillText(`${ROMAN[i]}  ${Ly.name}`, mapW + 22, y0 + (y1 - y0) * .55);
+    x.fillStyle = '#b9a88a'; x.font = `${Math.min(10, (y1 - y0) * .4)}px "Gowun Dodum",sans-serif`; x.textAlign = 'right'; x.fillText(`${(Ly.from - SURF) * 2}m · 강화 Lv${Ly.pick}`, w - 8, y0 + (y1 - y0) * .55);
+  });
+  x.fillStyle = '#ffd36b'; x.beginPath(); x.moveTo(mapW + 1, py); x.lineTo(mapW + 7, py - 5); x.lineTo(mapW + 7, py + 5); x.closePath(); x.fill();
+}
+const TUT = [
+  { t: '셀레스타에 오신 걸 환영해요', b: '삼백 년 전 하늘에서 떨어진 왕국 셀레스타가 이 땅 아래 잠들어 있어요. 견습 발굴사인 당신의 목표는 <b>열 개의 지층</b>을 파 내려가 맨 밑바닥 <b>왕좌의 금고</b>에 있는 <b>셀레스타의 심장</b>을 여는 거예요. 왼쪽은 지금 세계의 실제 지형 지도예요. 흰 점이 상자, 금색이 봉인된 금고, 노란 선이 지금 위치예요.', art: 'map' },
+  { t: '열 개의 지층', b: '깊이 내려갈수록 땅이 단단해지고, 더 높은 등급의 상자가 나와요. 지층마다 들어가려면 <b>곡괭이 강화 단계</b>가 필요해요(오른쪽 표의 Lv). 층마다 풍경과 음악, 원석, 상자 종류가 달라요.', art: 'map2' },
+  { t: '파는 법', b: '<kbd>←</kbd><kbd>→</kbd> 걷다가 벽을 향해 계속 누르면 옆을 파요. <kbd>↓</kbd> 아래를 파고, <kbd>↑</kbd>/<kbd>Space</kbd>로 점프해요. 누른 만큼 높이 뛰고, 머리 위가 막혀 있으면 위를 파요. 블록마다 단단함이 달라서 돌·벽돌은 오래 걸려요. 원석을 캐면 바로 셀라(돈)가 들어와요. 모바일은 왼쪽 아래 방향 버튼을 써요.', art: 'dig' },
+  { t: '랜턴 기름과 귀환', b: '땅속에서는 랜턴 기름이 계속 줄고, 블록을 팔 때도 줄어요. 기름이 떨어지면 정신을 잃고 조합 구조대가 끌어올리지만 <b>구조비 15%</b>를 내야 해요. 그 전에 <kbd>R</kbd> <b>귀환 두루마리</b>를 쓰면 공짜로 야영지에 돌아와요. 지상에서는 기름이 저절로 채워져요.', art: 'oil' },
+  { t: '상자와 열한 개의 등급', b: '상자를 곡괭이로 치면 열려요. 기를 모으는 동안 빛깔이 한 칸씩 오르며 안에 든 <b>최고 등급</b>을 미리 알려 줘요. 벽돌로 둘러싸인 <b>봉인된 금고</b>는 보상이 더 좋고, 평범한 상자처럼 생긴 <b>미믹</b>은 화면을 연타해 달래야 해요. <b>셀레스타</b> 등급은 심장 하나만을 위한 특별한 등급이에요.', art: 'rarity' },
+  { t: '야영지 · 강화 · 운명의 모루', b: '지상의 조합 천막(<kbd>E</kbd>)에서 보물을 팔고 장비를 강화해요. <b>강화는 수치만</b> 올려요(파는 힘, 기름, 행운, 나침반). 곡괭이 자체는 <b>⚒ 운명의 모루</b>에서 셀라를 내고 벼려야 바뀌어요. 곡괭이는 24종이고 등급이 높을수록 빠르고, 행운·기름 절약·원석 보너스가 붙어요.', art: 'picks' },
+  { t: '오른쪽 위치 바', b: '화면 오른쪽 세로 바는 세계 전체의 단면이에요. 로마 숫자가 지층 번호이고, <b>리오 얼굴</b>이 지금 내 위치, 점선이 지금까지 가장 깊이 간 곳, 맨 아래 하트가 셀레스타의 심장이에요. 아직 가 보지 않은 지층은 어둡게 보여요. 나중에 온라인 기능이 생기면 다른 발굴사들도 색 점으로 여기에 나타나요.', art: 'bar' },
+  { t: '보물 나침반', b: '왼쪽 위 다이얼은 <b>가장 가까운 상자</b>를 가리켜요. 바늘 색이 그 상자의 등급 색이에요. 야영지에서 나침반을 강화하면 탐지 반경이 넓어지고, Lv2부터 거리와 등급, Lv3부터 다음 후보 두 개(테두리의 작은 점)와 봉인된 금고까지 알려 줘요. 상자 바로 옆에 오면 다이얼이 빛나요.', art: 'compass' },
+  { t: '도감 · 계정 · 저장', b: '<kbd>C</kbd> 도감에는 찾은 상자·보물·곡괭이가 모여요. 한 번 연 상자는 도감에서 눌러 개봉 연출을 다시 볼 수 있어요. 진행은 브라우저에 자동 저장되고, 로그인하면 구글 시트에 클라우드 저장돼서 다른 기기에서도 이어서 할 수 있어요.', art: 'codex' },
+  { t: '준비됐어요!', b: '처음엔 발밑의 나무상자부터 열어 보세요. 원석과 보물을 팔아 곡괭이를 강화하고, 모루에서 좋은 곡괭이를 노리세요. 이 설명은 언제든 <kbd>H</kbd> 또는 오른쪽 아래 ❔ 버튼으로 다시 볼 수 있어요.', art: 'end' },
+];
+let tutPage = 0;
+function openTut(p = 0) { tutPage = p; renderTut(); $('#tutM').hidden = false; }
+function closeTut() { $('#tutM').hidden = true; store.set('celesta-tut', 1); }
+function renderTut() {
+  const pg = TUT[tutPage], s = $('#tutS');
+  s.innerHTML = `<div class="tut-head"><span>HOW TO PLAY · ${tutPage + 1}/${TUT.length}</span><button type="button" id="tutX">건너뛰기 (Esc)</button></div>
+    <div class="tut-body"><div class="tut-art" id="tutArt"></div><div class="tut-text"><h2>${pg.t}</h2><p>${pg.b}</p></div></div>
+    <div class="tut-nav"><button type="button" id="tutP"${tutPage ? '' : ' disabled'}>← 이전</button><div class="tut-dots">${TUT.map((_, i) => `<i class="${i === tutPage ? 'on' : ''}"></i>`).join('')}</div><button type="button" class="primary" id="tutN">${tutPage === TUT.length - 1 ? '발굴 시작' : '다음 →'}</button></div>`;
+  const art = $('#tutArt'), mk = (w, h) => { const c = document.createElement('canvas'); c.width = w; c.height = h; art.appendChild(c); return c; };
+  if (pg.art === 'map' || pg.art === 'map2') drawWorldMap(mk(420, 380), { hl: pg.art === 'map2' ? Math.max(0, layerAt(Math.floor(player.y / TS))) : -1 });
+  else if (pg.art === 'dig') { const c = mk(260, 200), x = c.getContext('2d'); x.imageSmoothingEnabled = false; for (let j = 0; j < 4; j++) for (let i = 0; i < 6; i++) if (!(j === 1 && i >= 2 && i <= 3)) x.drawImage(TEX[0][j === 0 ? 'dirt' : (i + j) % 3 ? 'dirt' : 'stone'][(i + j) % 4], i * 44, 40 + j * 40, 44, 40); x.fillStyle = '#08060c'; x.fillRect(88, 80, 88, 40); const hs = heroSprite(), k = 2.6; x.drawImage(hs, 100, 120 - hs.height * k, hs.width * k, hs.height * k); x.drawImage(TEX.crack[2], 176, 80, 44, 40); x.fillStyle = '#ffd36b'; x.font = '12px "Gowun Dodum"'; x.fillText('→ 계속 누르면 옆을 파요', 120, 30); x.fillText('↓', 128, 196); }
+  else if (pg.art === 'oil') art.innerHTML = `<div class="plate" style="display:inline-flex;flex-direction:column;gap:6px;text-align:left"><div class="layer-name">잿불 심층</div><div class="depth">깊이 212m · 기름 34/290</div><div class="oil low"><i style="width:12%"></i></div></div><p class="sub" style="margin-top:14px">기름이 25% 아래로 내려가면 막대가 깜박여요</p>`;
+  else if (pg.art === 'rarity') art.innerHTML = `<div class="rar-ladder">${RARITY.map((r, i) => `<span style="--c:${r.prism ? '#fff' : r.c}" class="${r.prism ? 'prism' : ''}${r.heart ? ' heart' : ''}"><b>${r.name}</b><small>${r.en}</small></span>`).join('')}</div>`;
+  else if (pg.art === 'picks') { const c = mk(420, 150), x = c.getContext('2d'); ['rusty', 'copper', 'crystal', 'storm', 'royalp', 'meteor', 'fall', 'seraph', 'astralp', 'genesisp'].forEach((id, i) => { drawPickIcon(x, id, 22 + i * 41, 60, 44, 1); x.fillStyle = rarCol(PICK_BY[id].tier, 1); x.font = '10px "Gowun Dodum"'; x.textAlign = 'center'; x.fillText(RARITY[PICK_BY[id].tier].name, 22 + i * 41, 112); }); }
+  else if (pg.art === 'bar') { const c = mk(64, 340); c.style.height = '340px'; drawDepthBar(c.getContext('2d'), 64, 340, { me: 30 + (Math.max(0, player.y / TS - SURF) / (H - 3 - SURF)) * 280, cur: Math.max(0, layerAt(Math.floor(player.y / TS))), deepest: Math.max(G.deepest, 60), seen: [0, 1, 2], others: [{ depth: 80, color: '#7bd36a' }, { depth: 150, color: '#ff8fc8' }, { depth: 210, color: '#8ab4ff' }], t: 1 }); art.insertAdjacentHTML('beforeend', '<p class="sub" style="max-width:150px">색 점은 다른 발굴사 자리(온라인 예정)</p>'); }
+  else if (pg.art === 'compass') { [1, 2, 3].forEach(lv => { const c = mk(96, 122); drawCompassDial(c.getContext('2d'), 96, { lv, list: [{ a: -.7, d: 7, tier: lv + 2, vault: lv === 3 }, { a: 2.2, d: 12, tier: 1 }, { a: 1, d: 15, tier: 4 }], a: -.7, t: 1 }); }); }
+  else if (pg.art === 'codex') { const c = mk(360, 120), x = c.getContext('2d'); x.imageSmoothingEnabled = false; ['wood', 'crystal', 'royal', 'jelly', 'genesis'].forEach((k, i) => drawChest(x, k, 40 + i * 70, 60, 2, { t: 1 })); }
+  else if (pg.art === 'end') { const c = mk(200, 170), x = c.getContext('2d'); x.imageSmoothingEnabled = false; drawChest(x, 'heart', 100, 86, 3.2, { t: 1, cage: .3 }); }
+  $('#tutX').onclick = closeTut; $('#tutP').onclick = () => { if (tutPage) { tutPage--; renderTut(); } };
+  $('#tutN').onclick = () => { if (tutPage < TUT.length - 1) { tutPage++; renderTut(); S.tick(); } else closeTut(); };
+}
+
 // ───────────── HUD · 야영지 · 도감 ─────────────
 let lastLayer = -2;
 function updHUD() {
@@ -2025,18 +2616,18 @@ function updHUD() {
   $('#bCamp').hidden = row > SURF;
   const nl = row <= SURF ? -1 : L;
   if (nl !== lastLayer) {
-    if (lastLayer !== -2 && nl >= 0) { G.seen = G.seen || []; if (!G.seen.includes(nl)) { G.seen.push(nl); toast(`▼ ${LAYERS[nl].name} — ${LAYERS[nl].lore}`); S.sparkle(4); } }
+    if (lastLayer !== -2 && nl >= 0) { G.seen = G.seen || []; stratumBanner(nl); if (!G.seen.includes(nl)) { G.seen.push(nl); toast(LAYERS[nl].lore); S.sparkle(4); } }
     lastLayer = nl; Sound.setDrone(nl);
   }
 }
-const modalOpen = () => !$('#campM').hidden || !$('#codexM').hidden || !$('#acctM').hidden || !$('#title').hidden;
+const modalOpen = () => !$('#campM').hidden || !$('#codexM').hidden || !$('#acctM').hidden || !$('#tutM').hidden || !$('#title').hidden;
 function iconCanvas(drawFn, size = 120) { const c = document.createElement('canvas'); c.width = size * 2; c.height = size * 2; const x = c.getContext('2d'); x.scale(2, 2); drawFn(x, size); return c; }
 let campTab = 'sell', confirmNew = false;
 function openCamp() { if (opening) return; campTab = campTab || 'sell'; confirmNew = false; renderCamp(); $('#campM').hidden = false; }
 function renderCamp() {
   const s = $('#campS'); s.innerHTML = '';
   s.insertAdjacentHTML('beforeend', `<h2>황동 나침반 조합 천막</h2><p class="sub">조합장 모르덴이 파이프를 물고 장부를 넘깁니다. “살아 돌아왔구먼. 캐 온 걸 보여 보게.”</p>
-  <div class="tabs"><button type="button" data-t="sell">보물 감정·판매</button><button type="button" data-t="up">장비 강화</button><button type="button" data-t="board">조합 게시판</button><button type="button" id="cClose" style="margin-left:auto">닫기 (Esc)</button></div><div id="campBody"></div>`);
+  <div class="tabs"><button type="button" data-t="sell">보물 감정·판매</button><button type="button" data-t="up">장비 강화</button><button type="button" data-t="forge">⚒ 운명의 모루</button><button type="button" data-t="board">조합 게시판</button><button type="button" id="cClose" style="margin-left:auto">닫기 (Esc)</button></div><div id="campBody"></div>`);
   s.querySelectorAll('[data-t]').forEach(b => { b.classList.toggle('on', b.dataset.t === campTab); b.onclick = () => { campTab = b.dataset.t; renderCamp(); }; });
   $('#cClose').onclick = closeModals;
   const body = $('#campBody');
@@ -2045,7 +2636,9 @@ function renderCamp() {
     const total = G.bag.reduce((a, i) => a + TREASURES[i][2], 0);
     body.innerHTML = G.bag.length ? `<p class="sub">가방 속 보물 ${G.bag.length}점. 팔아도 도감 기록은 그대로 남아요.</p><div class="bag">${Object.entries(counts).sort((a, b) => TREASURES[b[0]][1] - TREASURES[a[0]][1]).map(([i, n]) => `<span style="color:${RARITY[TREASURES[i][1]].c}">${TREASURES[i][0]} ×${n}</span>`).join('')}</div><div class="row"><button class="primary" type="button" id="sellAll">전부 팔기 · ${total.toLocaleString()} 셀라</button></div>` : `<p class="sub">가방이 비었어요. 땅속 상자를 열어 보물을 찾아오세요. 원석은 캐는 즉시 셀라로 바뀌어요.</p>`;
     const b = $('#sellAll'); if (b) b.onclick = () => { G.gold += total; G.bag = []; S.buy(); S.coin(); updHUD(); save(); toast(`보물을 팔아 ${total.toLocaleString()} 셀라를 받았어요.`); renderCamp(); };
+  } else if (campTab === 'forge') { renderForge(body);
   } else if (campTab === 'up') {
+    body.insertAdjacentHTML('beforeend', '<p class="sub">강화는 수치만 올려요. 곡괭이 자체를 바꾸려면 ⚒ 운명의 모루에서 벼려 보세요.</p>');
     for (const [k, U0] of Object.entries(UPG)) {
       const lv = G.upg[k], maxed = lv >= U0.max, cost = maxed ? 0 : U0.cost[lv];
       const pips = Array.from({ length: U0.max - (k === 'pick' || k === 'lantern' ? 0 : 0) }, (_, i) => `<i class="${i < lv ? 'f' : ''}"></i>`).join('');
@@ -2063,7 +2656,7 @@ function renderCamp() {
     <div class="up"><div><b>발굴 기록</b><p>연 상자 ${G.opened}개 · 상자 도감 ${nC}/${CHEST_ORDER.length} · 보물 도감 ${nT}/${TREASURES.length} · 최고 깊이 ${Math.max(0, (G.deepest - SURF) * 2)}m${G.heart ? ' · <span style="color:#ff5f8f">셀레스타의 심장 발견!</span>' : ''}</p></div></div>
     <div class="up"><div><b>지층 안내</b>${LAYERS.map((Ly, i) => `<p>${(G.seen || []).includes(i) || i === 0 ? `<span style="color:#e8dcc0">${Ly.name}</span> (${(Ly.from - SURF) * 2}m~) · 곡괭이 Lv${Ly.pick}` : `??? (${(Ly.from - SURF) * 2}m~) · 곡괭이 Lv${Ly.pick}`}</p>`).join('')}</div></div>
     <div class="row" style="margin-top:12px"><button type="button" id="newGame">${confirmNew ? '정말 처음부터? 한 번 더 누르면 지워져요' : '새 세계에서 처음부터'}</button></div>`;
-    $('#newGame').onclick = () => { if (!confirmNew) { confirmNew = true; renderCamp(); return; } store.set('celesta-save-v1', null); G.gold = 0; G.bag = []; G.foundT = {}; G.foundC = {}; G.upg = { pick: 1, lantern: 1, luck: 0, compass: 0 }; G.opened = 0; G.heart = false; G.deepest = 0; G.seen = []; genWorld(Math.floor(Math.random() * 1e9)); spawn(); G.oil = maxOil(); save(); updHUD(); closeModals(); toast('새로운 지층이 펼쳐졌어요.'); };
+    $('#newGame').onclick = () => { if (!confirmNew) { confirmNew = true; renderCamp(); return; } store.set('celesta-save-v1', null); store.set('celesta-save-v2', null); G.gold = 0; G.bag = []; G.foundT = {}; G.foundC = {}; G.upg = { pick: 1, lantern: 1, luck: 0, compass: 0 }; G.opened = 0; G.heart = false; G.deepest = 0; G.seen = []; G.picks = { rusty: 1 }; G.pickEq = 'rusty'; G.pity = 0; G.pulls = 0; closeModals(); transition('dirt', () => { genWorld(Math.floor(Math.random() * 1e9)); spawn(); G.oil = maxOil(); camUpdate(0, true); save(); updHUD(); }).then(() => toast('새로운 지층이 펼쳐졌어요.')); };
   }
 }
 let codexTab = 'chest';
@@ -2071,7 +2664,7 @@ function openCodex() { if (opening) return; renderCodex(); $('#codexM').hidden =
 function renderCodex() {
   const s = $('#codexS'); s.innerHTML = '';
   const nC = Object.keys(G.foundC).length, nT = Object.keys(G.foundT).length;
-  s.insertAdjacentHTML('beforeend', `<h2>발굴 도감</h2><p class="sub">찾아낸 상자는 카드를 눌러 개봉 연출을 다시 볼 수 있어요.</p><div class="tabs"><button type="button" data-t="chest">상자 ${nC}/${CHEST_ORDER.length}</button><button type="button" data-t="tr">보물 ${nT}/${TREASURES.length}</button><button type="button" id="xClose" style="margin-left:auto">닫기 (Esc)</button></div><div class="grid" id="cg"></div>`);
+  s.insertAdjacentHTML('beforeend', `<h2>발굴 도감</h2><p class="sub">찾아낸 상자는 카드를 눌러 개봉 연출을 다시 볼 수 있어요.</p><div class="tabs"><button type="button" data-t="chest">상자 ${nC}/${CHEST_ORDER.length}</button><button type="button" data-t="tr">보물 ${nT}/${TREASURES.length}</button><button type="button" data-t="pk">곡괭이 ${PICKS.filter(p => G.picks[p.id]).length}/${PICKS.length}</button><button type="button" id="xClose" style="margin-left:auto">닫기 (Esc)</button></div><div class="grid" id="cg"></div>`);
   s.querySelectorAll('[data-t]').forEach(b => { b.classList.toggle('on', b.dataset.t === codexTab); b.onclick = () => { codexTab = b.dataset.t; renderCodex(); }; });
   $('#xClose').onclick = closeModals;
   const grid = $('#cg');
@@ -2084,12 +2677,34 @@ function renderCodex() {
     if (f) el.onclick = () => { closeModals(); previewOpening(k); };
     grid.appendChild(el);
   });
+  else if (codexTab === 'pk') renderPickGrid(grid);
   else TREASURES.forEach((T0, i) => {
     const f = G.foundT[i], el = document.createElement('div'); el.className = 'card' + (f ? '' : ' locked');
     el.appendChild(iconCanvas((x, sz) => { if (!f) x.filter = 'brightness(0) opacity(.45)'; drawIcon(x, T0[3], T0[4], sz / 2, sz / 2, sz * .6, 0); }));
     el.insertAdjacentHTML('beforeend', `<span class="tag" style="color:${RARITY[T0[1]].c}">${RARITY[T0[1]].name}</span><b>${f ? T0[0] : '???'}</b><p>${f ? T0[5] + `<br>${T0[2]} 셀라 · ${f}점 발견` : '아직 발견하지 못했어요.'}</p>`);
     grid.appendChild(el);
   });
+}
+function pickCanvas(id, size, owned) { return iconCanvas((x, sz) => { if (!owned) x.filter = 'brightness(0) opacity(.45)'; drawPickIcon(x, id, sz / 2, sz / 2, sz * .62, 0); }, size); }
+function renderPickGrid(grid) {
+  PICKS.forEach(pk => {
+    const n = G.picks[pk.id] || 0, eq = G.pickEq === pk.id, el = document.createElement('div'); el.className = 'card' + (n ? '' : ' locked');
+    el.appendChild(pickCanvas(pk.id, 110, n));
+    el.insertAdjacentHTML('beforeend', `<span class="tag" style="color:${RARITY[pk.tier].prism ? '#fff' : RARITY[pk.tier].c}">${RARITY[pk.tier].name}</span><b>${n ? pk.name : '???'}</b><p>${n ? pickPerk(pk) + (n > 1 ? ` · ${n}개 보유` : '') : `운명의 모루에서 ${RARITY[pk.tier].name} 등급으로 나와요.`}</p>`);
+    if (n) { const b = document.createElement('button'); b.type = 'button'; b.className = eq ? '' : 'primary'; b.textContent = eq ? '장착 중' : '장착하기'; b.disabled = eq; b.onclick = () => { G.pickEq = pk.id; S.buy(); save(); toast(`${pk.name}을(를) 들었어요. ${pickPerk(pk)}`); renderCamp(); if (!$('#codexM').hidden) renderCodex(); }; el.appendChild(b); }
+    grid.appendChild(el);
+  });
+}
+function renderForge(body) {
+  const cur = curPick(), owned = PICKS.filter(p => G.picks[p.id]).length;
+  body.innerHTML = `<p class="sub">조합 대장장이 브론이 망치를 어깨에 걸칩니다. “강화는 쇠를 단단하게 할 뿐이야. 새 곡괭이를 원하면 모루에 맡겨 보게. 무엇이 나올지는 나도 몰라.”</p>
+  <div class="up"><div><b>지금 든 곡괭이 · ${cur.name}</b><p>${RARITY[cur.tier].name} · ${pickPerk(cur)} · 강화 Lv${G.upg.pick}과 곱해져요</p></div></div>
+  <div class="up"><div><b>등급별 확률</b><p class="rates">${GACHA_RATE.map((r, i) => `<span style="color:${RARITY[i].prism ? '#fff' : RARITY[i].c}">${RARITY[i].name} ${r}%</span>`).join(' · ')}</p><p>10회 벼리기는 영웅 이상 1개 확정 · 전설 이상이 ${60 - G.pity}회 안에 반드시 나와요 · 중복은 녹여서 셀라로 돌려줘요</p></div></div>
+  <div class="row" style="margin:12px 0"><button class="primary" type="button" id="f1">1회 벼리기 · ${GACHA_COST[0].toLocaleString()} 셀라</button><button class="primary" type="button" id="f10">10회 벼리기 · ${GACHA_COST[1].toLocaleString()} 셀라</button><span class="sub" style="margin:0">보유 ${G.gold.toLocaleString()} 셀라 · 수집 ${owned}/${PICKS.length}</span></div>
+  <div class="grid" id="pickGrid"></div>`;
+  $('#f1').disabled = G.gold < GACHA_COST[0]; $('#f10').disabled = G.gold < GACHA_COST[1];
+  $('#f1').onclick = () => startForge(1); $('#f10').onclick = () => startForge(10);
+  renderPickGrid($('#pickGrid'));
 }
 function previewOpening(k) {
   const c = { type: k, L: 3, disguise: k === 'mimic' ? 'wood' : null };
@@ -2108,6 +2723,7 @@ const KEYMAP = { ArrowLeft: 'left', KeyA: 'left', ArrowRight: 'right', KeyD: 'ri
 addEventListener('keydown', e => {
   Sound.init();
   if (!$('#acctM').hidden) { if (e.code === 'Escape') closeAcct(); return; }
+  if (!$('#tutM').hidden) { if (e.code === 'Escape') closeTut(); else if (e.code === 'ArrowRight' || e.code === 'Enter') $('#tutN').click(); else if (e.code === 'ArrowLeft') $('#tutP').click(); e.preventDefault(); return; }
   if (opening) { if (e.code === 'Space' || e.code === 'Enter') { openingTap(); e.preventDefault(); } return; }
   if (e.code === 'Escape') { closeModals(); return; }
   if (!$('#title').hidden) { if (e.code === 'Enter' || e.code === 'Space') { startGame(); e.preventDefault(); } return; }
@@ -2115,6 +2731,7 @@ addEventListener('keydown', e => {
   if (KEYMAP[e.code]) { keys[KEYMAP[e.code]] = true; e.preventDefault(); }
   if (e.code === 'KeyR') recall();
   if (e.code === 'KeyC') openCodex();
+  if (e.code === 'KeyH') openTut(0);
   if (e.code === 'KeyE' && Math.floor(player.y / TS) <= SURF) openCamp();
 });
 addEventListener('keyup', e => { if (KEYMAP[e.code]) keys[KEYMAP[e.code]] = false; });
@@ -2126,15 +2743,21 @@ document.querySelectorAll('#pad [data-k]').forEach(b => {
 });
 $('#bCamp').onclick = openCamp; $('#bReturn').onclick = recall; $('#bCodex').onclick = openCodex;
 $('#bSound').onclick = () => { Sound.init(); const on = Sound.toggle(); $('#bSound').textContent = on ? '🔊' : '🔇'; if (on) Sound.setDrone(layerAt(Math.floor(player.y / TS))); };
-for (const m of ['#campM', '#codexM', '#acctM']) $(m).addEventListener('pointerdown', e => { if (e.target === $(m)) closeModals(); });
+for (const m of ['#campM', '#codexM', '#acctM', '#tutM']) $(m).addEventListener('pointerdown', e => { if (e.target === $(m)) closeModals(); });
 if (matchMedia('(pointer: coarse)').matches) document.body.classList.add('touch');
 
 function startGame() {
-  Sound.init(); $('#title').hidden = true; $('#hud').hidden = false; $('#btns').hidden = false;
-  lastLayer = -2; updHUD(); Sound.setDrone(layerAt(Math.floor(player.y / TS)));
-  if (!G.opened) toast('발밑 땅속에서 무언가 반짝여요. ↓ 키로 파 내려가 보세요!');
+  Sound.init(); if (transBusy || $('#title').hidden) return;
+  transition('keyhole', () => {
+    $('#title').hidden = true; $('#hud').hidden = false; $('#btns').hidden = false; $('#depthBar').hidden = false; $('#compassDial').hidden = false;
+    lastLayer = -2; camUpdate(0, true); updHUD(); Sound.setDrone(layerAt(Math.floor(player.y / TS)));
+  }).then(() => {
+    if (!store.get('celesta-tut')) openTut(0);
+    else if (!G.opened) toast('발밑 땅속에서 무언가 반짝여요. ↓ 키로 파 내려가 보세요!');
+    if (migrated) toast('세계가 넓어져 지층 열 개짜리 새 대지가 생겼어요. 셀라·도감·강화는 그대로예요.');
+  });
 }
-$('#bStart').onclick = startGame; $('#bAccount').onclick = openAcct; $('#bAcct').onclick = openAcct;
+$('#bStart').onclick = startGame; $('#bHelp').onclick = () => openTut(0); $('#bAccount').onclick = openAcct; $('#bAcct').onclick = openAcct;
 // 타이틀 화면에서도 첫 터치부터 야영지 테마가 흐른다
 addEventListener('pointerdown', () => { if (!$('#title').hidden) { Sound.init(); Sound.setMusic('surface'); } }, { once: true });
 
@@ -2151,6 +2774,7 @@ function frame(now) {
   if (!opening || opening.phase === 'intro' || opening.phase === 'out') drawWorld();
   cam.x -= shx; cam.y -= shy;
   if (opening) drawOpening();
+  if ($('#title').hidden) { updDepthBar(dt); updCompass(dt); }
   requestAnimationFrame(frame);
 }
 addEventListener('resize', () => { resize(); camUpdate(0, true); });
