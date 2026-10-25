@@ -1735,7 +1735,9 @@ function updatePlayer(dt) {
     const ax = Math.sign(p.x + p.w / 2 - cx2), ay = Math.sign(p.y + 13 - cy2);
     if (Math.random() < dt * 40) addP({ x: fx + R(-3, 3), y: fy + R(-3, 3), vx: ax * R(40, 160) + R(-60, 60), vy: ay * R(40, 160) - R(40, 140), life: R(.25, .5), size: R(1.5, 3.5), c: Math.random() < .5 ? col : shade(col, -.3) });
     if (Math.random() < dt * 14) addP({ x: fx, y: fy, vx: ax * R(60, 220) + R(-90, 90), vy: R(-200, -40), life: R(.15, .35), size: R(1, 2), c: '#ffe6a0', glow: 1 });
-    if (p.hit) { const h = p.hit; p.hit = null; if (h.boss) dunPickHit(h); S.drill(); kick(-.03, .6); if (Math.random() < .5) sparks(fx, fy, '#fff6d0', 2); }
+    // 상자는 드릴 끝이 처음 닿아 갈리는 순간 열린다
+    if (p.hit && p.hit.chest) digImpact(p);
+    else if (p.hit) { const h = p.hit; p.hit = null; if (h.boss) dunPickHit(h); S.drill(); kick(-.03, .6); if (Math.random() < .5) sparks(fx, fy, '#fff6d0', 2); }
   } else if (p.hit && p.swing <= SWING_T * (1 - SWING_HIT)) digImpact(p);
   // 말랑한 스프링: 공중에선 속도만큼 늘어나고, 땅에선 0으로 출렁이며 복원
   const tgt = p.ground ? (keys.down && p.dig ? -.06 : 0) : clamp(-p.vy / 1700, -.14, .2);
