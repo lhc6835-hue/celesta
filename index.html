@@ -2271,7 +2271,7 @@ function drawOpening() {
 
 // ───────────── 계정 · 클라우드 저장 (Google Sheets + Apps Script) ─────────────
 // 서버 주소는 계정 창의 "서버 설정"에 넣거나, 아래 DEFAULT_API에 직접 적어 두면 된다.
-const DEFAULT_API = '';
+const DEFAULT_API = 'https://script.google.com/macros/s/AKfycbzqoMqhcwP-KxNTJhN2zdc_-Ey-_KCp15w5Mw3eFfkgmv2FLpb7QH0kYU4mJGOBnXvg/exec';
 const ACCT = { api: store.get('celesta-api') || DEFAULT_API, user: store.get('celesta-user') || null, token: store.get('celesta-token') || null, lastUp: 0, upTimer: null, busy: false };
 const ACCT_ERR = {
   NO_API: '계정 서버 주소가 아직 설정되지 않았어요. 아래 "서버 설정"에 Apps Script 웹 앱 주소를 넣어 주세요.',
