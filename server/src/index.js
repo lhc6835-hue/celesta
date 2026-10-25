@@ -122,6 +122,7 @@ export class Directory extends DurableObject {
   roomInfo(id, srv) {
     const r = this.roomLive(id);
     if (id.startsWith('pub-')) return { id, kind: 'pub', name: `공개 ${id.slice(4)}`, n: r ? r.n : 0, max: PUB_MAX };
+    if (id.startsWith('d-')) return { id, kind: 'dun', name: srv ? srv.name : '토벌대', owner: srv ? srv.owner : '', boss: srv ? srv.boss : 0, size: srv ? srv.size : 1, n: r ? r.n : 0, max: 8 };
     return { id, kind: 'prv', name: srv ? srv.name : '개인 서버', owner: srv ? srv.ownerName : '', n: r ? r.n : 0, max: PUB_MAX };
   }
 
@@ -268,6 +269,15 @@ export class Directory extends DurableObject {
     }
     if (A === 'dismiss_invite') { u.invites = (u.invites || []).filter(i => i.room !== b.room); await this.putUser(u); return json({ ok: true }); }
     if (A === 'top') return json({ ok: true, top: await this.top() });
+    if (A === 'party_create') {
+      // 보스 토벌대: 파티장 + 초대한 사람만 들어오는 임시 방. 초대받은 사람에게는 바로 알림이 간다
+      const boss = Math.max(0, Math.min(9, b.boss | 0)), names = [...new Set((b.invite || []).map(low))].filter(x => x && x !== me).slice(0, 7);
+      const id = 'd-' + randHex(6), bossName = String(b.bossName || '').slice(0, 20);
+      const srv = { id, kind: 'dun', boss, name: `${u.name}의 토벌대`, owner: me, ownerName: u.name, members: names, size: names.length + 1, seed: Math.floor(Math.random() * 1e9), created: Date.now() };
+      await this.ctx.storage.put('srv:' + id, srv);
+      for (const t of names) await this.push(t, { t: 'note', k: 'party', from: u.name, room: id, boss });
+      return json({ ok: true, room: id, size: srv.size });
+    }
     if (A === 'delete_account') {
       if (!same(await pbkdf2(String(b.password || ''), u.salt, this.pepper, u.it || PBKDF2_IT), u.hash)) return fail('BAD_LOGIN');
       for (const id of u.servers || []) { const srv = await this.ctx.storage.get('srv:' + id); if (srv) await this.ctx.storage.delete(['srv:' + id, 'code:' + srv.code, 'rc:' + id]); try { await this.env.ROOM.get(this.env.ROOM.idFromName(id)).fetch('https://room/push', { method: 'POST', body: JSON.stringify({ wipe: 1 }) }); } catch (e) { } }
@@ -332,7 +342,7 @@ export class Room extends DurableObject {
   bcast(o, except) { const s = typeof o === 'string' ? o : JSON.stringify(o); for (const ws of this.sockets()) if (ws !== except) this.send(ws, s); }
   players() { return this.sockets().map(ws => { const a = ws.deserializeAttachment(); return { id: a.id, name: a.name, color: a.color, d: this.pos.get(a.id) || null }; }); }
   async ensureWorld(info) {
-    if (!this.meta || (info && (this.meta.name !== info.name || this.meta.owner !== info.owner))) { this.meta = { id: info.id, kind: info.kind, name: info.name, owner: info.owner || null }; await this.ctx.storage.put('meta', this.meta); }
+    if (!this.meta || (info && (this.meta.name !== info.name || this.meta.owner !== info.owner || this.meta.size !== info.size))) { this.meta = { id: info.id, kind: info.kind, name: info.name, owner: info.owner || null, ...(info.kind === 'dun' ? { boss: info.boss | 0, size: info.size | 0 } : {}) }; await this.ctx.storage.put('meta', this.meta); }
     if (this.base == null) { this.base = this.meta.kind === 'pub' ? hashSeed(this.meta.id) : info && info.seed != null ? info.seed : Math.floor(Math.random() * 1e9); await this.ctx.storage.put('base', this.base); }
     const ep = epochNo();
     if (this.epoch !== ep) { this.epoch = ep; this.seed = hashSeed(this.base + ':' + ep); await this.resetMods(); await this.ctx.storage.put({ epoch: ep, seed: this.seed }); return true; }
@@ -425,6 +435,12 @@ export class Room extends DurableObject {
       if (t === 'claim') this.send(ws, { t: 'claim', i, ok: 1, seed: Math.floor(Math.random() * 2 ** 31) });
       this.bcast({ t: 'dig', i, by: a.id, chest: t === 'claim' ? 1 : 0 }, ws);
       return;
+    }
+    if (t === 'bs' || t === 'bp' || t === 'bd' || t === 'bx') {
+      // 보스 토벌대 중계: 보스 상태·패턴 시작은 파티장만, 피해 알림은 누구나
+      if (!this.meta || this.meta.kind !== 'dun') return;
+      if ((t === 'bs' || t === 'bp') && this.meta.owner !== low(a.name)) return;
+      m.id = a.id; return this.bcast(m, ws);
     }
     if (t === 'fx') {
       const now = Date.now(); if (now - (a.fxAt || 0) < 400) return; a.fxAt = now; ws.serializeAttachment(a);
