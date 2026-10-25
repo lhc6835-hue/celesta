@@ -29,6 +29,7 @@ canvas{position:fixed;inset:0;width:100%;height:100%;display:block}
 .depth{font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
 .oil{width:180px;max-width:42vw;height:10px;background:#0006;border:1px solid var(--brass-d);border-radius:6px;overflow:hidden}
 .oil>i{display:block;height:100%;background:linear-gradient(90deg,#ff9b3d,#ffd36b);transition:width .2s}
+.oil.jet{height:6px}.oil.jet>i{background:linear-gradient(90deg,#3a8ce0,#7fe0ff);transition:none}
 .oil.low>i{background:linear-gradient(90deg,#c0392b,#ff7a50);animation:blink .6s infinite alternate}
 @keyframes blink{to{opacity:.4}}
 .gold{font-family:var(--f-impact);font-size:20px;color:#ffd66b;font-variant-numeric:tabular-nums;display:flex;align-items:center;gap:6px}
@@ -217,6 +218,7 @@ body.touch #chat{bottom:calc(env(safe-area-inset-bottom,0px) + 214px)}
     <div class="layer-name" id="layerName">들풀 표토</div>
     <div class="depth" id="depth">깊이 0m</div>
     <div class="oil" id="oil"><i id="oilBar" style="width:100%"></i></div>
+    <div class="oil jet" id="jet" title="제트팩 연료"><i id="jetBar" style="width:100%"></i></div>
   </div>
   <div class="plate gold" id="gold">0 <small>셀라</small></div>
 </div>
@@ -337,6 +339,7 @@ const Sound = (() => {
     jump: () => tone(300, .12, 'triangle', .07, 1.8),
     land: () => noise(.06, 400, .1, 1),
     creak: () => { tone(160, .5, 'sawtooth', .05, 1.6); noise(.4, 900, .05, 8, 0, 'bandpass', 1.5); },
+    jet: () => { noise(.11, 520 + Math.random() * 160, .09, .9, 0, 'bandpass'); tone(70 + Math.random() * 12, .1, 'sawtooth', .02); },
     whoosh: (d = .6) => noise(d, 300, .22, 1.2, 0, 'bandpass', 8),
     suck: (d = 1.2) => noise(d, 3000, .2, 2, 0, 'bandpass', .05),
     boom: (v = .5) => { tone(80, .9, 'sine', v, .3); noise(.7, 900, v * .6, .7, 0, 'lowpass', .1); },
@@ -746,10 +749,14 @@ const TREASURES = [
 const ORES = [['구리 원석', 3], ['은 원석', 7], ['금 원석', 14], ['수정 원석', 22], ['불꽃석', 32], ['성운석', 48], ['하늘진주', 64], ['세계수 호박', 82], ['공허 결정', 105], ['왕좌석', 130]];
 
 // 강화는 수치만 올린다. 곡괭이 종류는 '운명의 모루' 뽑기로 얻는다.
+// 제트팩: 연료는 '비행 가능한 초'. 날지 않을 때만 천천히 찬다
+const JET_MAX = [0, 1, 1.5, 2.1, 2.8, 3.6, 4.6, 6], JET_RE = [0, .18, .26, .36, .48, .62, .8, 1.05];
 const UPG = {
   pick:    { name: '곡괭이 강화', max: 10, cost: [0, 140, 450, 1200, 2800, 6200, 11000, 18000, 28000, 42000], desc: l => `기본 파는 힘 ×${(1 + (l - 1) * .45).toFixed(2)} · ${LAYERS.filter(x => x.pick <= l).slice(-1)[0].name}까지 팔 수 있어요.` },
   lantern: { name: '랜턴', max: 8, cost: [0, 110, 380, 950, 2200, 4800, 9000, 16000], desc: l => `기름 ${[0, 100, 150, 215, 290, 380, 480, 600, 740][l]} · 빛 반경 ${[0, 5, 6, 7, 8, 9, 10, 11, 12][l]}칸` },
   luck:    { name: '행운 부적', max: 5, cost: [160, 520, 1400, 3200, 7000], desc: l => `상자 속 보물이 한 등급 오를 확률 +${l * 5}%` },
+  jet:     { name: '제트팩 연료통', max: 7, cost: [0, 300, 900, 2400, 5600, 11000, 20000], desc: l => `최대 연료 ${JET_MAX[l]}초 비행` },
+  jetre:   { name: '제트팩 재충전기', max: 7, cost: [0, 260, 800, 2100, 5000, 10000, 18000], desc: l => `날지 않을 때 초당 ${JET_RE[l]}초씩 충전 · 지금 연료통 기준 가득 차는 데 ${(JET_MAX[G.upg.jet] / JET_RE[l]).toFixed(1)}초` },
   compass: { name: '보물 나침반', max: 3, cost: [220, 950, 3200], desc: l => l ? ['', '반경 14칸 · 가장 가까운 상자 방향', '반경 24칸 · 거리와 등급까지 표시', '반경 40칸 · 다음 후보 2개와 봉인된 금고 표시'][l] : 'HUD 다이얼로 근처 상자를 가리켜요' },
 };
 
@@ -1355,9 +1362,10 @@ const pickSprite = (id, f = 0) => {
 };
 
 // ───────────── 게임 상태 · 저장 ─────────────
-const G = { gold: 0, bag: [], foundT: {}, foundC: {}, upg: { pick: 1, lantern: 1, luck: 0, compass: 0 }, oil: 100, opened: 0, heart: false, deepest: 0, picks: { rusty: 1 }, pickEq: 'rusty', pity: 0, pulls: 0, seen: [] };
+const G = { gold: 0, bag: [], foundT: {}, foundC: {}, upg: { pick: 1, lantern: 1, luck: 0, compass: 0, jet: 1, jetre: 1 }, oil: 100, opened: 0, heart: false, deepest: 0, picks: { rusty: 1 }, pickEq: 'rusty', pity: 0, pulls: 0, seen: [] };
 const curPick = () => PICK_BY[G.pickEq] || PICKS[0];
-function fixG() { G.upg = Object.assign({ pick: 1, lantern: 1, luck: 0, compass: 0 }, G.upg); G.picks = G.picks || { rusty: 1 }; if (!G.picks.rusty) G.picks.rusty = 1; if (!PICK_BY[G.pickEq]) G.pickEq = 'rusty'; G.pity = G.pity || 0; G.pulls = G.pulls || 0; G.seen = G.seen || []; }
+function fixG() { G.upg = Object.assign({ pick: 1, lantern: 1, luck: 0, compass: 0, jet: 1, jetre: 1 }, G.upg); G.picks = G.picks || { rusty: 1 }; if (!G.picks.rusty) G.picks.rusty = 1; if (!PICK_BY[G.pickEq]) G.pickEq = 'rusty'; G.pity = G.pity || 0; G.pulls = G.pulls || 0; G.seen = G.seen || []; }
+const jetMax = () => JET_MAX[G.upg.jet || 1], jetRe = () => JET_RE[G.upg.jetre || 1];
 const maxOil = () => [0, 100, 150, 215, 290, 380, 480, 600, 740][G.upg.lantern];
 const lightR = () => [0, 5, 6, 7, 8, 9, 10, 11, 12][G.upg.lantern];
 const pickSpd = () => (1 + (G.upg.pick - 1) * .45) * curPick().spd;
@@ -1494,6 +1502,22 @@ function updatePlayer(dt) {
   // 누른 만큼 높이: 일찍 떼면 빨리 떨어지고, 정점에선 잠깐 떠 있는다
   const gm = p.vy < 0 && !keys.jump ? 2.4 : Math.abs(p.vy) < 90 ? .55 : p.vy > 0 ? 1.22 : 1;
   p.vy = Math.min(p.vy + 1500 * gm * dt, 900);
+  // 제트팩: 공중에서 점프를 다시 누르거나, 점프를 길게 누르고 있으면 분사. 날지 않을 때만 연료가 찬다
+  const J = p.jet || (p.jet = { fuel: jetMax(), held: 0, arm: false, prev: false, idle: 1, sndT: 0 });
+  J.held = keys.jump ? J.held + dt : 0;
+  if (p.ground) J.arm = false;
+  else if ((keys.jump && !J.prev && J.held < .05) || J.held > .22) J.arm = true;
+  J.prev = keys.jump;
+  p.jetOn = J.arm && keys.jump && !p.ground && J.fuel > 0 && p.faint <= 0 && !digging;
+  if (p.jetOn) {
+    J.fuel = Math.max(0, J.fuel - dt); J.idle = 0;
+    p.vy = Math.max(p.vy - 2600 * dt, -230);
+    J.sndT -= dt; if (J.sndT <= 0) { J.sndT = .085; S.jet(); }
+    const nx = p.x + p.w / 2 - p.face * 7, ny = p.y + 20;
+    if (Math.random() < dt * 70) addP({ x: nx + R(-2, 2), y: ny, vx: R(-30, 30) - p.vx * .2, vy: R(160, 320), life: R(.12, .26), size: R(2, 4), c: pick(['#fff2b0', '#ffb33a', '#ff7a2a']), glow: 1, grav: 200 });
+    if (Math.random() < dt * 22) addP({ x: nx, y: ny + 6, vx: R(-40, 40), vy: R(40, 120), life: R(.4, .8), size: R(3, 6), c: 'rgba(190,180,170,.45)', grav: -60 });
+    if (J.fuel <= 0) { S.clunk(); toast('제트팩 연료가 바닥났어요!'); }
+  } else { J.idle += dt; if (J.idle > .35) J.fuel = Math.min(jetMax(), J.fuel + jetRe() * dt); }
   const vyPre = p.vy;
   p.x += p.vx * dt; collideX();
   p.y += p.vy * dt; collideY();
@@ -1804,6 +1828,12 @@ const SWING_ARC = {
   3: { a0: 2.3, a1: .05, hx0: 1, hy0: 2, hx1: 0, hy1: -3 },       // 위
 };
 const DRILL_ANG = { 1: Math.PI / 2, 2: Math.PI * .97, 3: .04 };
+function drawJetGauge() {
+  const J = player.jet; if (!J || J.fuel >= jetMax() - .001 || opening) return;
+  const k = J.fuel / jetMax(), x = Math.round(player.x + player.w + 5), y = Math.round(player.y - 2), h = 22;
+  g.fillStyle = PX_OUT; g.fillRect(x - 1, y - 1, 5, h + 2); g.fillStyle = '#1a2230'; g.fillRect(x, y, 3, h);
+  g.fillStyle = k < .25 ? (Math.floor(time * 6) % 2 ? '#ff6b6b' : '#c0392b') : '#5fc8ff'; g.fillRect(x, y + h - Math.round(h * k), 3, Math.round(h * k));
+}
 function drawPlayer() { drawHero(player, G.pickEq, player.dig ? player.dig.dir || 1 : keys.dig && player.swing > 0 ? player.swingDir || 1 : 0, '#e04848'); }
 // 내 캐릭터와 다른 발굴사가 함께 쓰는 그리기. dig: 0 없음 1 옆 2 아래 3 위
 function drawHero(p, pickId, dig, scarfCol) {
@@ -1852,6 +1882,13 @@ function drawHero(p, pickId, dig, scarfCol) {
     if (drill && dig) { g.globalCompositeOperation = 'lighter'; glowDot(g, 0, -10 * PS, 3 * PS, '#fff2c0', .35 + Math.random() * .3); g.globalCompositeOperation = 'source-over'; }
     g.restore();
   };
+  // 등에 멘 제트팩(몸 뒤). 분사 중이면 노즐에서 불꽃이 깜빡인다
+  { const jx = -sw / 2 + 1 * PS, jy = -sh + bob + 14 * PS, w2 = 4 * PS, h2 = 8 * PS;
+    g.fillStyle = PX_OUT; g.fillRect(jx - PS, jy - PS, w2 + 2 * PS, h2 + 2 * PS);
+    g.fillStyle = '#8a8f9a'; g.fillRect(jx, jy, w2, h2); g.fillStyle = '#c8ced8'; g.fillRect(jx, jy, PS, h2); g.fillStyle = '#e04848'; g.fillRect(jx, jy + 2 * PS, w2, PS);
+    g.fillStyle = PX_OUT; g.fillRect(jx + PS, jy + h2, 2 * PS, 2 * PS); g.fillStyle = '#5a5a6a'; g.fillRect(jx + PS, jy + h2, 2 * PS, PS);
+    if (p.jetOn) { const fl = 3 + Math.floor(Math.random() * 3); for (let i = 0; i < fl; i++) { g.fillStyle = i < 1 ? '#fff2b0' : i < 3 ? '#ffb33a' : '#ff6a1a'; g.fillRect(jx + PS - (i > 1 ? 0 : 0), jy + h2 + (2 + i) * PS, 2 * PS - (i > 2 ? PS : 0), PS); }
+      g.globalCompositeOperation = 'lighter'; glowDot(g, jx + 2 * PS, jy + h2 + 4 * PS, 8 * PS, '#ff9a3a', .45); g.globalCompositeOperation = 'source-over'; } }
   // 어깨 뒤로 젖힌 곡괭이는 몸 뒤에 그린다
   const behind = ang < -.35;
   if (behind) drawTool();
@@ -1918,7 +1955,7 @@ function drawWorld() {
     if (hash2(x, y, Math.floor(time * 1.5)) > .7) pxSpark(g, x * TS + 6 + Math.floor(hash2(x, y, 9) * 10) * 2, y * TS + 2 + Math.floor(hash2(y, x, 9) * 6) * 2, 2, rgba(CHESTS[ty].glow, .95));
   }
   drawOthers();
-  if (!opening || opening.phase === 'fade') drawPlayer();
+  if (!opening || opening.phase === 'fade') { drawPlayer(); drawJetGauge(); }
   // 파티클
   for (const p of parts) { const a = clamp(p.life / p.max, 0, 1); if (p.glow) { g.globalCompositeOperation = 'lighter'; glowDot(g, p.x, p.y, p.size * 3, p.c.startsWith('#') ? p.c : '#ffffff', a * .8); g.globalCompositeOperation = 'source-over'; } else { g.globalAlpha = a; g.fillStyle = p.c; g.fillRect(p.x - p.size / 2, p.y - p.size / 2, p.size, p.size); g.globalAlpha = 1; } }
   drawLighting(x0, x1, y0, y1, chestsVis);
@@ -2885,6 +2922,7 @@ const TUT = [
   { t: '셀레스타에 오신 걸 환영해요', b: '삼백 년 전 하늘에서 떨어진 왕국 셀레스타가 이 땅 아래 잠들어 있어요. 견습 발굴사인 당신의 목표는 <b>열 개의 지층</b>을 파 내려가 맨 밑바닥 <b>왕좌의 금고</b>에 있는 <b>셀레스타의 심장</b>을 여는 거예요. 왼쪽은 지금 세계의 실제 지형 지도예요. 흰 점이 상자, 금색이 봉인된 금고, 노란 선이 지금 위치예요.', art: 'map' },
   { t: '열 개의 지층', b: '깊이 내려갈수록 땅이 단단해지고, 더 높은 등급의 상자가 나와요. 지층마다 들어가려면 <b>곡괭이 강화 단계</b>가 필요해요(오른쪽 표의 Lv). 층마다 풍경과 음악, 원석, 상자 종류가 달라요.', art: 'map2' },
   { t: '파는 법', b: '<kbd>←</kbd><kbd>→</kbd>로 걷고 <kbd>↑</kbd>/<kbd>Space</kbd>로 점프해요(누른 만큼 높이). 파려면 <b>방향키로 겨누고 캐기 버튼</b>을 눌러요. 그냥 서 있으면 바라보는 쪽, <kbd>↓</kbd>를 누르고 있으면 발밑, <kbd>↑</kbd>를 누르고 있으면 머리 위를 겨눠요. 겨눈 칸에 하얀 괄호가 보이고, <kbd>X</kbd>·<kbd>J</kbd>·마우스 왼쪽 버튼(모바일은 왼쪽 아래 조이스틱으로 겨누고 오른쪽 아래 ⛏)을 누르는 동안 곡괭이가 내리꽂힐 때마다 블록이 깎여요. 야영지 바닥은 기반암이라 천막 옆 발굴터에서 파 내려가요. 블록마다 단단함이 달라서 돌·벽돌은 오래 걸려요. 원석을 캐면 바로 셀라(돈)가 들어와요. 모바일은 왼쪽 아래 조이스틱으로 걷고 겨누며, 점프는 ⛏ 옆 파란 버튼이에요.', art: 'dig' },
+  { t: '제트팩', b: '등에 멘 제트팩으로 잠깐 날 수 있어요. <b>공중에서 점프를 한 번 더 누르거나</b>, 점프를 <b>길게 누르고 있으면</b> 불을 뿜으며 떠올라요. 연료는 왼쪽 위 파란 막대와 캐릭터 옆 작은 막대로 보이고, <b>날지 않을 때 천천히</b> 다시 차요. 야영지 상점의 <b>제트팩 연료통</b>은 최대 연료를, <b>제트팩 재충전기</b>는 차는 속도를 올려 줘요. 깊은 굴에서 빠져나오거나 벽을 넘을 때 써 보세요.', art: 'jet' },
   { t: '랜턴 기름과 귀환', b: '땅속에서는 랜턴 기름이 계속 줄고, 블록을 팔 때도 줄어요. 기름이 떨어지면 정신을 잃고 조합 구조대가 끌어올리지만 <b>구조비 15%</b>를 내야 해요. 그 전에 <kbd>R</kbd> <b>귀환 두루마리</b>를 쓰면 공짜로 야영지에 돌아와요. 지상에서는 기름이 저절로 채워져요.', art: 'oil' },
   { t: '상자와 열한 개의 등급', b: '상자를 곡괭이로 치면 열려요. 기를 모으는 동안 빛깔이 한 칸씩 오르며 안에 든 <b>최고 등급</b>을 미리 알려 줘요. 벽돌로 둘러싸인 <b>봉인된 금고</b>는 보상이 더 좋고, 평범한 상자처럼 생긴 <b>미믹</b>은 화면을 연타해 달래야 해요. <b>셀레스타</b> 등급은 심장 하나만을 위한 특별한 등급이에요.', art: 'rarity' },
   { t: '야영지 · 강화 · 운명의 모루', b: '지상의 조합 천막(<kbd>E</kbd>)에서 보물을 팔고 장비를 강화해요. <b>강화는 수치만</b> 올려요(파는 힘, 기름, 행운, 나침반). 곡괭이 자체는 <b>⚒ 운명의 모루</b>에서 셀라를 내고 벼려야 바뀌어요. 곡괭이는 24종이고 등급이 높을수록 빠르고, 행운·기름 절약·원석 보너스가 붙어요.', art: 'picks' },
@@ -2910,6 +2948,7 @@ function renderTut() {
   else if (pg.art === 'picks') { const c = mk(420, 150), x = c.getContext('2d'); ['rusty', 'copper', 'crystal', 'storm', 'royalp', 'meteor', 'fall', 'seraph', 'astralp', 'genesisp'].forEach((id, i) => { drawPickIcon(x, id, 22 + i * 41, 60, 44, 1); x.fillStyle = rarCol(PICK_BY[id].tier, 1); x.font = '10px "Gowun Dodum"'; x.textAlign = 'center'; x.fillText(RARITY[PICK_BY[id].tier].name, 22 + i * 41, 112); }); }
   else if (pg.art === 'bar') { const c = mk(64, 340); c.style.height = '340px'; drawDepthBar(c.getContext('2d'), 64, 340, { me: 30 + (Math.max(0, player.y / TS - SURF) / (H - 3 - SURF)) * 280, cur: Math.max(0, layerAt(Math.floor(player.y / TS))), deepest: Math.max(G.deepest, 60), seen: [0, 1, 2], others: [{ depth: 80, color: '#7bd36a' }, { depth: 150, color: '#ff8fc8' }, { depth: 210, color: '#8ab4ff' }], t: 1 }); art.insertAdjacentHTML('beforeend', '<p class="sub" style="max-width:150px">색 점은 다른 발굴사 자리(온라인 예정)</p>'); }
   else if (pg.art === 'compass') { [1, 2, 3].forEach(lv => { const c = mk(96, 122); drawCompassDial(c.getContext('2d'), 96, { lv, list: [{ a: -.7, d: 7, tier: lv + 2, vault: lv === 3 }, { a: 2.2, d: 12, tier: 1 }, { a: 1, d: 15, tier: 4 }], a: -.7, t: 1 }); }); }
+  else if (pg.art === 'jet') art.innerHTML = `<div class="plate" style="display:inline-flex;flex-direction:column;gap:6px;text-align:left;min-width:220px"><div class="layer-name">울림 수정굴</div><div class="depth">깊이 124m · 기름 180/215</div><div class="oil"><i style="width:84%"></i></div><div class="oil jet"><i style="width:46%"></i></div><p style="margin:4px 0 0;font-size:12px;color:#7fe0ff">파란 막대 = 제트팩 연료</p></div>`;
   else if (pg.art === 'online') art.innerHTML = `<div style="display:flex;flex-direction:column;gap:8px;text-align:left;width:min(320px,100%)"><div class="up"><div><b>공개 1</b><p>공개 서버 · 17/40명</p></div><button class="primary" type="button" tabindex="-1">입장</button></div><div class="up"><div><b>리오의 발굴지</b><p>개인 서버 · 2/40명 · 초대 코드 <code style="font-family:var(--f-px);color:#9fe6d8">K7QM2X</code></p></div><button type="button" tabindex="-1">초대</button></div><p style="margin:0;font-size:13px;color:#f6ecd4"><b style="color:#5fa8ff">미르</b> 여기 전설 상자 있어요! &nbsp;💎</p></div>`;
   else if (pg.art === 'codex') { const c = mk(360, 120), x = c.getContext('2d'); x.imageSmoothingEnabled = false; ['wood', 'crystal', 'royal', 'jelly', 'genesis'].forEach((k, i) => drawChest(x, k, 40 + i * 70, 60, 2, { t: 1 })); }
   else if (pg.art === 'end') { const c = mk(200, 170), x = c.getContext('2d'); x.imageSmoothingEnabled = false; drawChest(x, 'heart', 100, 86, 3.2, { t: 1, cage: .3 }); }
@@ -2958,7 +2997,7 @@ function renderCamp() {
       el.innerHTML = `<div><b>${U0.name}</b><span class="pips">${pips}</span><p>현재: ${lv ? U0.desc(lv) : '없음'}</p>${maxed ? '' : `<p style="color:#e8dcc0">다음: ${U0.desc(lv + 1)}</p>`}</div>`;
       const btn = document.createElement('button'); btn.type = 'button'; btn.className = 'primary';
       btn.textContent = maxed ? '최고 단계' : `${cost.toLocaleString()} 셀라`; btn.disabled = maxed || G.gold < cost;
-      btn.onclick = () => { if (G.gold < cost) { S.deny(); return; } G.gold -= cost; G.upg[k]++; if (k === 'lantern') G.oil = maxOil(); S.buy(); updHUD(); save(); toast(`${U0.name} 강화 완료! Lv${G.upg[k]}`); renderCamp(); };
+      btn.onclick = () => { if (G.gold < cost) { S.deny(); return; } G.gold -= cost; G.upg[k]++; if (k === 'lantern') G.oil = maxOil(); if (k === 'jet') player.jet = null; S.buy(); updHUD(); save(); toast(`${U0.name} 강화 완료! Lv${G.upg[k]}`); renderCamp(); };
       el.appendChild(btn); body.appendChild(el);
     }
   } else {
@@ -3179,7 +3218,7 @@ function netUpdate(dt) {
   if (NET.sendT <= 0) {
     NET.sendT = 1 / 15;
     const dig = p.dig ? p.dig.dir || 1 : keys.dig && p.swing > 0 ? p.swingDir || 1 : 0;
-    const flags = (p.face > 0 ? 1 : 0) | (p.ground ? 2 : 0) | (dig << 2) | (p.faint > 0 ? 16 : 0) | (p.swing > 0 ? 32 : 0) | (opening && !opening.forge ? 64 : 0);
+    const flags = (p.face > 0 ? 1 : 0) | (p.ground ? 2 : 0) | (dig << 2) | (p.faint > 0 ? 16 : 0) | (p.swing > 0 ? 32 : 0) | (opening && !opening.forge ? 64 : 0) | (p.jetOn ? 128 : 0);
     const msg = [0, Math.round(p.x), Math.round(p.y), Math.round(p.vx), Math.round(p.vy), flags, Math.max(0, PICKS.findIndex(k => k.id === G.pickEq))];
     const s = JSON.stringify(msg);
     if (s !== NET.last || NET.idleT <= 0) { if (netSend(s)) { NET.last = s; NET.idleT = 2; } }
@@ -3198,7 +3237,7 @@ function netUpdate(dt) {
     let q = o.pup;
     if (!q || Math.hypot(q.x - x, q.y - y) > TS * 6) q = o.pup = { x, y, vx: 0, vy: 0, w: 18, h: 26, face: 1, faceS: 1, ground: true, walk: 0, swing: 0, sq: 0, sqv: 0, lean: 0, scarf: 1.2, scarfV: 0, faint: 0, dig: null };
     const wasG = q.ground;
-    q.x = x; q.y = y; q.vx = vx; q.vy = vy; q.face = f & 1 ? 1 : -1; q.ground = !!(f & 2); q.dig = f & 12 ? { d: (f >> 2) & 3 } : null; q.faint = f & 16 ? 1 : 0; q.open = !!(f & 64); q.pick = PICKS[s[6]] ? PICKS[s[6]].id : 'rusty';
+    q.x = x; q.y = y; q.vx = vx; q.vy = vy; q.face = f & 1 ? 1 : -1; q.ground = !!(f & 2); q.dig = f & 12 ? { d: (f >> 2) & 3 } : null; q.faint = f & 16 ? 1 : 0; q.open = !!(f & 64); q.jetOn = !!(f & 128); if (q.jetOn && Math.random() < dt * 40) addP({ x: q.x + 9 - q.face * 7, y: q.y + 20, vx: R(-30, 30), vy: R(160, 300), life: R(.12, .24), size: R(2, 4), c: pick(['#fff2b0', '#ffb33a', '#ff7a2a']), glow: 1, grav: 200 }); q.pick = PICKS[s[6]] ? PICKS[s[6]].id : 'rusty';
     if (f & 32) { q.swing -= dt; if (q.swing <= 0) q.swing = .2; } else q.swing = Math.max(0, q.swing - dt);
     if (q.ground && !wasG) q.sqv -= 3;
     q.sqv += (-q.sq * 260 - q.sqv * 16) * dt; q.sq = clamp(q.sq + q.sqv * dt, -.3, .3);
@@ -3441,6 +3480,7 @@ function frame(now) {
   if (opening) updateOpening(dt);
   else if (!modalOpen()) { if (hitStop > 0) hitStop -= dt; else updatePlayer(dt); saveT += dt; if (saveT > 15) { saveT = 0; save(); } }
   netUpdate(dt); updParts(dt); camUpdate(dt);
+  if (player.jet) { const w = Math.round(player.jet.fuel / jetMax() * 100); if (w !== frame.jw) { frame.jw = w; $('#jetBar').style.width = w + '%'; } }
   hudT += dt; if (hudT > .15) { hudT = 0; if ($('#title').hidden) updHUD(); }
   // 연출 중에는 월드가 거의 가려지므로 마지막 프레임을 그대로 둔다
   shakeA = Math.max(0, shakeA - dt * 22); const shx = shakeA ? R(-1, 1) * shakeA : 0, shy = shakeA ? R(-1, 1) * shakeA : 0;
