@@ -2966,6 +2966,7 @@ const BOSS_DRAW = {
     const iris = bspr('ei' + (en ? 1 : 0), 18, 18, P => { P.ell(9, 9, 8.5, 8.5, 'i'); P.ell(9, 9, 6, 6, 'I'); P.ell(9, 9, 4.5, 4.5, 'i'); P.ell(9, 9, 1.4, 6.5, 'k'); P.rect(5, 4, 2, 2, 'x'); }, I2, ov);
     const mini = bspr('em' + (en ? 1 : 0), 12, 8, P => { P.poly([[0, 4], [6, 0], [12, 4], [6, 8]], 'a'); P.poly([[2, 4], [6, 2], [10, 4], [6, 6]], 's'); }, '#3a1a40', ov);
     const A = bossAnim(b, t), lean = bspring(A, 'ln', clamp(A.vx / 900, -.22, .22), 28, .6);
+    A.sx = 1; A.f = 1;
     const open = bspring(A, 'op', clamp(1 - (b.blink || 0) * 1.4 + (b.wide || 0) * .25, .04, 1.2), 520, .75);
     rigM(A, { lean });
     // 뒤에서 도는 룬 고리
@@ -3008,6 +3009,8 @@ const BOSS_DRAW = {
     }, '#1f4a5c', ov);
     // 느긋한 맥동: 천천히 오므렸다가(물 뿜기) 더 천천히 펴진다
     const A = bossAnim(b, t), per = en ? 3.4 : 4.6;
+    // 좌우 대칭이라 돌아설 때 뒤집지 않는다(뒤집으면 다리 뿌리가 반대편으로 건너가 꼬인다)
+    A.sx = 1; A.f = 1;
     A.pt = (A.pt || 0) + A.dt; const ph = (A.pt % per) / per, pv = ph < .24 ? eio(ph / .24) : 1 - eio((ph - .24) / .76);
     const jet = ph < .24 && (A.lastPh || 1) > ph; A.lastPh = ph;
     const lean = bspring(A, 'ln', clamp(A.vx / 1400, -.16, .16), 10, .95), by = -pv * 7 + Math.sin(t * .7) * 4;
@@ -3117,7 +3120,9 @@ const BOSS_DRAW = {
     bglow(b.x, b.y, 150, W2, .18 + ba * .4);
     for (let i = 0; i < 6; i++) { const a = t * .9 + i / 6 * TAU, r = 90 + Math.sin(t * 2 + i) * 8, x = b.x + Math.cos(a) * r, y = b.y + Math.sin(a) * r * .5 - 10; addG(() => { g.globalAlpha = .6; g.fillStyle = W2; g.beginPath(); g.moveTo(snap(x), snap(y - 9)); g.lineTo(snap(x + 4), snap(y)); g.lineTo(snap(x), snap(y + 9)); g.lineTo(snap(x - 4), snap(y)); g.fill(); g.globalAlpha = 1; }); }
     g.save(); g.globalAlpha = Math.max(.08, 1 - ba);
+    const sx0 = A.sx; A.sx = 1;
     for (let i = 0; i < 6; i++) { const r = brope(A, 'st' + i, 6, 12, bw(b, A, -24 + i * 9.6, 70 + hov), { g: 260, damp: .9, stiff: .08, force: (j) => [Math.sin(t * 3.2 + i * 1.7 + j * .9) * 90 - A.vx * 2, -40] }); strand(r, 10, 4, '#1c1530', null); }
+    A.sx = sx0;
     rigFrame(b, A, () => {
       bdraw(cloak, 0, hov, Math.sin(t * 1.2) * .03, 1, .5, .5);
       const pv = [34, 2 + hov], ux = Math.sin(ga) * .5 + Math.cos(ga) * .866 * 0, d = [Math.cos(ga - 1.05), Math.sin(ga - 1.05)];
