@@ -2538,29 +2538,29 @@ function drawSkillMarks() {
   }
 }
 // ───────────── 보스 10종 ─────────────
-// 지층마다 하나. 큰 도트(아트 1칸 = 4px)를 부위별로 나눠 그려서 숨 쉬고 팔을 휘두르고 날개를 친다.
+// 지층마다 하나. 큰 도트(아트 1칸 = 3px)를 부위별로 나눠 그려서 숨 쉬고 팔을 휘두르고 날개를 친다.
 // pat: 쓰는 패턴, shot: 탄 모양, mode: ground(걷고 뛴다) · float(떠다닌다)
-const BP = 4;
+const BP = 3;
 const BOSSES = [
-  { id: 'root', name: '고목 뿌리왕', en: 'THE ROOTKING', col: '#7bd36a', mode: 'ground', hit: [118, 140], pat: ['slam', 'volley', 'summon'], shot: 'acorn', minion: 'rootling',
+  { id: 'root', name: '고목 뿌리왕', en: 'THE ROOTKING', col: '#7bd36a', mode: 'ground', hit: [130, 190], pat: ['slam', 'volley', 'summon'], shot: 'acorn', minion: 'rootling',
     lore: '개척민이 처음 베어 낸 나무의 뿌리가 원한을 품고 일어났다. 뿌리로 땅을 디딜 때마다 흙이 들썩인다.' },
-  { id: 'bone', name: '해골 하늘고래', en: 'BONE LEVIATHAN', col: '#bfe8ff', mode: 'float', hit: [200, 90], pat: ['charge', 'rain', 'ring'], shot: 'bone',
+  { id: 'bone', name: '해골 하늘고래', en: 'BONE LEVIATHAN', col: '#bfe8ff', mode: 'float', hit: [230, 96], pat: ['charge', 'rain', 'ring'], shot: 'bone',
     lore: '뼈의 지층에 가라앉은 하늘고래의 유해. 죽어서도 하늘을 헤엄치려 지층 사이를 떠돈다.' },
-  { id: 'spider', name: '수정 거미 여왕', en: 'CRYSTAL BROODQUEEN', col: '#8fe3ff', mode: 'ground', hit: [150, 96], pat: ['volley', 'spikes', 'summon'], shot: 'crystal', minion: 'spiderling',
+  { id: 'spider', name: '수정 거미 여왕', en: 'CRYSTAL BROODQUEEN', col: '#8fe3ff', mode: 'ground', hit: [180, 104], pat: ['volley', 'spikes', 'summon'], shot: 'crystal', minion: 'spiderling',
     lore: '울림 수정굴의 가장 깊은 방에 알을 낳는 여왕. 등의 수정이 울릴 때마다 굴이 노래한다.' },
-  { id: 'drake', name: '잿불 드레이크', en: 'EMBER DRAKE', col: '#ff7a2a', mode: 'float', hit: [170, 90], pat: ['beam', 'rain', 'charge'], shot: 'ember',
+  { id: 'drake', name: '잿불 드레이크', en: 'EMBER DRAKE', col: '#ff7a2a', mode: 'float', hit: [180, 100], pat: ['beam', 'rain', 'charge'], shot: 'ember',
     lore: '잿불 심층의 용암 속에서 깨어난 어린 용. 숨결 한 번에 바위가 붉게 녹아내린다.' },
-  { id: 'golem', name: '유적 수호 거상', en: 'RUIN COLOSSUS', col: '#5affd0', mode: 'ground', hit: [130, 160], pat: ['slam', 'beam', 'volley'], shot: 'rubble',
+  { id: 'golem', name: '유적 수호 거상', en: 'RUIN COLOSSUS', col: '#5affd0', mode: 'ground', hit: [150, 220], pat: ['slam', 'beam', 'volley'], shot: 'rubble',
     lore: '셀레스타 왕국이 유적을 지키라고 세운 돌거인. 명령을 내릴 왕은 사라졌지만 거상은 아직 지키고 있다.' },
   { id: 'eye', name: '심연의 눈', en: 'EYE OF THE ABYSS', col: '#b56cff', mode: 'float', hit: [150, 150], pat: ['beam', 'ring', 'vortex'], shot: 'void',
     lore: '별이 잠든 심연에서 위를 올려다보는 눈. 눈이 마주친 자는 심연 쪽으로 끌려간다.' },
-  { id: 'kraken', name: '하늘바다 크라켄', en: 'SKYSEA KRAKEN', col: '#4ecdc4', mode: 'float', hit: [130, 120], pat: ['volley', 'spikes', 'ring'], shot: 'ink',
+  { id: 'kraken', name: '하늘바다 크라켄', en: 'SKYSEA KRAKEN', col: '#4ecdc4', mode: 'float', hit: [120, 140], pat: ['volley', 'spikes', 'ring'], shot: 'ink',
     lore: '가라앉은 하늘바다의 주인. 여덟 개의 다리가 바다였던 땅 밑에서 솟구친다.' },
-  { id: 'tree', name: '세계수의 정령', en: 'WORLDTREE WARDEN', col: '#b8ff8a', mode: 'ground', hit: [110, 170], pat: ['spikes', 'rain', 'summon'], shot: 'leaf', minion: 'sprout',
+  { id: 'tree', name: '세계수의 정령', en: 'WORLDTREE WARDEN', col: '#b8ff8a', mode: 'ground', hit: [100, 200], pat: ['spikes', 'rain', 'summon'], shot: 'leaf', minion: 'sprout',
     lore: '태초의 숲을 지키는 세계수의 정령. 화를 내면 땅에서 가시 뿌리가 솟고 꽃잎이 칼날이 된다.' },
-  { id: 'void', name: '공허의 집행자', en: 'VOID EXECUTIONER', col: '#c99cff', mode: 'float', hit: [110, 150], pat: ['charge', 'beam', 'ring'], shot: 'void',
+  { id: 'void', name: '공허의 집행자', en: 'VOID EXECUTIONER', col: '#c99cff', mode: 'float', hit: [110, 170], pat: ['charge', 'beam', 'ring'], shot: 'void',
     lore: '공허의 함이 열린 밤 함께 빠져나온 집행자. 큰 낫으로 공간째로 베어 낸다.' },
-  { id: 'king', name: '타락한 금고지기 왕', en: 'THE FALLEN VAULT KING', col: '#ffd36b', mode: 'ground', hit: [150, 190], pat: ['slam', 'rain', 'beam', 'summon'], shot: 'gold', minion: 'knight',
+  { id: 'king', name: '타락한 금고지기 왕', en: 'THE FALLEN VAULT KING', col: '#ffd36b', mode: 'ground', hit: [140, 212], pat: ['slam', 'rain', 'beam', 'summon'], shot: 'gold', minion: 'knight',
     lore: '셀레스타의 심장을 지키던 첫 금고지기. 왕좌의 금고에서 삼백 년을 버티다 금빛 탐욕에 삼켜졌다.' },
 ];
 const BOSS_LIFT = { bone: 14, drake: 30, eye: 54, kraken: 84, void: 18 };
@@ -2569,180 +2569,477 @@ BOSSES.forEach((b, i) => { b.L = i; b.lift = BOSS_LIFT[b.id] || 0; b.hp = Math.r
 function pxArt(w, h, fn) {
   const G2 = Array.from({ length: h }, () => Array(w).fill('.'));
   const set = (x, y, c) => { x = Math.round(x); y = Math.round(y); if (x >= 0 && y >= 0 && x < w && y < h) G2[y][x] = c; };
+  const paint = (x, y, c) => { x = Math.round(x); y = Math.round(y); if (G2[y] && G2[y][x] && G2[y][x] !== '.') G2[y][x] = c; };
+  const walk = (x0, y0, x1, y1, f) => { const n = Math.max(1, Math.ceil(Math.hypot(x1 - x0, y1 - y0) * 1.5)); for (let k = 0; k <= n; k++) f(lerp(x0, x1, k / n), lerp(y0, y1, k / n)); };
   const P = {
-    set, ell(cx, cy, rx, ry, c) { for (let y = Math.floor(cy - ry); y <= Math.ceil(cy + ry); y++) for (let x = Math.floor(cx - rx); x <= Math.ceil(cx + rx); x++) if (((x - cx) / rx) ** 2 + ((y - cy) / ry) ** 2 <= 1) set(x, y, c); },
+    set, paint,
+    ell(cx, cy, rx, ry, c) { for (let y = Math.floor(cy - ry); y <= Math.ceil(cy + ry); y++) for (let x = Math.floor(cx - rx); x <= Math.ceil(cx + rx); x++) if (((x - cx) / rx) ** 2 + ((y - cy) / ry) ** 2 <= 1) set(x, y, c); },
     rect(x, y, w2, h2, c) { for (let j = 0; j < h2; j++) for (let i = 0; i < w2; i++) set(x + i, y + j, c); },
-    line(x0, y0, x1, y1, c, th = 1) { const n = Math.max(1, Math.ceil(Math.hypot(x1 - x0, y1 - y0))); for (let k = 0; k <= n; k++) { const x = lerp(x0, x1, k / n), y = lerp(y0, y1, k / n); for (let a = 0; a < th; a++) for (let b = 0; b < th; b++) set(x + a - (th >> 1), y + b - (th >> 1), c); } },
-    tri(x0, y0, x1, y1, x2, y2, c) { const minX = Math.min(x0, x1, x2), maxX = Math.max(x0, x1, x2), minY = Math.min(y0, y1, y2), maxY = Math.max(y0, y1, y2); const s = (ax, ay, bx, by, px, py) => (bx - ax) * (py - ay) - (by - ay) * (px - ax); for (let y = Math.floor(minY); y <= maxY; y++) for (let x = Math.floor(minX); x <= maxX; x++) { const a = s(x0, y0, x1, y1, x, y), b = s(x1, y1, x2, y2, x, y), d = s(x2, y2, x0, y0, x, y); if ((a >= 0 && b >= 0 && d >= 0) || (a <= 0 && b <= 0 && d <= 0)) set(x, y, c); } },
+    line(x0, y0, x1, y1, c, th = 1) { walk(x0, y0, x1, y1, (x, y) => { for (let a = 0; a < th; a++) for (let b = 0; b < th; b++) set(x + a - (th >> 1), y + b - (th >> 1), c); }); },
+    // 이미 칠한 칸 위에만 긋는 선(결·이음매·균열)
+    lineIn(x0, y0, x1, y1, c) { walk(x0, y0, x1, y1, (x, y) => paint(x, y, c)); },
+    tri(x0, y0, x1, y1, x2, y2, c) { P.poly([[x0, y0], [x1, y1], [x2, y2]], c); },
+    poly(pts, c) {
+      const ys = pts.map(p => p[1]), y0 = Math.floor(Math.min(...ys)), y1 = Math.ceil(Math.max(...ys)), xs = pts.map(p => p[0]), x0 = Math.floor(Math.min(...xs)), x1 = Math.ceil(Math.max(...xs));
+      for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) {
+        let inside = false; const px = x + .5, py = y + .5;
+        for (let i = 0, j = pts.length - 1; i < pts.length; j = i++) { const [xi, yi] = pts[i], [xj, yj] = pts[j]; if ((yi > py) !== (yj > py) && px < (xj - xi) * (py - yi) / (yj - yi) + xi) inside = !inside; }
+        if (inside) set(x, y, c);
+      }
+      for (let i = 0; i < pts.length; i++) { const a = pts[i], b = pts[(i + 1) % pts.length]; walk(a[0], a[1], b[0], b[1], (x, y) => set(Math.min(x, x1 - .01), Math.min(y, y1 - .01), c)); }
+    },
     get: (x, y) => G2[y] && G2[y][x],
   };
   fn(P); return G2.map(r => r.join(''));
 }
 const bspr = (key, w, h, fn, base, ov) => cspr('boss' + key, () => buildSprite(pxArt(w, h, fn), base, ov));
-// 큰 픽셀 선(팔다리·촉수): 테두리 → 색 순서로 네모를 찍는다
-function plin(x0, y0, x1, y1, th, col, out = true) {
-  const n = Math.max(1, Math.ceil(Math.hypot(x1 - x0, y1 - y0) / (BP * .8)));
-  for (const pass of out ? [0, 1] : [1]) { g.fillStyle = pass ? col : PX_OUT; const e = pass ? 0 : BP; for (let k = 0; k <= n; k++) { const x = lerp(x0, x1, k / n), y = lerp(y0, y1, k / n); g.fillRect(Math.round((x - th / 2 - e) / BP) * BP, Math.round((y - th / 2 - e) / BP) * BP, th + e * 2, th + e * 2); } }
+const snap = v => Math.round(v / BP) * BP;
+const bfr = v => v - Math.floor(v), bhash = (i, s) => bfr(Math.sin(i * 127.1 + s * 311.7) * 43758.5453);
+function addG(fn) { const o = g.globalCompositeOperation; g.globalCompositeOperation = 'lighter'; fn(); g.globalCompositeOperation = o; }
+const bglow = (x, y, r, c, a) => addG(() => glowDot(g, x, y, r, c, a));
+const bsq = (x, y, s, c) => { g.fillStyle = c; g.fillRect(snap(x), snap(y), s, s); };
+// 떠오르는 빛 알갱이(포자·불씨·금가루). 시간만으로 정해져서 초상에서도 똑같이 움직인다
+function motes(x, y, w, h, n, col, t, spd, seed, size = BP, fall = false) {
+  addG(() => { for (let i = 0; i < n; i++) { const r1 = bhash(i, seed), r2 = bhash(i + 50, seed), k = bfr(t * spd / h + r2); g.globalAlpha = Math.sin(k * Math.PI) * .85; bsq(x + (r1 - .5) * w + Math.sin(t * 1.7 + i * 2.1) * 8, fall ? y - h + k * h : y - k * h, size, col); } g.globalAlpha = 1; });
 }
-// 스프라이트를 아트 픽셀 단위로(중심 기준) 그린다
-function bdraw(s, x, y, rot = 0, sx = 1, ax = .5, ay = .5) { g.save(); g.translate(Math.round(x), Math.round(y)); if (rot) g.rotate(rot); g.scale(sx, 1); g.drawImage(s, -s.width * BP * ax, -s.height * BP * ay, s.width * BP, s.height * BP); g.restore(); }
+// 굵기가 줄어드는 픽셀 획(팔·꼬리·촉수·다리): 테두리 → 색 → 등줄기 밝은 선
+function strand(pts, th0, th1, col, hi, out = true) {
+  const n = pts.length - 1;
+  const run = pass => { for (let i = 0; i < n; i++) {
+    const [x0, y0] = pts[i], [x1, y1] = pts[i + 1], th = Math.max(BP, snap(lerp(th0, th1, n > 1 ? i / (n - 1) : 0))), st = Math.max(1, Math.ceil(Math.hypot(x1 - x0, y1 - y0) / (BP * .8)));
+    for (let k = 0; k <= st; k++) { const x = snap(lerp(x0, x1, k / st) - th / 2), y = snap(lerp(y0, y1, k / st) - th / 2);
+      if (pass === 0) { g.fillStyle = PX_OUT; g.fillRect(x - BP, y - BP, th + BP * 2, th + BP * 2); }
+      else if (pass === 1) { g.fillStyle = col; g.fillRect(x, y, th, th); }
+      else if (th >= BP * 3) { g.fillStyle = hi; g.fillRect(x + BP, y, Math.max(BP, snap(th / 3)), BP); } } } };
+  if (out) run(0); run(1); if (hi) run(2);
+}
+// 보스는 오른쪽을 보는 그림으로 그리고, 바라보는 방향만큼 뒤집는다
+function faceFrame(b, fn) { g.save(); g.translate(Math.round(b.x), Math.round(b.y)); g.scale(b.face < 0 ? -1 : 1, 1); try { fn(); } finally { g.restore(); } }
+function bdraw(s, x, y, rot = 0, sx = 1, ax = .5, ay = .5) { g.save(); g.translate(snap(x), snap(y)); if (rot) g.rotate(rot); if (sx !== 1) g.scale(sx, 1); g.drawImage(s, -Math.round(s.width * ax) * BP, -Math.round(s.height * ay) * BP, s.width * BP, s.height * BP); g.restore(); }
+const plin = (x0, y0, x1, y1, th, col, out = true) => strand([[x0, y0], [x1, y1]], th, th, col, null, out);
+
 // ── 보스별 그리기: (보스 상태 b, 시간 t). 지상형은 b.x,b.y가 발밑 가운데, 부유형은 몸 가운데 ──
 const BOSS_DRAW = {
+  // I. 고목 뿌리왕: 구부정한 거목, 가지 뿔 왕관, 가슴에 박힌 얼굴과 수액빛 눈
   root(b, t) {
-    const en = b.enraged, ov = { a: '#7a5232', d: '#4a301c', k: '#1a1008', w: en ? '#ff6a4a' : '#ffe36b', g: '#4ec05a', y: '#ffd36b', f: '#ff9ac8' };
-    const body = bspr('root' + (en ? 1 : 0), 36, 40, P => {
-      for (const [a, b2, c, d] of [[10, 32, 3, 39], [14, 33, 11, 39], [22, 33, 25, 39], [26, 32, 33, 39]]) P.line(a, b2, c, d, 'd', 2);
-      P.ell(18, 24, 12, 12, 'a');
-      for (const x of [11, 15, 21, 25]) P.line(x, 15, x + (x < 18 ? -1 : 1), 33, 'd', 1);
-      P.ell(13, 22, 3, 2.4, 'k'); P.ell(23, 22, 3, 2.4, 'k'); P.rect(12, 22, 2, 1, 'w'); P.rect(22, 22, 2, 1, 'w');
-      P.ell(18, 29, 4, 1.8, 'k'); P.set(16, 29, 'y'); P.set(20, 29, 'y');
-      P.ell(18, 9, 16, 7, 'g'); P.ell(7, 12, 6, 4, 'g'); P.ell(29, 11, 6, 4, 'g'); P.ell(18, 4, 9, 4, 'g');
-      for (const [x, y] of [[9, 8], [16, 3], [24, 6], [29, 10], [12, 13], [21, 10]]) { P.set(x, y, 'f'); P.set(x + 1, y, 'f'); }
-      P.line(18, 16, 18, 6, 'd', 2); P.line(18, 10, 10, 6, 'd', 1); P.line(18, 10, 27, 5, 'd', 1);
-    }, '#7a5232', ov);
-    const arm = bspr('rootArm', 18, 10, P => { P.line(0, 2, 11, 6, 'd', 3); P.ell(13, 6, 4, 3.2, 'a'); P.line(15, 4, 17, 1, 'd', 1); P.line(16, 7, 17, 9, 'd', 1); }, '#7a5232', ov);
-    const bob = Math.sin(t * 2.2) * 3 + (b.squash || 0) * 8, sw = Math.sin(t * 2.2) * .25 + (b.armUp || 0) * -1.4;
-    bdraw(arm, b.x - 30 * b.face, b.y - 92 + bob, -.4 * b.face - sw * b.face, -b.face, 0, .3);
-    bdraw(body, b.x, b.y + 2, 0, b.face, .5, 1);
-    bdraw(arm, b.x + 30 * b.face, b.y - 92 + bob, .4 * b.face + sw * b.face, b.face, 0, .3);
+    const en = b.enraged, E = en ? '#ff4a2a' : '#ffb02e';
+    const ov = { a: '#5a3e28', d: '#2e1d0e', n: '#86643f', g: '#5a9a3e', l: '#2f5a2a', k: '#0e0804', w: E, h: '#dcc89c', y: en ? '#ff8a5a' : '#ffd36b', v: '#3f7a34' };
+    const body = bspr('rk' + (en ? 1 : 0), 44, 60, P => {
+      for (const [x0, y0, x1, y1, th] of [[17, 46, 6, 59, 3], [20, 48, 13, 59, 3], [24, 48, 31, 59, 3], [27, 46, 38, 59, 3], [14, 50, 1, 58, 2], [30, 50, 43, 58, 2], [22, 50, 22, 59, 2]]) P.line(x0, y0, x1, y1, 'd', th);
+      P.poly([[13, 51], [31, 51], [33, 38], [39, 22], [35, 12], [9, 12], [5, 22], [11, 38]], 'a');
+      P.ell(9, 20, 6, 5, 'a'); P.ell(35, 20, 6, 5, 'a');
+      for (const [x0, x1] of [[12, 13], [16, 15], [28, 29], [32, 31]]) P.lineIn(x0, 34, x1, 50, 'd');
+      P.lineIn(7, 22, 11, 36, 'd'); P.lineIn(37, 22, 33, 36, 'd'); P.lineIn(14, 40, 18, 46, 'n'); P.lineIn(30, 40, 26, 46, 'n');
+      P.ell(9, 15, 6, 2.4, 'g'); P.ell(35, 15, 6, 2.4, 'g'); P.ell(22, 11, 10, 2, 'g');
+      for (const x of [4, 6, 9, 12]) P.line(x, 16, x - .5, 18 + (x % 3) * 2, 'v');
+      for (const x of [32, 35, 38, 40]) P.line(x, 16, x + .5, 18 + (x % 3) * 2, 'v');
+      // 깊은 눈두덩과 찢어진 눈
+      P.poly([[11, 16], [21, 19], [21, 22], [11, 20]], 'k'); P.poly([[33, 16], [23, 19], [23, 22], [33, 20]], 'k');
+      P.line(12, 18, 19, 20, 'w'); P.line(32, 18, 25, 20, 'w'); P.set(18, 20, 'W'); P.set(26, 20, 'W');
+      P.line(10, 15, 21, 18, 'n'); P.line(34, 15, 23, 18, 'n');
+      P.lineIn(22, 20, 22, 25, 'd'); P.lineIn(21, 24, 23, 24, 'd');
+      // 톱니 이빨 사이로 수액빛이 샌다
+      P.poly([[14, 27], [30, 27], [28, 33], [16, 33]], 'k'); P.rect(17, 29, 11, 2, 'w');
+      for (let x = 15; x <= 29; x += 3) P.tri(x - 1, 27, x + 1, 27, x, 30, 'h');
+      for (let x = 17; x <= 27; x += 3) P.tri(x - 1, 33, x + 1, 33, x, 30, 'h');
+      for (const [x, l] of [[15, 6], [18, 9], [21, 12], [24, 11], [27, 8], [30, 5]]) P.line(x, 33, x + (x < 22 ? -1 : 1), 33 + l, 'g');
+      P.line(22, 39, 20, 42, 'w'); P.line(20, 42, 23, 45, 'w'); P.line(23, 45, 21, 48, 'w'); P.set(21, 42, 'W');
+    }, '#5a3e28', ov);
+    const crown = bspr('rkc' + (en ? 1 : 0), 44, 26, P => {
+      const L = (a, b2, c, d, th) => P.line(a, b2, c, d, 'a', th);
+      L(16, 25, 9, 13, 3); L(9, 13, 3, 4, 2); L(3, 4, 1, 0, 1); L(9, 13, 13, 5, 2); L(13, 5, 12, 1, 1); L(6, 9, 1, 8, 1);
+      L(28, 25, 35, 13, 3); L(35, 13, 41, 4, 2); L(41, 4, 43, 0, 1); L(35, 13, 31, 5, 2); L(31, 5, 32, 1, 1); L(38, 9, 43, 8, 1);
+      L(22, 25, 22, 8, 3); L(22, 15, 18, 7, 2); L(22, 15, 26, 7, 2); L(22, 8, 22, 2, 1);
+      for (const [x, y] of [[9, 14], [35, 14], [22, 16], [13, 6], [31, 6], [5, 9], [39, 9], [18, 8], [26, 8]]) P.ell(x, y, 2, 1.3, 'l');
+      for (const [x, y] of [[3, 4], [41, 4], [22, 2], [12, 1], [32, 1], [1, 8], [43, 8]]) P.set(x, y, 'y');
+    }, '#5a3e28', ov);
+    const up = b.armUp || 0, sq = (b.squash || 0) * 10, br = Math.sin(t * 1.8) * 3;
+    faceFrame(b, () => {
+      motes(0, -10, 240, 230, 16, en ? '#ff8a4a' : '#d8ff8a', t, 16, 3);
+      const arm = side => {
+        const sx = side * 40, sy = -122 + br + sq, sw = Math.sin(t * 1.8 + side) * 6;
+        const el = [lerp(sx + side * 30, sx + side * 26, up), lerp(-76 + sw, -176, up) + sq], ha = [lerp(sx + side * 36, sx + side * 8, up), lerp(-30 + sw, -222, up) + sq];
+        strand([[sx, sy], el, ha], 24, 13, '#5a3e28', '#86643f');
+        for (let k = 0; k < 4; k++) { const dx = (k - 1.5) * 7, dir = up > .5 ? -1 : 1; strand([ha, [ha[0] + dx * 1.2 + side * 3, ha[1] + dir * 16], [ha[0] + dx * 1.8 + side * 6, ha[1] + dir * 30]], 7, 3, '#cbb68a', '#efe2c0'); }
+        strand([[sx - side * 4, sy + 6], [el[0] + side * 4, el[1] + 18], [el[0] + side * 2, el[1] + 40]], 3, 3, '#4f8a3a', null, false);
+      };
+      arm(-1);
+      bdraw(body, 0, 3 + sq * .4, 0, 1, .5, 1);
+      bdraw(crown, Math.sin(t * 1.3) * 2, -138 + br * .6 + sq, Math.sin(t * 1.3) * .03, 1, .5, 1);
+      arm(1);
+      const pul = .7 + Math.sin(t * 3) * .15;
+      for (const ex of [-21, 21]) bglow(ex, -123 + sq * .4, 18, E, pul);
+      bglow(0, -90 + sq * .4, 26, E, .45 * pul); bglow(0, -54, 20, E, .35 * pul);
+    });
   },
+  // II. 해골 하늘고래: 볏이 솟은 긴 두개골, 유령빛 살결 속을 헤엄치는 등뼈와 갈비
   bone(b, t) {
-    const ov = { a: '#e8dcc0', k: '#1a1222', w: b.enraged ? '#ff6a8a' : '#7fd0ff', d: '#a89878' };
-    const skull = bspr('boneSkull', 24, 18, P => { P.ell(11, 8, 11, 7.5, 'a'); P.rect(3, 12, 18, 4, 'a'); for (let x = 4; x < 20; x += 3) P.set(x, 12, 'k'); P.ell(15, 6, 2.6, 2.2, 'k'); P.set(15, 6, 'w'); P.set(16, 6, 'w'); P.ell(21, 9, 1, 1, 'k'); P.line(2, 8, 8, 4, 'd', 1); }, '#e8dcc0', ov);
-    const rib = bspr('boneRib', 8, 20, P => { P.rect(2, 0, 4, 3, 'a'); for (let y = 2; y < 20; y++) { const x = Math.round(4 - 3.2 * Math.sin((y - 2) / 17 * Math.PI)); P.set(x, y, 'a'); P.set(x + 1, y, 'a'); } }, '#e8dcc0', ov);
-    const fluke = bspr('boneFluke', 14, 16, P => { P.tri(13, 8, 0, 0, 4, 8, 'a'); P.tri(13, 8, 0, 16, 4, 8, 'a'); P.line(13, 8, 3, 8, 'd', 1); }, '#e8dcc0', ov);
-    const f = b.face, n = 7, ghost = .55 + Math.sin(t * 3) * .1;
-    g.globalCompositeOperation = 'lighter'; glowDot(g, b.x, b.y, 140, ov.w, .18); g.globalCompositeOperation = 'source-over';
-    // 척추: 머리에서 꼬리로 갈수록 늦게 출렁인다
-    const pts = []; for (let i = 0; i <= n; i++) pts.push([b.x + f * (52 - i * 20), b.y + Math.sin(t * 2.4 - i * .7) * (6 + i * 1.5)]);
-    for (let i = 1; i < pts.length; i++) plin(pts[i - 1][0], pts[i - 1][1] - 10, pts[i][0], pts[i][1] - 10, 8, '#d8ccb0');
-    for (let i = 1; i < n; i++) { bdraw(rib, pts[i][0], pts[i][1] - 12, 0, f, .5, 0); }
-    bdraw(fluke, pts[n][0] - f * 20, pts[n][1] - 10, Math.sin(t * 2.4 - n * .7) * .3, -f, .5, .5);
-    bdraw(skull, pts[0][0] + f * 30, pts[0][1] - 6 + (b.jaw || 0) * 4, 0, f, .5, .5);
-    g.globalCompositeOperation = 'lighter'; glowDot(g, pts[0][0] + f * 46, pts[0][1] - 14, 18, ov.w, ghost); g.globalCompositeOperation = 'source-over';
+    const en = b.enraged, C = en ? '#ff6a8a' : '#7fd0ff', ov = { a: '#e4d8bc', d: '#9a8a6a', k: '#0c0814', w: C, h: '#fff6e0' };
+    const skull = bspr('bl' + (en ? 1 : 0), 40, 24, P => {
+      P.poly([[2, 15], [8, 9], [20, 7], [31, 10], [39, 16], [38, 19], [24, 20], [8, 21], [2, 19]], 'a');
+      P.line(8, 10, 0, 2, 'a', 2); P.line(13, 8, 7, 0, 'a', 2); P.line(18, 7, 15, 1, 'a', 1); P.line(23, 8, 22, 3, 'a', 1);
+      P.lineIn(10, 17, 31, 17, 'd'); P.lineIn(14, 10, 17, 15, 'd'); P.lineIn(6, 14, 10, 19, 'd');
+      P.poly([[21, 12], [30, 12], [28, 15], [22, 15]], 'k'); P.line(23, 13, 28, 13, 'w'); P.set(27, 13, 'W');
+      P.set(36, 16, 'k'); P.set(35, 16, 'k');
+      for (let x = 12; x <= 36; x += 3) P.tri(x - 1, 20, x + 1, 20, x, 23, 'h');
+    }, '#e4d8bc', ov);
+    const jaw = bspr('blj', 36, 10, P => { P.poly([[0, 4], [30, 4], [35, 6], [30, 9], [6, 9], [0, 7]], 'a'); P.lineIn(4, 7, 28, 7, 'd'); for (let x = 10; x <= 32; x += 3) P.tri(x - 1, 4, x + 1, 4, x, 1, 'h'); }, '#e4d8bc', ov);
+    const vert = bspr('blv', 8, 12, P => { P.rect(1, 6, 6, 5, 'a'); P.tri(2, 6, 6, 6, 0, 0, 'a'); P.lineIn(1, 8, 6, 8, 'd'); }, '#e4d8bc', ov);
+    faceFrame(b, () => {
+      const n = 8, pts = []; for (let i = 0; i <= n; i++) pts.push([70 - i * 25, Math.sin(t * 2.2 - i * .7) * (5 + i * 1.6)]);
+      const rad = i => Math.max(8, 44 - i * 4.6);
+      // 유령 살결: 등뼈를 따라 반투명한 고래 몸
+      g.beginPath(); pts.forEach(([x, y], i) => (i ? g.lineTo : g.moveTo).call(g, x, y - rad(i) * .7)); for (let i = n; i >= 0; i--) g.lineTo(pts[i][0], pts[i][1] + rad(i)); g.closePath();
+      g.fillStyle = rgba(C, .22); g.fill(); g.strokeStyle = rgba(C, .7); g.lineWidth = BP; g.stroke();
+      bglow(0, 0, 190, C, .2);
+      // 유령 지느러미
+      const fin = (i, len, ph) => { const [x, y] = pts[i], ang = .9 + Math.sin(t * 2.2 + ph) * .25, tip = [x - Math.cos(ang) * len * .4, y + Math.sin(ang) * len]; g.beginPath(); g.moveTo(x + 10, y + 10); g.lineTo(tip[0], tip[1]); g.lineTo(x - 30, y + 12); g.closePath(); g.fillStyle = rgba(C, .16); g.fill(); for (let r = 0; r < 3; r++) strand([[x + 6 - r * 12, y + 10], [lerp(x + 6 - r * 12, tip[0], .6), lerp(y + 10, tip[1], .6)], [tip[0] + r * 6, tip[1] - r * 6]], 5, 3, '#d8ccb0', null); };
+      fin(2, 70, 0);
+      // 갈비뼈
+      for (let i = 1; i <= 5; i++) { const [x, y] = pts[i], L2 = 1 - i * .12, sw = Math.sin(t * 2.2 - i * .7 + 1) * 3; strand([[x, y + 4], [x - 6, y + 22 * L2 + sw], [x - 14, y + 38 * L2 + sw], [x - 24, y + 46 * L2 + sw]], 8, 4, '#d8ccb0', '#f4ecd8'); }
+      for (let i = 0; i < n; i++) bglow(pts[i][0], pts[i][1] + 6, rad(i) * 1.3, C, .14);
+      strand(pts, 13, 6, '#c8bc9c', '#ece2c8');
+      for (let i = 1; i < n; i++) bdraw(vert, pts[i][0], pts[i][1] - 6, 0, 1, .5, .5);
+      // 꼬리지느러미
+      const [tx, ty] = pts[n], fl = Math.sin(t * 2.2 - n * .7) * 10;
+      g.beginPath(); g.moveTo(tx, ty); g.lineTo(tx - 44, ty - 40 + fl); g.lineTo(tx - 26, ty); g.lineTo(tx - 44, ty + 40 + fl); g.closePath(); g.fillStyle = rgba(C, .2); g.fill();
+      strand([[tx, ty], [tx - 22, ty - 18 + fl], [tx - 44, ty - 40 + fl]], 7, 3, '#d8ccb0', null); strand([[tx, ty], [tx - 22, ty + 18 + fl], [tx - 44, ty + 40 + fl]], 7, 3, '#d8ccb0', null);
+      fin(1, 56, 2);
+      const hx = pts[0][0] + 34, hy = pts[0][1] - 4, jw = (b.jaw || 0) + Math.max(0, Math.sin(t * 1.3)) * .15;
+      bdraw(jaw, hx - 6, hy + 26, jw * .45, 1, .05, .3);
+      bdraw(skull, hx, hy, 0, 1, .5, .5);
+      const ex = hx + 18, ey = hy + 3;
+      addG(() => { for (let k = 0; k < 7; k++) { const p = bfr(t * 1.6 + k / 7); g.globalAlpha = (1 - p) * .8; bsq(ex - 6 - p * 70, ey + Math.sin(t * 4 + k) * 4 - p * 6, BP, C); } g.globalAlpha = 1; });
+      bglow(ex, ey, 26, C, .95);
+    });
   },
+  // III. 수정 거미 여왕: 수정 군집이 솟은 장갑 배, 여덟 개의 붉은 눈과 송곳니, 날카롭게 꺾인 긴 다리
   spider(b, t) {
-    const ov = { a: '#3a3a6a', v: '#8fe3ff', r: b.enraged ? '#ffffff' : '#ff4d6d', k: '#1a1222', d: '#2a2a4a' };
-    const abd = bspr('spAbd', 36, 28, P => { P.ell(18, 18, 17, 10, 'a'); for (const [x, hh] of [[7, 9], [13, 14], [19, 17], [25, 13], [31, 8]]) P.tri(x - 3, 14, x + 3, 14, x, 14 - hh, 'v'); P.line(6, 19, 30, 19, 'd', 1); P.line(9, 23, 27, 23, 'd', 1); }, '#3a3a6a', ov);
-    const head = bspr('spHead', 20, 16, P => { P.ell(10, 8, 9, 7, 'a'); for (const [x, y] of [[9, 4], [12, 5], [6, 5], [10, 7], [7, 7], [13, 7]]) P.set(x, y, 'r'); P.line(5, 11, 4, 13, 'v', 1); P.line(12, 11, 13, 13, 'v', 1); }, '#3a3a6a', ov);
-    const f = b.face, by = b.y - 44 + Math.sin(t * 6) * 2 + (b.squash || 0) * 6;
-    // 다리 여덟 개: 엉덩이에서 무릎(위로 꺾임)·발끝까지, 걸을 때 번갈아 든다
-    for (let i = 0; i < 8; i++) {
-      const side = i < 4 ? -1 : 1, k = i % 4, hipX = b.x + f * (k * 10 - 10), hipY = by + 6, ph = t * (b.walking ? 10 : 2) + k * 1.6 + (side > 0 ? Math.PI : 0);
-      const footX = hipX + side * (46 + k * 10), footY = b.y - Math.max(0, Math.sin(ph)) * 10, kneeX = (hipX + footX) / 2 + side * 6, kneeY = Math.min(hipY, footY) - 40 - k * 3;
-      plin(hipX, hipY, kneeX, kneeY, 8, '#2a2a4a'); plin(kneeX, kneeY, footX, footY, 6, '#4a5a8a');
-      g.fillStyle = '#8fe3ff'; g.fillRect(Math.round(footX / BP) * BP - 2, Math.round(footY / BP) * BP - 4, 6, 6);
-    }
-    bdraw(abd, b.x - f * 34, by - 6, 0, f, .5, .7);
-    bdraw(head, b.x + f * 30, by + 4, 0, f, .5, .5);
-    g.globalCompositeOperation = 'lighter'; glowDot(g, b.x - f * 34, by - 40, 60, '#8fe3ff', .25 + Math.sin(t * 4) * .08); g.globalCompositeOperation = 'source-over';
+    const en = b.enraged, R2 = en ? '#ffffff' : '#ff3a5a', ov = { a: '#3e3a66', d: '#1e1c3a', v: '#8fe3ff', r: R2, h: '#d8e8f0', k: '#08060e', c: '#e8ffff' };
+    const abd = bspr('sq' + (en ? 1 : 0), 46, 38, P => {
+      P.ell(23, 27, 21, 10, 'a');
+      for (const y of [22, 26, 30, 34]) P.lineIn(3, y, 43, y, 'd');
+      for (const [x, hg, ln] of [[8, 10, -3], [13, 15, -2], [18, 20, -1], [23, 21, 0], [28, 18, 2], [33, 13, 2], [38, 9, 3], [15, 8, -4], [31, 10, 4], [25, 12, 1]]) { P.tri(x - 3, 21, x + 3, 21, x + ln, 21 - hg, 'v'); P.line(x - 1, 20, x + ln - .5, 23 - hg, 'V'); }
+      for (const [x, y] of [[18, 6], [23, 4], [28, 8]]) P.paint(x, y, 'c');
+      P.tri(20, 30, 26, 30, 23, 34, 'r'); P.tri(20, 36, 26, 36, 23, 33, 'r');
+    }, '#3e3a66', ov);
+    const head = bspr('sh' + (en ? 1 : 0), 28, 22, P => {
+      P.poly([[0, 9], [8, 4], [20, 4], [27, 10], [26, 15], [18, 18], [6, 17], [0, 14]], 'a');
+      for (const x of [5, 9, 13]) P.tri(x - 1, 5, x + 2, 5, x - 2, 0, 'a');
+      P.lineIn(3, 13, 18, 16, 'd'); P.lineIn(8, 5, 6, 15, 'd'); P.lineIn(2, 10, 12, 6, 'v');
+      for (const [x, y, s] of [[20, 7, 1], [23, 9, 1], [17, 7, 0], [21, 10, 0], [24, 12, 0], [18, 10, 0], [15, 9, 0], [25, 7, 0]]) { if (s) { P.rect(x, y, 2, 2, 'r'); P.set(x, y, 'R'); } else P.set(x, y, 'r'); }
+      P.line(19, 16, 21, 19, 'h', 2); P.line(21, 19, 19, 21, 'h'); P.line(24, 15, 26, 18, 'h', 2); P.line(26, 18, 25, 21, 'h');
+    }, '#3e3a66', ov);
+    const by = -66 + Math.sin(t * 5) * 2 + (b.squash || 0) * 8;
+    faceFrame(b, () => {
+      motes(-30, by - 30, 160, 140, 10, '#bff4ff', t, 22, 7);
+      bglow(-36, by - 50, 80, '#8fe3ff', .22 + Math.sin(t * 3) * .07);
+      const leg = (k, side) => {
+        const hipX = 14 - k * 10, hipY = by + 6, ph = t * (b.walking ? 9 : 1.8) + k * 1.7 + (side > 0 ? Math.PI : 0);
+        const footX = [104, 62, -58, -110][k] + side * 10, footY = -Math.max(0, Math.sin(ph)) * 12 - (side < 0 ? 6 : 0), kneeX = lerp(hipX, footX, .45), kneeY = by - [40, 54, 50, 34][k] + Math.sin(ph) * 4 - (side < 0 ? 10 : 0), ankX = lerp(kneeX, footX, .8), ankY = footY - 26;
+        const c = side < 0 ? '#28264a' : '#3e3a66', hi = side < 0 ? '#3a3866' : '#625e96';
+        strand([[hipX, hipY], [kneeX, kneeY]], 11, 9, c, hi); strand([[kneeX, kneeY], [ankX, ankY]], 8, 6, c, hi); strand([[ankX, ankY], [footX, footY]], 5, 3, '#8fe3ff', '#e8ffff');
+        bsq(kneeX - 3, kneeY - 6, BP * 2, '#8fe3ff');
+      };
+      for (let k = 0; k < 4; k++) leg(k, -1);
+      for (let k = 0; k < 4; k++) leg(k, 1);
+      bdraw(abd, -44, by + 4, Math.sin(t * 1.4) * .03, 1, .5, .78);
+      bdraw(head, 34, by + 8, 0, 1, .5, .5);
+      for (const [x, y] of [[46, by - 2], [54, by + 4]]) bglow(x, y, 14, R2, .8);
+      for (let i = 0; i < 3; i++) bglow(-40 + (i - 1) * 16, by - 42 - i * 4, 22, '#bff4ff', .3 + Math.sin(t * 4 + i * 2) * .15);
+    });
   },
+  // IV. 잿불 드레이크: 뿔이 뒤로 젖혀진 와이번, 찢긴 막 날개, 용암 균열이 흐르는 비늘
   drake(b, t) {
-    const ov = { a: '#c8401a', b: '#ffb33a', d: '#5a1a0a', m: '#ff7a3a', h: '#e8dcc0', w: b.enraged ? '#ffffff' : '#fff2b0', k: '#1a0a06' };
-    const body = bspr('drBody', 44, 26, P => { P.ell(18, 14, 13, 8, 'a'); P.ell(18, 17, 9, 4, 'b'); P.line(28, 11, 34, 8, 'a', 4); P.ell(37, 8, 6, 4.6, 'a'); P.rect(36, 11, 7, 2, 'a'); P.line(33, 5, 27, 1, 'h', 2); P.line(36, 4, 33, 0, 'h', 1); P.set(39, 7, 'w'); P.set(40, 7, 'w'); P.set(43, 10, 'k'); for (let x = 8; x < 28; x += 4) P.set(x, 7, 'd'); }, '#c8401a', ov);
-    const wing = bspr('drWing', 30, 24, P => { P.tri(0, 22, 14, 0, 29, 20, 'm'); P.line(14, 0, 0, 22, 'd', 1); P.line(14, 0, 10, 22, 'd', 1); P.line(14, 0, 20, 22, 'd', 1); P.line(14, 0, 29, 20, 'd', 2); }, '#ff7a3a', ov);
-    const f = b.face, fl = Math.sin(t * (b.enraged ? 9 : 6));
-    g.globalAlpha = .75; bdraw(wing, b.x - f * 10, b.y - 16, (-.75 + fl * .45) * f, f, .5, 1); g.globalAlpha = 1;
-    // 꼬리: 몸 뒤로 이어지며 끝에서 불꽃
-    let px = b.x - f * 46, py = b.y + 8;
-    for (let i = 0; i < 7; i++) { const nx = px - f * 14, ny = py + Math.sin(t * 3 + i * .8) * 6 + 3; plin(px, py, nx, ny, 12 - i, i % 2 ? '#c8401a' : '#a8301a'); px = nx; py = ny; }
-    g.globalCompositeOperation = 'lighter'; glowDot(g, px, py, 24, '#ffb33a', .8); g.globalCompositeOperation = 'source-over';
-    bdraw(wing, b.x + f * 14, b.y - 12, (-.15 + fl * .55) * f, f, .3, 1);
-    bdraw(body, b.x, b.y, 0, f, .5, .5);
-    if (b.breath) { g.globalCompositeOperation = 'lighter'; glowDot(g, b.x + f * 92, b.y - 12, 26, '#fff2b0', .9); g.globalCompositeOperation = 'source-over'; }
+    const en = b.enraged, ov = { a: '#7a1e10', d: '#3a0c06', b: '#d8782a', h: '#e8d8b8', m: '#ffb02e', w: en ? '#ffffff' : '#fff2a0', k: '#120404' };
+    const body = bspr('dk' + (en ? 1 : 0), 60, 36, P => {
+      P.ell(24, 22, 14, 8, 'a'); P.line(34, 18, 44, 12, 'a', 6);
+      P.poly([[41, 8], [49, 6], [56, 9], [59, 12], [53, 14], [44, 15], [40, 12]], 'a'); P.poly([[45, 15], [56, 14], [54, 17], [47, 17]], 'a');
+      P.line(43, 8, 33, 2, 'h', 2); P.line(33, 2, 30, 1, 'h'); P.line(46, 7, 39, 1, 'h'); P.line(50, 7, 47, 3, 'h');
+      P.lineIn(44, 10, 52, 9, 'd'); P.line(46, 11, 51, 10, 'w'); P.set(50, 10, 'W');
+      for (let x = 47; x <= 55; x += 2) P.set(x, 15, 'h'); P.set(57, 11, 'k');
+      P.ell(24, 26, 10, 3.6, 'b'); for (let x = 17; x <= 31; x += 3) P.lineIn(x, 24, x, 29, 'd');
+      for (const [x, y] of [[12, 15], [16, 14], [20, 14], [24, 14], [28, 14], [32, 15], [37, 13], [41, 10]]) P.tri(x - 1, y, x + 2, y, x - 1, y - 4, 'h');
+      P.lineIn(12, 18, 18, 21, 'm'); P.lineIn(18, 21, 25, 18, 'm'); P.lineIn(25, 18, 31, 22, 'm'); P.lineIn(15, 24, 21, 22, 'm'); P.lineIn(36, 15, 41, 12, 'm');
+      P.poly([[17, 26], [26, 26], [24, 32], [19, 33]], 'a'); P.line(19, 33, 15, 35, 'h'); P.line(21, 33, 20, 35, 'h'); P.line(24, 32, 27, 34, 'h');
+      P.poly([[34, 22], [38, 22], [40, 27], [37, 28]], 'a'); P.line(37, 28, 41, 29, 'h');
+    }, '#7a1e10', ov);
+    const wing = bspr('dw', 46, 36, P => {
+      const W0 = [2, 34], wr = [16, 6], tips = [[45, 4], [42, 18], [34, 29], [22, 35]];
+      P.tri(W0[0], W0[1], wr[0], wr[1], tips[0][0], tips[0][1], 'm');
+      for (let i = 0; i < tips.length - 1; i++) P.tri(wr[0], wr[1], tips[i][0], tips[i][1], tips[i + 1][0], tips[i + 1][1], 'm');
+      P.tri(W0[0], W0[1], wr[0], wr[1], tips[3][0], tips[3][1], 'm'); P.tri(W0[0], W0[1], tips[3][0], tips[3][1], 8, 35, 'm');
+      for (let i = 0; i < tips.length - 1; i++) { const mx = (tips[i][0] + tips[i + 1][0]) / 2, my = (tips[i][1] + tips[i + 1][1]) / 2; P.ell(mx + 1.5, my + 1.5, 3.2, 2.6, '.'); }
+      P.ell(14, 34, 3, 2, '.');
+      P.line(W0[0], W0[1], wr[0], wr[1], 'd', 2); for (const tp of tips) P.line(wr[0], wr[1], tp[0], tp[1], 'd');
+      P.tri(wr[0] - 1, wr[1], wr[0] + 1, wr[1], wr[0] - 3, wr[1] - 5, 'h');
+    }, '#6a1a10', { m: '#5a140c', d: '#b8401c', h: '#e8d8b8' });
+    const fl = Math.sin(t * (en ? 9 : 5.5));
+    faceFrame(b, () => {
+      motes(-20, 50, 220, 200, 16, '#ffb02e', t, 40, 11);
+      bglow(0, 0, 150, '#ff5a1a', .16);
+      bdraw(wing, -6, -14, -.35 + fl * .4, -1, .04, .95);
+      let px = -50, py = 12;
+      const tl = [[px, py]]; for (let i = 0; i < 8; i++) { px -= 15; py += Math.sin(t * 3 + i * .8) * 6 + 2; tl.push([px, py]); }
+      strand(tl, 22, 5, '#7a1e10', '#a8361a');
+      for (let i = 1; i < 7; i++) { const [x, y] = tl[i]; bsq(x - 2, y - (22 - i * 2.4) / 2 - 8, BP * 2, '#e8d8b8'); }
+      addG(() => { for (let k = 0; k < 5; k++) { const p = bfr(t * 2 + k / 5); g.globalAlpha = 1 - p; bsq(px - 6 + Math.sin(t * 9 + k) * 5, py - p * 30, BP * 2, k % 2 ? '#ffb02e' : '#fff2a0'); } g.globalAlpha = 1; });
+      bglow(px, py, 26, '#ffb02e', .8);
+      bdraw(body, 0, 0, 0, 1, .5, .5);
+      bdraw(wing, 12, -12, -.05 + fl * .5, -1, .04, .95);
+      bglow(-18, 4, 30, '#ff7a1a', .3 + Math.sin(t * 4) * .1);
+      bglow(62, -26, 14, ov.w, .7);
+      if (b.breath) { bglow(86, -16, 34, '#fff2b0', .9); addG(() => { for (let k = 0; k < 6; k++) { const p = bfr(t * 4 + k / 6); g.globalAlpha = 1 - p; bsq(84 + p * 50, -16 + Math.sin(t * 20 + k) * p * 14, BP * 2, '#ffd36b'); } g.globalAlpha = 1; }); }
+    });
   },
+  // V. 유적 수호 거상: 견갑이 부서진 돌거인, 룬 회로와 심장석, 마법으로 떠 있는 팔 마디
   golem(b, t) {
-    const ov = { a: '#7a7488', d: '#4a4458', w: b.enraged ? '#ff6a5a' : '#5affd0', c: b.enraged ? '#ffb0a0' : '#c8fff0' };
-    const torso = bspr('gTorso', 28, 24, P => { P.rect(2, 2, 24, 20, 'a'); P.rect(0, 4, 2, 14, 'a'); P.rect(26, 4, 2, 14, 'a'); P.set(2, 2, '.'); P.set(25, 2, '.'); P.line(6, 6, 10, 6, 'w', 1); P.line(18, 6, 22, 6, 'w', 1); P.line(8, 16, 20, 16, 'd', 1); P.ell(14, 11, 4, 4, 'w'); P.ell(14, 11, 2, 2, 'c'); P.line(4, 20, 9, 14, 'd', 1); }, '#7a7488', ov);
-    const head = bspr('gHead', 14, 12, P => { P.rect(1, 1, 12, 10, 'a'); P.rect(3, 5, 8, 2, 'w'); P.set(1, 1, '.'); P.set(12, 1, '.'); P.line(2, 9, 11, 9, 'd', 1); }, '#7a7488', ov);
-    const block = bspr('gBlock', 12, 12, P => { P.rect(0, 0, 12, 12, 'a'); P.rect(4, 4, 4, 4, 'w'); P.line(0, 11, 11, 11, 'd', 1); P.set(0, 0, '.'); P.set(11, 0, '.'); }, '#7a7488', ov);
-    const leg = bspr('gLeg', 10, 14, P => { P.rect(1, 0, 8, 14, 'a'); P.line(1, 6, 8, 6, 'd', 1); }, '#7a7488', ov);
-    const f = b.face, hov = Math.sin(t * 2) * 4, up = b.armUp || 0, sq = (b.squash || 0) * 10;
-    bdraw(leg, b.x - 26, b.y + 2, 0, 1, .5, 1); bdraw(leg, b.x + 26, b.y + 2, 0, 1, .5, 1);
-    // 마법으로 떠 있는 팔 마디: 어깨 → 팔뚝 → 주먹
-    for (const side of [-1, 1]) {
-      const sx = b.x + side * 72, sy = b.y - 132 + hov - up * 50 * (side === f ? 1 : .3) + sq;
-      bdraw(block, sx, sy, 0); bdraw(block, sx + side * 6, sy + 46 + Math.sin(t * 2 + side) * 3, 0); bdraw(block, sx + side * 10, sy + 92 + Math.sin(t * 2.4 + side) * 4, .2 * side);
-    }
-    bdraw(torso, b.x, b.y - 52 + hov * .5 + sq, 0, 1, .5, 1);
-    bdraw(head, b.x + f * 4, b.y - 156 + hov + sq, 0, 1, .5, 1);
-    g.globalCompositeOperation = 'lighter'; glowDot(g, b.x, b.y - 106 + sq, 40, ov.w, .45); if (b.eyeGlow) glowDot(g, b.x + f * 30, b.y - 176 + hov, 30, ov.w, b.eyeGlow); g.globalCompositeOperation = 'source-over';
+    const en = b.enraged, W2 = en ? '#ff6a5a' : '#5affd0', ov = { a: '#5e5a6e', d: '#302c3c', w: W2, c: en ? '#ffd8c8' : '#e0fff8', k: '#0a0810', m: '#4a6a4a' };
+    const torso = bspr('gt' + (en ? 1 : 0), 44, 36, P => {
+      P.poly([[5, 6], [39, 6], [36, 26], [28, 35], [16, 35], [8, 26]], 'a');
+      P.poly([[0, 3], [14, 0], [16, 10], [4, 14], [0, 10]], 'a'); P.poly([[43, 3], [30, 0], [28, 10], [40, 14], [43, 10]], 'a');
+      P.lineIn(2, 8, 14, 6, 'd'); P.lineIn(41, 8, 30, 6, 'd'); P.lineIn(1, 4, 5, 2, 'm'); P.lineIn(38, 2, 42, 4, 'm');
+      P.lineIn(10, 18, 34, 18, 'd'); P.lineIn(22, 6, 22, 12, 'd'); P.lineIn(14, 27, 30, 27, 'd'); P.lineIn(12, 9, 14, 17, 'd'); P.lineIn(32, 9, 30, 17, 'd');
+      P.line(9, 12, 15, 12, 'w'); P.line(15, 12, 17, 15, 'w'); P.line(35, 12, 29, 12, 'w'); P.line(29, 12, 27, 15, 'w'); P.line(22, 26, 22, 32, 'w'); P.line(18, 30, 26, 30, 'w'); P.line(12, 21, 16, 24, 'w'); P.line(32, 21, 28, 24, 'w');
+      P.poly([[22, 13], [27, 19], [22, 25], [17, 19]], 'w'); P.poly([[22, 15], [25, 19], [22, 23], [19, 19]], 'c'); P.set(21, 18, 'C');
+    }, '#5e5a6e', ov);
+    const head = bspr('gh' + (en ? 1 : 0), 20, 18, P => { P.poly([[3, 4], [17, 4], [19, 10], [16, 17], [4, 17], [1, 10]], 'a'); P.tri(3, 5, 6, 5, 1, 0, 'a'); P.tri(17, 5, 14, 5, 19, 0, 'a'); P.rect(4, 9, 12, 2, 'k'); P.line(5, 9, 15, 9, 'w'); P.set(13, 9, 'W'); P.lineIn(10, 4, 10, 8, 'd'); P.lineIn(4, 14, 16, 14, 'd'); P.lineIn(10, 12, 10, 16, 'w'); }, '#5e5a6e', ov);
+    const leg = bspr('gl' + (en ? 1 : 0), 16, 26, P => { P.poly([[2, 0], [14, 0], [15, 22], [1, 22]], 'a'); P.rect(0, 7, 16, 5, 'a'); P.lineIn(1, 9, 15, 9, 'd'); P.set(8, 16, 'w'); P.set(8, 17, 'w'); P.rect(0, 21, 16, 5, 'a'); P.lineIn(0, 23, 15, 23, 'd'); }, '#5e5a6e', ov);
+    const blk = bspr('gb' + (en ? 1 : 0), 16, 16, P => { P.poly([[1, 0], [15, 1], [16, 14], [0, 15]], 'a'); P.lineIn(1, 6, 15, 7, 'd'); P.line(5, 10, 11, 10, 'w'); P.set(8, 3, 'w'); }, '#5e5a6e', ov);
+    const fist = bspr('gf' + (en ? 1 : 0), 20, 20, P => { P.poly([[1, 2], [19, 0], [20, 17], [0, 19]], 'a'); for (const x of [5, 10, 15]) P.lineIn(x, 1, x, 7, 'd'); P.lineIn(1, 7, 19, 6, 'd'); P.poly([[10, 10], [13, 13], [10, 16], [7, 13]], 'w'); }, '#5e5a6e', ov);
+    const rune = bspr('gr' + (en ? 1 : 0), 6, 6, P => { P.poly([[3, 0], [6, 3], [3, 6], [0, 3]], 'a'); P.set(3, 3, 'w'); P.set(3, 2, 'w'); }, '#5e5a6e', ov);
+    const hov = Math.sin(t * 1.8) * 4, up = b.armUp || 0, sq = (b.squash || 0) * 10;
+    faceFrame(b, () => {
+      motes(0, -30, 240, 240, 12, W2, t, 20, 5);
+      bglow(0, -130 + sq, 120, W2, .12);
+      for (let i = 0; i < 5; i++) { const a = t * .8 + i / 5 * TAU, x = Math.cos(a) * 100, y = -150 + Math.sin(a) * 28 + sq; if (Math.sin(a) < 0) bdraw(rune, x, y); }
+      bdraw(leg, -26, 3, 0, 1, .5, 1); bdraw(leg, 26, 3, 0, 1, .5, 1);
+      const arm = side => {
+        const sx = side * 78, sy = -150 + hov - up * 60 * (side > 0 ? 1 : .35) + sq, a2 = [sx + side * 8, sy + 54 + Math.sin(t * 2 + side) * 3 - up * 20], a3 = [sx + side * 12, sy + 108 + Math.sin(t * 2.4 + side) * 4 - up * 40];
+        addG(() => { g.strokeStyle = rgba(W2, .35); g.lineWidth = BP; g.beginPath(); g.moveTo(side * 54, -168 + sq); g.lineTo(sx, sy); g.lineTo(a2[0], a2[1]); g.lineTo(a3[0], a3[1]); g.stroke(); });
+        bdraw(blk, sx, sy, .1 * side); bdraw(blk, a2[0], a2[1], -.08 * side); bdraw(fist, a3[0], a3[1], .15 * side);
+        bglow(a3[0], a3[1], 22, W2, .35);
+      };
+      arm(-1);
+      bdraw(torso, 0, -66 + hov * .4 + sq, 0, 1, .5, 1);
+      bdraw(head, 6, -174 + hov + sq, 0, 1, .5, 1);
+      arm(1);
+      for (let i = 0; i < 5; i++) { const a = t * .8 + i / 5 * TAU, x = Math.cos(a) * 100, y = -150 + Math.sin(a) * 28 + sq; if (Math.sin(a) >= 0) { bdraw(rune, x, y); bglow(x, y, 10, W2, .5); } }
+      const pul = .55 + Math.sin(t * 3) * .2;
+      bglow(0, -125 + hov * .4 + sq, 46, W2, pul); bglow(14, -205 + hov + sq, 24, W2, .7 + (b.eyeGlow || 0) * .3);
+      if (b.eyeGlow) bglow(14, -205 + hov, 60, W2, b.eyeGlow * .6);
+    });
   },
+  // VI. 심연의 눈: 가시 왕관을 두른 살덩이 속 세로 동공, 이빨 눈꺼풀, 주위를 도는 작은 눈들
   eye(b, t) {
-    const en = b.enraged, ov = { s: '#f0e8f8', r: '#c83a5a', a: '#2a1a3a', d: '#4a2a5a', i: en ? '#ff4d6d' : '#9a5cff', k: '#0a0612', w: '#ffffff' };
-    const ball = bspr('eyeBall', 48, 48, P => { P.ell(24, 24, 22, 22, 's'); for (const [x0, y0, x1, y1] of [[4, 18, 14, 22], [6, 32, 15, 28], [42, 16, 33, 21], [40, 34, 32, 29], [22, 46, 23, 38]]) P.line(x0, y0, x1, y1, 'r', 1); }, '#f0e8f8', ov);
-    const iris = bspr('eyeIris' + (en ? 1 : 0), 20, 20, P => { P.ell(10, 10, 9.5, 9.5, 'i'); P.ell(10, 10, 5, 5, 'k'); P.rect(6, 5, 2, 2, 'w'); }, '#9a5cff', ov);
-    const lid = bspr('eyeLid', 56, 18, P => { for (let x = 0; x < 56; x++) { const h2 = Math.round(10 - 8 * ((x - 28) / 28) ** 2); for (let y = 0; y < h2; y++) P.set(x, 17 - y, 'a'); } for (let x = 6; x < 52; x += 6) P.tri(x - 2, 9, x + 2, 9, x, 1 + (x % 12 ? 2 : 0), 'd'); }, '#2a1a3a', ov);
-    // 촉수: 아래로 늘어져 넘실댄다
-    for (let i = 0; i < 6; i++) {
-      let px = b.x - 70 + i * 28, py = b.y + 60;
-      for (let k = 0; k < 6; k++) { const nx = px + Math.sin(t * 2 + i + k * .8) * 10, ny = py + 18; plin(px, py, nx, ny, 12 - k * 1.6, k % 2 ? '#3a2050' : '#4a2a5a'); px = nx; py = ny; }
-    }
-    g.globalCompositeOperation = 'lighter'; glowDot(g, b.x, b.y, 150, en ? '#ff4d6d' : '#9a5cff', .25); g.globalCompositeOperation = 'source-over';
-    bdraw(ball, b.x, b.y);
-    const lx = clamp((b.lookX || 0) / 200, -1, 1) * 40, ly = clamp((b.lookY || 0) / 200, -1, 1) * 36, blink = b.blink || 0;
-    bdraw(iris, b.x + lx, b.y + ly, 0, 1, .5, .5);
-    const lo = -118 + blink * 84 - (b.wide || 0) * 14; g.save(); g.translate(b.x, b.y); bdraw(lid, 0, lo, 0, 1, .5, 0); g.scale(1, -1); bdraw(lid, 0, lo - 6, 0, 1, .5, 0); g.restore();
+    const en = b.enraged, I2 = en ? '#ff3a5a' : '#9a5cff', ov = { a: '#3a1a40', d: '#1a0a20', s: '#f0e4c8', r: '#c0304a', k: '#050208', h: '#e8dcc0', i: I2 };
+    const orb = bspr('eo', 56, 56, P => {
+      for (let i = 0; i < 14; i++) { const a = i / 14 * TAU + .11, r1 = 17, r2 = i % 2 ? 28 : 24; P.tri(28 + Math.cos(a - .2) * r1, 28 + Math.sin(a - .2) * r1, 28 + Math.cos(a + .2) * r1, 28 + Math.sin(a + .2) * r1, 28 + Math.cos(a) * r2, 28 + Math.sin(a) * r2, 'd'); }
+      P.ell(28, 28, 20, 20, 'a');
+      for (let i = 0; i < 10; i++) { const a = i / 10 * TAU + .3; P.lineIn(28 + Math.cos(a) * 14, 28 + Math.sin(a) * 14, 28 + Math.cos(a) * 19, 28 + Math.sin(a) * 19, 'd'); }
+      for (let y = -9; y <= 9; y++) { const hw = Math.round(17 * Math.sqrt(1 - (y / 9.6) ** 2)); for (let x = -hw; x <= hw; x++) P.set(28 + x, 28 + y, 'k'); }
+    }, '#3a1a40', ov);
+    const iris = bspr('ei' + (en ? 1 : 0), 18, 18, P => { P.ell(9, 9, 8.5, 8.5, 'i'); P.ell(9, 9, 6, 6, 'I'); P.ell(9, 9, 4.5, 4.5, 'i'); P.ell(9, 9, 1.4, 6.5, 'k'); P.rect(5, 4, 2, 2, 'x'); }, I2, ov);
+    const mini = bspr('em' + (en ? 1 : 0), 12, 8, P => { P.poly([[0, 4], [6, 0], [12, 4], [6, 8]], 'a'); P.poly([[2, 4], [6, 2], [10, 4], [6, 6]], 's'); }, '#3a1a40', ov);
+    const open = clamp(1 - (b.blink || 0) + (b.wide || 0) * .25, .05, 1.2);
+    faceFrame(b, () => {
+      // 뒤에서 도는 룬 고리
+      addG(() => { for (let i = 0; i < 36; i++) { const a = i / 36 * TAU + t * .25, r = 120 + (i % 3 === 0 ? 6 : 0); g.globalAlpha = i % 3 === 0 ? .7 : .35; bsq(Math.cos(a) * r, Math.sin(a) * r, i % 3 === 0 ? BP * 2 : BP, I2); } g.globalAlpha = 1; });
+      bglow(0, 0, 170, I2, .22);
+      for (let i = 0; i < 6; i++) {
+        const base = (i - 2.5) * 22, pts = [[base, 50]]; let px = base, py = 50;
+        for (let k = 0; k < 7; k++) { px += Math.sin(t * 1.8 + i * 1.3 + k * .7) * 9 + (i - 2.5) * 2.4; py += 16; pts.push([px, py]); }
+        strand(pts, 15, 3, '#2a1236', '#4a2a5a');
+        for (let k = 1; k < 6; k += 2) bsq(pts[k][0] + 6, pts[k][1] - 3, BP, '#e8dcc0');
+      }
+      bdraw(orb, 0, 0);
+      // 눈알: 눈꺼풀이 열린 만큼만 보인다
+      const H = 9 * BP, Wd = 17 * BP, hgt = x => H * Math.sqrt(Math.max(0, 1 - (x / (Wd + BP)) ** 2)) * open;
+      g.save(); g.beginPath(); for (let x = -Wd; x <= Wd; x += BP) { const hh = snap(hgt(x)); if (hh > 0) g.rect(x, -hh, BP, hh * 2); } g.clip();
+      g.fillStyle = '#f0e4c8'; g.fillRect(-Wd - BP, -H - BP, Wd * 2 + BP * 3, H * 2 + BP * 2);
+      g.fillStyle = '#c0304a'; for (const [x0, y0, x1] of [[-Wd, -6, -Wd + 24], [-Wd, 9, -Wd + 18], [Wd, -9, Wd - 21], [Wd, 6, Wd - 27]]) for (let x = Math.min(x0, x1); x <= Math.max(x0, x1); x += BP) g.fillRect(snap(x), snap(y0 + Math.sin(x * .2) * 3), BP, BP);
+      const lx = clamp((b.lookX || 0) / 200, -1, 1) * 26, ly = clamp((b.lookY || 0) / 200, -1, 1) * 10;
+      bdraw(iris, lx, ly);
+      g.restore();
+      // 이빨 눈꺼풀
+      for (let x = -Wd + BP * 2; x <= Wd - BP * 2; x += BP * 3) { const hh = snap(hgt(x)); g.fillStyle = PX_OUT; g.fillRect(x - BP, -hh - BP, BP * 3, BP * 2); g.fillRect(x - BP, hh - BP, BP * 3, BP * 2); g.fillStyle = '#e8dcc0'; g.fillRect(x, -hh, BP, BP * 2); g.fillRect(x, hh - BP, BP, BP); }
+      bglow(lx, ly, 34, I2, .55 * open);
+      for (let i = 0; i < 5; i++) {
+        const a = t * .5 + i / 5 * TAU, x = Math.cos(a) * 96, y = Math.sin(a) * 84 - 4;
+        bdraw(mini, x, y); const px = clamp((b.lookX || 0) - x, -1, 1), py = clamp((b.lookY || 0) - y, -1, 1); bsq(x + px * 3 - 1, y + py * 1 - 1, BP, I2); bglow(x, y, 12, I2, .4);
+      }
+    });
   },
+  // VII. 하늘바다 크라켄: 장갑 능선이 선 뾰족한 외투막, 사나운 눈, 갈고리 달린 다리와 곤봉 촉수
   kraken(b, t) {
-    const ov = { a: '#3a8a9a', d: '#2a5a6a', w: '#fff8e0', k: '#1a1222', l: '#ffb0c8', p: b.enraged ? '#ff5a8a' : '#e85a9a' };
-    const mantle = bspr('krM', 32, 30, P => { P.ell(16, 13, 14, 13, 'a'); P.tri(2, 14, -2, 24, 8, 18, 'a'); P.tri(30, 14, 34, 24, 24, 18, 'a'); for (const [x, y] of [[9, 6], [20, 5], [14, 10], [24, 12], [7, 13]]) P.ell(x, y, 1.6, 1.2, 'd'); P.ell(10, 21, 3.4, 3, 'w'); P.ell(22, 21, 3.4, 3, 'w'); P.rect(10, 21, 2, 2, 'k'); P.rect(21, 21, 2, 2, 'k'); P.rect(14, 26, 4, 1, 'p'); }, '#3a8a9a', ov);
-    // 다리 여덟 개: 마디마다 빨판, 끝은 말려 올라간다
-    for (let i = 0; i < 8; i++) {
-      let px = b.x - 42 + i * 12, py = b.y + 44; const ph = t * 2.6 + i * .9, spread = (i - 3.5) * 5.5;
-      for (let k = 0; k < 8; k++) { const nx = px + spread * (1 - k * .08) + Math.sin(ph + k * .7) * (3 + k * 1.6), ny = py + 15 - k * 1.2 - (k > 5 ? 6 : 0); plin(px, py, nx, ny, 11 - k * 1.1, '#3a8a9a'); if (k % 2 === 0 && k < 6) { g.fillStyle = '#ffb0c8'; g.fillRect(Math.round(nx / BP) * BP, Math.round(ny / BP) * BP, 4, 4); } px = nx; py = ny; }
-    }
-    bdraw(mantle, b.x, b.y + Math.sin(t * 2) * 4, Math.sin(t * 1.3) * .06, 1, .5, .62);
+    const en = b.enraged, C = en ? '#ff5a8a' : '#5affe8', ov = { a: '#1f4a5c', d: '#0f2a38', c: C, k: '#040a10', w: en ? '#ffffff' : '#ffe36b', h: '#2a2a30', f: '#3a7a8a' };
+    const mantle = bspr('km' + (en ? 1 : 0), 42, 48, P => {
+      P.poly([[21, 0], [29, 8], [34, 22], [33, 34], [27, 42], [15, 42], [9, 34], [8, 22], [13, 8]], 'a');
+      P.poly([[9, 10], [0, 24], [9, 28]], 'f'); P.poly([[33, 10], [42, 24], [33, 28]], 'f');
+      P.lineIn(21, 1, 21, 30, 'd'); P.lineIn(15, 10, 13, 28, 'd'); P.lineIn(27, 10, 29, 28, 'd'); P.lineIn(1, 24, 9, 22, 'd'); P.lineIn(41, 24, 33, 22, 'd');
+      for (const [x, y] of [[18, 8], [24, 12], [16, 18], [26, 20], [20, 24], [12, 24], [30, 26], [22, 16], [19, 4]]) P.set(x, y, 'C');
+      P.poly([[9, 32], [18, 34], [17, 37], [10, 36]], 'k'); P.poly([[33, 32], [24, 34], [25, 37], [32, 36]], 'k');
+      P.line(10, 34, 17, 35, 'w'); P.line(32, 34, 25, 35, 'w'); P.set(15, 35, 'k'); P.set(27, 35, 'k');
+      P.line(8, 31, 18, 33, 'd'); P.line(34, 31, 24, 33, 'd');
+      P.tri(17, 41, 25, 41, 21, 47, 'h');
+    }, '#1f4a5c', ov);
+    faceFrame(b, () => {
+      motes(0, 120, 220, 230, 14, C, t, 18, 9);
+      bglow(0, 10, 160, C, .14);
+      const by = Math.sin(t * 2) * 4;
+      const tent = (i, back) => {
+        const n = 9, base = [(i - 3.5) * 11, by + 56], spread = (i - 3.5) * 6, pts = [base]; let [px, py] = base;
+        for (let k = 0; k < n; k++) { px += spread * (1 - k * .07) + Math.sin(t * 2.4 + i * .9 + k * .65) * (3 + k * 1.4); py += 16 - k * 1.1 - (k > 6 ? 5 : 0); pts.push([px, py]); }
+        strand(pts, 18, 4, back ? '#163a4a' : '#1f4a5c', back ? null : '#3a7a8a');
+        if (!back) for (let k = 1; k < n - 1; k += 2) { bsq(pts[k][0] - 2, pts[k][1] + 4, BP, '#f0a0b8'); bsq(pts[k][0] + (i < 4 ? -8 : 6), pts[k][1], BP, '#d8e8f0'); }
+      };
+      for (const i of [0, 7, 2, 5]) tent(i, true);
+      // 곤봉 촉수 두 개: 길게 뻗어 가시 곤봉을 흔든다
+      for (const side of [-1, 1]) {
+        const pts = [[side * 24, by + 50]]; for (let k = 1; k <= 8; k++) pts.push([side * (24 + k * 10) + Math.sin(t * 1.6 + k * .5 + side) * k * 2.4, by + 50 + k * 14 - Math.sin(t * 1.6 + side) * k * 2]);
+        strand(pts, 9, 6, '#1f4a5c', '#3a7a8a'); const [cx, cy] = pts[8];
+        strand([[cx, cy], [cx + side * 12, cy + 10]], 15, 15, '#2a5a6c', '#4a8a9a');
+        for (const [dx, dy] of [[-8, -6], [8, -6], [side * 20, 6], [side * 4, 20], [-side * 6, 14]]) bsq(cx + side * 6 + dx, cy + 5 + dy, BP * 2, '#d8e8f0');
+      }
+      for (const i of [1, 6, 3, 4]) tent(i, false);
+      bdraw(mantle, 0, by, Math.sin(t * 1.3) * .04, 1, .5, .62);
+      for (const ex of [-26, 26]) bglow(ex, by + 14, 16, ov.w, .7);
+      for (const [x, y] of [[-9, -42], [9, -30], [-15, -12], [15, -6]]) bglow(x, by + y, 10, C, .45 + Math.sin(t * 3 + x) * .2);
+    });
   },
+  // VIII. 세계수의 정령: 가면 같은 긴 얼굴, 빛나는 가지 뿔, 잎 망토를 두른 창백한 나무 몸
   tree(b, t) {
-    const ov = { a: '#e8e0d0', d: '#3a3430', g: '#6fd36a', G: '#9ae07a', f: '#ffb0d0', w: b.enraged ? '#ff8a5a' : '#b8ff8a', k: '#1a2a18' };
-    const trunk = bspr('trT', 24, 44, P => { P.rect(7, 8, 10, 30, 'a'); P.ell(12, 10, 7, 6, 'a'); for (const [x, y] of [[8, 16], [14, 22], [9, 28], [15, 33], [11, 38]]) P.rect(x, y, 3, 1, 'd'); P.rect(8, 9, 3, 2, 'k'); P.rect(13, 9, 3, 2, 'k'); P.set(9, 9, 'w'); P.set(14, 9, 'w'); for (const [a, b2, c, d] of [[7, 38, 1, 43], [10, 38, 7, 43], [14, 38, 17, 43], [16, 38, 23, 43]]) P.line(a, b2, c, d, 'a', 2); }, '#e8e0d0', ov);
-    const crown = bspr('trC', 40, 22, P => { P.ell(20, 12, 19, 9, 'g'); P.ell(8, 14, 8, 6, 'g'); P.ell(32, 13, 8, 6, 'g'); P.ell(20, 5, 11, 5, 'g'); for (const [x, y] of [[6, 10], [14, 4], [24, 6], [33, 9], [11, 16], [28, 17], [19, 12]]) { P.set(x, y, 'f'); P.set(x + 1, y, 'f'); P.set(x, y + 1, 'f'); } }, '#6fd36a', ov);
-    const sway = Math.sin(t * 1.6) * 2, f = b.face, hov = Math.sin(t * 1.8) * 4 - 8, up = b.armUp || 0;
-    for (const side of [-1, 1]) { const sx = b.x + side * 14, sy = b.y - 120 + hov, ex = sx + side * (48 + up * 10), ey = sy - 10 - up * 40 + Math.sin(t * 2 + side) * 6; plin(sx, sy, ex, ey, 10, '#e8e0d0'); plin(ex, ey, ex + side * 22, ey - 18, 6, '#d8d0c0'); g.globalCompositeOperation = 'lighter'; glowDot(g, ex + side * 22, ey - 18, 14, '#b8ff8a', .5); g.globalCompositeOperation = 'source-over'; }
-    bdraw(trunk, b.x, b.y + hov * .2, 0, f, .5, 1);
-    bdraw(crown, b.x + sway, b.y - 168 + hov, Math.sin(t * 1.6) * .04, f, .5, .5);
-    g.globalCompositeOperation = 'lighter'; glowDot(g, b.x, b.y - 140, 70, '#b8ff8a', .18); g.globalCompositeOperation = 'source-over';
+    const en = b.enraged, W2 = en ? '#ff8a5a' : '#b8ff8a', ov = { a: '#e0d6c0', d: '#6a5a48', g: '#3e8a3a', l: '#225a26', w: W2, f: '#ffb0d0', k: '#0a140a', y: W2 };
+    const body = bspr('tb' + (en ? 1 : 0), 36, 62, P => {
+      P.poly([[10, 30], [26, 30], [33, 57], [3, 57]], 'g');
+      for (let x = 3; x <= 33; x += 3) P.tri(x - 2, 56, x + 2, 56, x, 61, 'g');
+      for (const y of [37, 45, 53]) for (let x = 5 + (y % 4); x <= 31; x += 4) { P.paint(x, y, 'l'); P.paint(x + 1, y + 1, 'l'); P.paint(x - 1, y + 1, 'l'); }
+      P.poly([[12, 14], [24, 14], [26, 30], [22, 35], [14, 35], [10, 30]], 'a');
+      P.lineIn(15, 16, 14, 33, 'd'); P.lineIn(21, 16, 22, 33, 'd'); P.lineIn(11, 24, 13, 30, 'd');
+      P.poly([[18, 20], [21, 24], [18, 28], [15, 24]], 'w'); P.set(18, 23, 'W'); P.set(18, 24, 'W');
+      P.rect(16, 10, 4, 5, 'a');
+      P.poly([[13, 0], [23, 0], [24, 6], [21, 12], [15, 12], [12, 6]], 'a');
+      P.poly([[13, 4], [17, 5], [17, 7], [13, 6]], 'k'); P.poly([[23, 4], [19, 5], [19, 7], [23, 6]], 'k');
+      P.line(14, 5, 16, 6, 'w'); P.line(22, 5, 20, 6, 'w');
+      P.lineIn(18, 0, 18, 3, 'd'); P.lineIn(15, 9, 21, 9, 'd'); P.lineIn(18, 9, 18, 11, 'd');
+      P.ell(11, 15, 4, 2.5, 'g'); P.ell(25, 15, 4, 2.5, 'g');
+    }, '#e0d6c0', ov);
+    const crown = bspr('tc' + (en ? 1 : 0), 50, 34, P => {
+      const L = (a, b2, c, d, th) => P.line(a, b2, c, d, 'a', th);
+      L(22, 33, 14, 20, 2); L(14, 20, 6, 12, 2); L(6, 12, 1, 3, 1); L(14, 20, 12, 8, 1); L(12, 8, 15, 1, 1); L(6, 12, 2, 14, 1); L(10, 16, 4, 20, 1);
+      L(28, 33, 36, 20, 2); L(36, 20, 44, 12, 2); L(44, 12, 49, 3, 1); L(36, 20, 38, 8, 1); L(38, 8, 35, 1, 1); L(44, 12, 48, 14, 1); L(40, 16, 46, 20, 1);
+      L(25, 33, 25, 18, 1); L(25, 22, 22, 14, 1); L(25, 22, 28, 14, 1);
+      for (const [x, y] of [[1, 3], [15, 1], [49, 3], [35, 1], [4, 20], [46, 20], [22, 14], [28, 14], [2, 14], [48, 14], [12, 8], [38, 8]]) { P.ell(x, y, 1.6, 1.2, 'l'); P.set(x, y, 'w'); }
+      for (const [x, y] of [[8, 13], [42, 13], [16, 20], [34, 20], [25, 20]]) { P.set(x, y, 'f'); P.set(x + 1, y, 'f'); }
+    }, '#e0d6c0', ov);
+    const sway = Math.sin(t * 1.4) * 2, hov = Math.sin(t * 1.8) * 3, up = b.armUp || 0;
+    faceFrame(b, () => {
+      motes(0, 0, 260, 260, 12, '#ffb0d0', t, 14, 13); motes(0, 0, 260, 260, 10, W2, t, 20, 17);
+      bglow(0, -150, 120, W2, .15);
+      const arm = side => {
+        const sx = side * 22, sy = -138 + hov, el = [sx + side * 34, sy + 30 - up * 60], ha = [sx + side * (58 - up * 14), sy + 62 - up * 130 + Math.sin(t * 2 + side) * 5];
+        strand([[sx, sy], el, ha], 10, 6, '#e0d6c0', '#f4ecdc');
+        for (let k = -1; k <= 1; k++) strand([ha, [ha[0] + side * 12 + k * 6, ha[1] + 10 - up * 22 + k * 8], [ha[0] + side * 22 + k * 10, ha[1] + 14 - up * 36 + k * 12]], 4, 3, '#d8ccb4', null);
+        if (side > 0) { bglow(ha[0] + side * 10, ha[1], 22, W2, .7); bsq(ha[0] + side * 10 - 3, ha[1] - 3, BP * 2, '#ffffff'); }
+        bsq(el[0] - 3, el[1] - 6, BP * 2, '#3e8a3a');
+      };
+      arm(-1);
+      bdraw(body, 0, 3, 0, 1, .5, 1);
+      bdraw(crown, sway, -183 + hov, Math.sin(t * 1.4) * .03, 1, .5, 1);
+      arm(1);
+      for (const ex of [-9, 9]) bglow(ex, -168 + hov * 0, 12, W2, .8);
+      bglow(0, -120, 22, W2, .55 + Math.sin(t * 3) * .15);
+    });
   },
+  // IX. 공허의 집행자: 뾰족한 두건 속 두 개의 빛, 가시 견갑과 사슬, 빛나는 날의 큰 낫, 찢어진 망토 자락
   void(b, t) {
-    const ov = { a: '#1a1428', k: '#05030a', w: b.enraged ? '#ff6a8a' : '#c99cff', p: '#6a3a9a', n: '#3a2a20', b: '#c8ced8', h: '#e8dcc0' };
-    const cloak = bspr('vCloak', 32, 42, P => { P.ell(16, 9, 9, 8, 'a'); P.tri(4, 40, 28, 40, 16, 6, 'a'); P.rect(6, 16, 20, 18, 'a'); for (let x = 4; x < 29; x += 4) P.tri(x, 38, x + 4, 38, x + 2, 42, 'a'); P.ell(16, 10, 5, 5, 'k'); P.set(14, 10, 'w'); P.set(18, 10, 'w'); P.line(7, 18, 7, 36, 'p', 1); P.line(25, 18, 25, 36, 'p', 1); }, '#1a1428', ov);
-    const scythe = bspr('vScythe', 36, 36, P => { P.line(4, 34, 26, 4, 'n', 2); for (let k = 0; k < 18; k++) { const a = -Math.PI / 2 + k / 17 * 1.6, x = 26 + Math.cos(a) * 10 - k * .2, y = 6 + Math.sin(a) * 4 + k * .8; P.set(x - k * .55, y, 'b'); P.set(x - k * .55, y + 1, 'b'); } P.line(26, 4, 8, 6, 'b', 2); P.line(26, 3, 8, 4, 'h', 1); }, '#c8ced8', ov);
-    const f = b.face, hov = Math.sin(t * 2.4) * 6, sw = b.swing || 0;
-    g.globalCompositeOperation = 'lighter'; glowDot(g, b.x, b.y, 120, ov.w, .2 + (b.blinkA || 0) * .4); g.globalCompositeOperation = 'source-over';
-    const a = 1 - (b.blinkA || 0); g.globalAlpha = Math.max(.08, a);
-    bdraw(cloak, b.x, b.y + hov, Math.sin(t * 1.2) * .05, f, .5, .5);
-    bdraw(scythe, b.x + f * 40, b.y - 10 + hov, (-.5 + sw * 2.6) * f, f, .2, .9);
-    g.globalAlpha = 1;
+    const en = b.enraged, W2 = en ? '#ff5a8a' : '#c99cff', ov = { a: '#1c1530', k: '#030206', w: W2, p: '#4a2a7a', b: '#8a8ea0', n: '#2a2030' };
+    const cloak = bspr('vc' + (en ? 1 : 0), 40, 58, P => {
+      P.poly([[8, 24], [32, 24], [31, 44], [25, 57], [15, 57], [9, 44]], 'a');
+      P.lineIn(14, 26, 16, 54, 'p'); P.lineIn(26, 26, 24, 54, 'p'); P.lineIn(20, 40, 20, 56, 'p');
+      for (let k = 0; k < 9; k++) { P.paint(10 + k * 2.4, 27 + k * 1.6, k % 2 ? 'b' : 'n'); P.paint(30 - k * 2.4, 27 + k * 1.6, k % 2 ? 'b' : 'n'); }
+      P.poly([[20, 30], [23, 34], [20, 38], [17, 34]], 'w');
+      P.poly([[20, 0], [29, 9], [31, 19], [26, 23], [14, 23], [9, 19], [11, 9]], 'a');
+      P.poly([[20, 6], [26, 13], [25, 20], [15, 20], [14, 13]], 'k');
+      P.line(16, 14, 19, 15, 'w'); P.line(24, 14, 21, 15, 'w'); P.set(18, 15, 'W'); P.set(22, 15, 'W');
+      P.poly([[5, 21], [16, 19], [16, 27], [3, 27]], 'b'); P.tri(5, 21, 9, 21, 2, 13, 'b'); P.lineIn(4, 24, 15, 23, 'n');
+      P.poly([[35, 21], [24, 19], [24, 27], [37, 27]], 'b'); P.tri(35, 21, 31, 21, 38, 13, 'b'); P.lineIn(36, 24, 25, 23, 'n');
+    }, '#1c1530', ov);
+    const scythe = bspr('vs' + (en ? 1 : 0), 44, 50, P => {
+      P.line(6, 48, 30, 6, 'n', 2); for (const k of [.2, .45, .7]) P.line(lerp(6, 30, k) - 1, lerp(48, 6, k), lerp(6, 30, k) + 2, lerp(48, 6, k) + 1, 'b');
+      P.poly([[32, 5], [20, 3], [9, 6], [1, 15], [5, 11], [13, 9], [22, 9], [32, 10]], 'b');
+      P.line(32, 10, 22, 9, 'w'); P.line(22, 9, 13, 9, 'w'); P.line(13, 9, 5, 11, 'w'); P.line(5, 11, 1, 15, 'w');
+      P.tri(31, 5, 34, 6, 39, 0, 'b'); P.set(30, 7, 'w'); P.ell(6, 48, 1.5, 1.5, 'w');
+    }, '#8a8ea0', ov);
+    const hov = Math.sin(t * 2.2) * 6, sw = b.swing || 0, ba = b.blinkA || 0;
+    faceFrame(b, () => {
+      bglow(0, 0, 150, W2, .18 + ba * .4);
+      for (let i = 0; i < 6; i++) { const a = t * .9 + i / 6 * TAU, r = 90 + Math.sin(t * 2 + i) * 8, x = Math.cos(a) * r, y = Math.sin(a) * r * .5 - 10; addG(() => { g.globalAlpha = .6; g.fillStyle = W2; g.beginPath(); g.moveTo(snap(x), snap(y - 9)); g.lineTo(snap(x + 4), snap(y)); g.lineTo(snap(x), snap(y + 9)); g.lineTo(snap(x - 4), snap(y)); g.fill(); g.globalAlpha = 1; }); }
+      g.globalAlpha = Math.max(.08, 1 - ba);
+      for (let i = 0; i < 6; i++) { const x0 = -24 + i * 9.6, pts = [[x0, 70 + hov]]; for (let k = 1; k <= 4; k++) pts.push([x0 + Math.sin(t * 3 + i + k * .8) * (4 + k * 2) - k * 3, 70 + hov + k * 12]); strand(pts, 10, 4, '#1c1530', null); }
+      bdraw(cloak, 0, hov, Math.sin(t * 1.2) * .03, 1, .5, .5);
+      const ga = -.5 + sw * 2.6;
+      bdraw(scythe, 34, 2 + hov, ga, 1, .3, .68);
+      bsq(38, -12 + hov, BP * 3, '#d8d0e8'); bsq(26, 10 + hov, BP * 3, '#d8d0e8');
+      g.globalAlpha = 1;
+      for (const ex of [-6, 6]) bglow(ex, -42 + hov, 14, W2, .9 * (1 - ba * .7));
+      bglow(0, 14 + hov, 18, W2, .5);
+    });
   },
+  // X. 타락한 금고지기 왕: T자 눈구멍의 투구, 떠 있는 부서진 왕관, 보랏빛 균열이 갉아먹는 금 갑주와 대검
   king(b, t) {
-    const en = b.enraged, ov = { a: '#5a5a6a', d: '#3a3a48', y: '#ffd36b', r: en ? '#ffffff' : '#ff4d6d', c: '#8a1a2a', k: '#0a0610', w: en ? '#ffffff' : '#ff8a5a', s: '#c8ced8' };
-    const body = bspr('kBody', 40, 50, P => {
-      P.rect(12, 38, 6, 12, 'a'); P.rect(22, 38, 6, 12, 'a'); P.rect(11, 47, 8, 3, 'd'); P.rect(21, 47, 8, 3, 'd');
-      P.rect(9, 20, 22, 20, 'a'); P.rect(12, 22, 16, 12, 'y'); P.ell(20, 28, 3.2, 3.2, 'r'); P.rect(9, 36, 22, 3, 'd');
-      P.ell(5, 21, 5, 4, 'y'); P.ell(35, 21, 5, 4, 'y');
-      P.rect(13, 6, 14, 14, 'a'); P.rect(15, 11, 10, 5, 'k'); P.set(17, 13, 'w'); P.set(22, 13, 'w');
-      for (let x = 13; x <= 27; x += 3) P.tri(x - 1, 6, x + 2, 6, x + .5, 0, 'y'); P.rect(13, 5, 15, 2, 'y'); P.set(20, 3, 'r');
-    }, '#5a5a6a', ov);
-    const cape = bspr('kCape', 30, 40, P => { P.tri(6, 0, 24, 0, 28, 40, 'c'); P.tri(6, 0, 2, 40, 28, 40, 'c'); for (let x = 2; x < 28; x += 4) P.set(x, 39, 'k'); }, '#8a1a2a', ov);
-    const sword = bspr('kSword', 10, 40, P => { P.rect(4, 0, 3, 30, 's'); P.set(5, 0, '.'); P.line(5, 2, 5, 28, 'y', 1); P.rect(0, 30, 11, 2, 'y'); P.rect(4, 32, 3, 6, 'd'); P.rect(3, 38, 5, 2, 'y'); }, '#c8ced8', ov);
-    const shield = bspr('kShield', 18, 22, P => { P.rect(1, 1, 16, 12, 'y'); P.tri(1, 12, 17, 12, 9, 21, 'y'); P.rect(4, 4, 10, 8, 'c'); P.tri(4, 11, 14, 11, 9, 17, 'c'); P.ell(9, 9, 2, 2, 'y'); }, '#ffd36b', ov);
-    const f = b.face, br = Math.sin(t * 2) * 2, up = b.armUp || 0, sq = (b.squash || 0) * 10;
-    bdraw(cape, b.x - f * 6, b.y - 150 + sq, Math.sin(t * 1.5) * .06 - f * .08, f, .5, 0);
-    bdraw(shield, b.x - f * 70, b.y - 104 + br + sq, 0, f);
-    bdraw(body, b.x, b.y + 2 + sq * .3, 0, f, .5, 1);
-    bdraw(sword, b.x + f * 74, b.y - 96 + br + sq, (.35 - up * 2.4) * f, f, .5, .9);
-    g.globalCompositeOperation = 'lighter'; glowDot(g, b.x + f * 0, b.y - 88 + sq, 40, '#ff4d6d', .35 + Math.sin(t * 5) * .12); g.globalCompositeOperation = 'source-over';
+    const en = b.enraged, V2 = en ? '#ffffff' : '#ff6a3a', ov = { a: '#3a3848', d: '#1e1c28', y: '#d8a838', r: '#ff3a4a', p: '#9a4ad8', k: '#08060c', w: V2, s: '#a8a4b8', c: '#6a0e1a', n: '#3a2418' };
+    const body = bspr('kb' + (en ? 1 : 0), 48, 66, P => {
+      P.poly([[15, 46], [22, 46], [21, 62], [14, 62]], 'a'); P.poly([[26, 46], [33, 46], [34, 62], [27, 62]], 'a');
+      P.poly([[12, 61], [22, 61], [23, 65], [11, 65]], 'd'); P.poly([[26, 61], [36, 61], [37, 65], [25, 65]], 'd');
+      P.rect(14, 52, 8, 3, 'y'); P.rect(26, 52, 8, 3, 'y');
+      P.poly([[12, 38], [36, 38], [38, 48], [10, 48]], 'a'); for (const x of [14, 20, 28, 34]) P.lineIn(x, 39, x, 47, 'd'); P.lineIn(10, 47, 38, 47, 'y');
+      P.poly([[11, 20], [37, 20], [35, 38], [13, 38]], 'a');
+      P.poly([[16, 22], [32, 22], [30, 34], [24, 37], [18, 34]], 'y');
+      P.poly([[24, 25], [27, 29], [24, 33], [21, 29]], 'r'); P.set(23, 28, 'R');
+      P.lineIn(17, 23, 20, 30, 'p'); P.lineIn(31, 24, 28, 31, 'p'); P.lineIn(20, 30, 22, 35, 'p'); P.lineIn(13, 30, 16, 37, 'p');
+      P.ell(9, 22, 8, 6, 'a'); P.ell(39, 22, 8, 6, 'a'); P.lineIn(2, 25, 16, 25, 'y'); P.lineIn(32, 25, 46, 25, 'y');
+      P.tri(3, 19, 8, 18, 1, 9, 'y'); P.tri(9, 17, 13, 17, 10, 8, 'y'); P.tri(45, 19, 40, 18, 47, 9, 'y'); P.tri(39, 17, 35, 17, 38, 8, 'y');
+      P.poly([[17, 4], [31, 4], [33, 10], [31, 19], [17, 19], [15, 10]], 'a');
+      P.rect(18, 9, 12, 2, 'k'); P.rect(23, 9, 2, 8, 'k'); P.line(19, 9, 22, 9, 'w'); P.line(26, 9, 29, 9, 'w'); P.set(21, 9, 'W'); P.set(27, 9, 'W');
+      P.lineIn(24, 4, 24, 8, 'y'); P.lineIn(15, 13, 33, 13, 'd'); P.lineIn(17, 18, 31, 18, 'y');
+      P.line(16, 7, 10, 3, 's', 2); P.line(10, 3, 8, 7, 's'); P.line(32, 7, 38, 3, 's', 2); P.line(38, 3, 40, 7, 's');
+    }, '#3a3848', ov);
+    const crown = bspr('kc', 24, 12, P => { P.rect(1, 7, 22, 4, 'y'); for (const [x, h] of [[2, 6], [7, 4], [12, 7], [17, 4], [21, 6]]) P.tri(x - 2, 8, x + 2, 8, x, 8 - h, 'y'); P.set(12, 9, 'r'); P.set(6, 9, 'p'); P.set(18, 9, 'p'); P.lineIn(15, 7, 17, 11, 'd'); }, '#d8a838', ov);
+    const cape = bspr('kp', 40, 60, P => { P.poly([[8, 0], [32, 0], [39, 56], [1, 56]], 'c'); for (let x = 1; x < 39; x += 5) P.tri(x, 55, x + 4, 55, x + 2 + (x % 3), 59, 'c'); for (let x = 3; x < 37; x += 7) P.ell(x + 2, 55, 1.4, 2, '.'); P.lineIn(8, 0, 1, 56, 'y'); P.lineIn(32, 0, 39, 56, 'y'); P.lineIn(14, 6, 10, 50, 'd'); P.lineIn(26, 6, 30, 50, 'd'); P.lineIn(20, 10, 20, 52, 'd'); }, '#6a0e1a', ov);
+    const sword = bspr('ks' + (en ? 1 : 0), 16, 60, P => {
+      P.poly([[8, 0], [12, 6], [12, 40], [4, 40], [4, 6]], 's'); P.line(8, 6, 8, 38, 'd'); for (let y = 9; y < 38; y += 5) P.set(8, y, 'w'); P.lineIn(5, 8, 5, 38, 'S');
+      P.rect(0, 40, 16, 3, 'y'); P.tri(0, 40, 3, 40, 0, 36, 'y'); P.tri(16, 40, 13, 40, 16, 36, 'y'); P.set(8, 41, 'r');
+      P.rect(6, 43, 4, 11, 'n'); for (let y = 44; y < 54; y += 2) P.lineIn(6, y, 9, y + 1, 'd'); P.ell(8, 56, 2.5, 2.5, 'y'); P.set(8, 56, 'r');
+    }, '#a8a4b8', ov);
+    const fist = bspr('kf', 9, 9, P => { P.poly([[0, 1], [8, 0], [9, 8], [1, 9]], 'a'); P.lineIn(1, 4, 8, 4, 'y'); }, '#3a3848', ov);
+    const br = Math.sin(t * 1.6) * 2, up = b.armUp || 0, sq = (b.squash || 0) * 10;
+    faceFrame(b, () => {
+      motes(0, 0, 220, 240, 10, '#ffd36b', t, 30, 19, BP, true); motes(0, 0, 200, 240, 10, '#b06aff', t, 18, 23);
+      bglow(0, -120, 140, en ? '#ff4a4a' : '#9a4ad8', .16);
+      bdraw(cape, -12, -150 + sq, Math.sin(t * 1.2) * .05 - .06, 1, .5, 0);
+      const grip = [lerp(34, 8, up), lerp(-126, -214, up) + br + sq], rot = lerp(Math.PI - .42, -.45, up);
+      strand([[-30, -146 + sq + br * .5], [lerp(-6, -12, up), lerp(-112, -186, up) + sq], grip], 18, 14, '#3a3848', '#5a586a');
+      bdraw(body, 0, 3 + sq * .3, 0, 1, .5, 1);
+      bdraw(sword, grip[0], grip[1], rot, 1, .5, .79);
+      strand([[34, -146 + sq + br * .5], [lerp(44, 30, up), lerp(-112, -186, up) + sq], grip], 18, 14, '#3a3848', '#5a586a');
+      bdraw(fist, grip[0], grip[1]);
+      bdraw(crown, Math.sin(t * 1.1) * 3, -206 + Math.sin(t * 1.6 + 1) * 4 + sq, -.18 + Math.sin(t * 1.1) * .05, 1, .5, 1);
+      for (const ex of [-6, 12]) bglow(ex, -168 + sq * .3, 12, V2, .9);
+      bglow(0, -108 + sq * .3, 24, '#ff3a4a', .55 + Math.sin(t * 4) * .15);
+      bglow(0, -222 + sq, 26, '#ffd36b', .35);
+    });
   },
 };
-// 보스 초상(게이트 창·도감): 작은 캔버스에 같은 그림을 맞춰 그린다
+// 보스 초상(게이트 창·튜토리얼): 작은 캔버스에 같은 그림을 맞춰 그린다
+const BOSS_ART = { root: [300, 250, 0], bone: [420, 220, 0], spider: [380, 220, 0], drake: [380, 240, 0], golem: [300, 300, 0], eye: [300, 300, 30], kraken: [300, 330, 70], tree: [300, 300, 0], void: [300, 300, 20], king: [300, 300, 0] };
 function drawBossPortrait(ctx, L, w, h, t) {
-  const B = BOSSES[L], st = { x: 0, y: 0, face: -1, hp: 1, max: 1, enraged: false, lookX: 60, lookY: 30 }, g0 = g, T0 = time;
-  const box = B.mode === 'ground' ? [B.hit[0] * 1.9, B.hit[1] * 1.35] : [B.hit[0] * 1.35, B.hit[1] * 1.6];
-  const k = Math.min(w / box[0], h / box[1]);
-  ctx.save(); ctx.translate(w / 2, B.mode === 'ground' ? h * .95 : h / 2); ctx.scale(k, k); ctx.imageSmoothingEnabled = false;
+  const B = BOSSES[L], st = { x: 0, y: 0, face: -1, hp: 1, max: 1, enraged: false, lookX: 60, lookY: 30 }, g0 = g, T0 = time, [bw, bh, oy] = BOSS_ART[B.id];
+  const k = Math.min(w / bw, h / bh);
+  ctx.save(); ctx.translate(w / 2, B.mode === 'ground' ? h * .96 : h / 2 - oy * k); ctx.scale(k, k); ctx.imageSmoothingEnabled = false;
   g = ctx; time = t; try { BOSS_DRAW[B.id](st, t); } finally { g = g0; time = T0; ctx.restore(); }
 }
+
 
 const DUN = { active: false };
 // ───────────── 보스 게이트 ─────────────
