@@ -8,7 +8,7 @@ HTML 파일 하나로 돌아가며, 그래픽과 사운드·배경음악은 모�
 
 ## 바로 플레이
 
-- **GitHub Pages**: 저장소의 Pages 주소에서 바로 실행됩니다.
+- **GitHub Pages**: https://lhc6835-hue.github.io/celesta/ (저장소 Settings → Pages에서 `main` 브랜치 `/ (root)`로 켜면 열립니다)
 - **오프라인**: `index.html`을 내려받아 브라우저로 열면 됩니다.
 
 ## 특징
