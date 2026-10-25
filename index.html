@@ -75,7 +75,7 @@ button[disabled]{opacity:.45;cursor:not-allowed;filter:none}
 #title{position:fixed;inset:0;z-index:40;overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px;background:radial-gradient(ellipse 70% 60% at 50% 42%,#0b071000 0%,#0b071040 55%,#0b0710c8 100%),linear-gradient(#0b071000 55%,#0b0710e0)}
 #tfx{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
 .t-rays{position:absolute;left:50%;top:40%;width:150vmax;height:150vmax;transform:translate(-50%,-50%);background:repeating-conic-gradient(from 0deg,#ffd9a000 0deg 9deg,#ffd9a022 11deg 13deg,#ffd9a000 15deg 24deg);-webkit-mask:radial-gradient(circle,#000 0,#0000 46%);mask:radial-gradient(circle,#000 0,#0000 46%);animation:tspin 90s linear infinite;pointer-events:none}
-.t-rune{position:absolute;left:50%;top:40%;width:min(760px,118vw);aspect-ratio:1;transform:translate(-50%,-50%);pointer-events:none;opacity:.42;animation:tspin 140s linear infinite reverse}
+.t-rune{position:absolute;left:50%;top:40%;width:min(760px,118vw);aspect-ratio:1;transform:translate(-50%,-50%);pointer-events:none;opacity:.16;animation:tspin 240s linear infinite reverse}
 .t-rune svg{width:100%;height:100%;overflow:visible}
 @keyframes tspin{to{transform:translate(-50%,-50%) rotate(360deg)}}
 .t-inner{position:relative;display:flex;flex-direction:column;align-items:center;gap:14px;max-width:100%}
@@ -85,7 +85,7 @@ button[disabled]{opacity:.45;cursor:not-allowed;filter:none}
 .t-logo{margin:0;display:flex;flex-direction:column;align-items:center;line-height:1}
 .t-top{font-family:var(--f-it);font-style:italic;font-weight:600;font-size:clamp(18px,2.6vw,30px);letter-spacing:.55em;margin-right:-.55em;color:#ffe9c4;text-shadow:0 2px 0 #3a1a28,0 0 18px #ffb08088;opacity:0;animation:tfade 1s .25s ease-out forwards}
 .t-word{display:flex;font-family:var(--f-logo);font-weight:900;font-size:clamp(54px,13.5vw,176px);letter-spacing:.04em;margin:.04em 0 .02em;filter:drop-shadow(0 2px 0 #7a4210) drop-shadow(0 3px 0 #4a2208) drop-shadow(0 4px 0 #2a1004) drop-shadow(0 14px 22px #000a) drop-shadow(0 0 34px #ffb84a55)}
-.t-word span{display:inline-block;background:linear-gradient(100deg,#fff8dc 0%,#ffd36b 22%,#c0802c 40%,#fff4c4 50%,#c0802c 60%,#ffd36b 78%,#fff8dc 100%);background-size:300% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;opacity:0;transform:translateY(-.6em) scale(1.25);filter:blur(10px);animation:tdrop .9s cubic-bezier(.2,1.6,.4,1) forwards,tsheen 5.5s linear infinite,tfloat 4.8s ease-in-out infinite;animation-delay:calc(.45s + var(--i)*.09s),calc(1.6s + var(--i)*.12s),calc(1.4s + var(--i)*.22s)}
+.t-word span{display:inline-block;background:linear-gradient(100deg,#fff8dc 0%,#ffd36b 22%,#c0802c 40%,#fff4c4 50%,#c0802c 60%,#ffd36b 78%,#fff8dc 100%);background-size:300% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;opacity:0;transform:translateY(-.6em) scale(1.25);filter:blur(10px);animation:tdrop 1.1s cubic-bezier(.2,1.3,.4,1) forwards,tsheen 9s linear infinite;animation-delay:calc(.45s + var(--i)*.08s),calc(1.8s + var(--i)*.1s)}
 @keyframes tdrop{to{opacity:1;transform:none;filter:none}}
 @keyframes tsheen{from{background-position:100% 0}to{background-position:-200% 0}}
 @keyframes tfloat{0%,100%{translate:0 0}50%{translate:0 -.045em}}
@@ -94,9 +94,8 @@ button[disabled]{opacity:.45;cursor:not-allowed;filter:none}
 .t-sub::before,.t-sub::after{content:"";width:clamp(20px,6vw,70px);height:2px;background:repeating-linear-gradient(90deg,#ffd36b 0 4px,#0000 4px 7px)}
 .t-ko{margin:2px 0 0;font-family:var(--f-display);font-size:clamp(14px,1.8vw,18px);color:#f0e3c2;text-shadow:0 2px 6px #000;letter-spacing:.06em;opacity:0;animation:tfade 1s 1.5s ease-out forwards}
 .t-stage{display:flex;align-items:flex-end;justify-content:center;gap:clamp(10px,4vw,46px);margin-top:4px;opacity:0;animation:tfade 1s 1.7s ease-out forwards}
-.t-stage canvas{position:static;width:auto;height:auto;image-rendering:pixelated;animation:tbob 2.6s ease-in-out infinite}
-.t-stage canvas:nth-child(2){animation-delay:-.6s}.t-stage canvas:nth-child(4){animation-delay:-1.3s}.t-stage canvas:nth-child(5){animation-delay:-1.9s}
-@keyframes tbob{50%{transform:translateY(-7px)}}
+.t-stage canvas{position:static;width:min(180px,40vw);height:auto;image-rendering:pixelated;animation:tbob 4s ease-in-out infinite;filter:drop-shadow(0 0 22px #ff8fb066)}
+@keyframes tbob{50%{transform:translateY(-5px)}}
 #hero{animation:herobob 1.2s steps(2) infinite}
 @keyframes herobob{50%{transform:translateY(-4px)}}
 .t-menu{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-top:6px;opacity:0;animation:tfade .9s 1.9s ease-out forwards}
@@ -109,9 +108,9 @@ button[disabled]{opacity:.45;cursor:not-allowed;filter:none}
 .t-btn.t-main small{color:#5a3410}
 .t-user{min-height:18px;font-family:var(--f-px);font-size:11px;letter-spacing:.18em;color:#9fe6d8;opacity:0;animation:tfade .8s 2.1s ease-out forwards}
 #title .keys{font-size:12px;color:#c8b8a0;text-shadow:0 1px 3px #000;opacity:0;animation:tfade .8s 2.2s ease-out forwards}
-.t-foot{position:absolute;left:0;right:0;bottom:calc(env(safe-area-inset-bottom,0px) + 12px);font-family:var(--f-px);font-size:10px;letter-spacing:.3em;color:#ffffff70;animation:tblink 2.4s steps(2) infinite}
+.t-foot{position:absolute;left:0;right:0;bottom:calc(env(safe-area-inset-bottom,0px) + 12px);font-family:var(--f-px);font-size:10px;letter-spacing:.3em;color:#ffffff55;}
 @keyframes tblink{50%{opacity:.35}}
-@media (max-width:640px){.t-stage canvas.t-side{display:none}.t-eyebrow{font-size:9px;letter-spacing:.2em}.t-eyebrow i{width:20px}}
+@media (max-width:640px){.t-eyebrow{font-size:9px;letter-spacing:.2em}.t-eyebrow i{width:20px}}
 @media (max-height:620px){.t-stage{display:none}}
 @media (prefers-reduced-motion:reduce){.t-word span{opacity:1;transform:none;filter:none}}
 kbd{font-family:var(--f-body);background:#0006;border:1px solid var(--brass-d);border-bottom-width:3px;border-radius:5px;padding:1px 6px;font-size:12px;color:var(--parch)}
@@ -158,7 +157,6 @@ kbd{font-family:var(--f-body);background:#0006;border:1px solid var(--brass-d);b
 <div id="toast"></div>
 
 <div id="title">
-  <div class="t-rays"></div>
   <div class="t-rune" aria-hidden="true"><svg viewBox="-100 -100 200 200" fill="none">
     <circle r="96" stroke="#ffd9a055" stroke-width=".6"/><circle r="91" stroke="#ffd9a033" stroke-width="2.4" stroke-dasharray="1 3.2"/>
     <circle r="78" stroke="#ffd9a044" stroke-width=".5" stroke-dasharray="14 4 2 4"/><circle r="64" stroke="#9fe6d833" stroke-width=".5"/>
@@ -1204,7 +1202,7 @@ function resize() {
   zoom = Math.max(.9, Math.min(VH / (14 * TS), VW / (11 * TS))); resizeBackdrop();
 }
 function camUpdate(dt, snap) {
-  if (!$('#title').hidden) { const vw = VW / zoom, vh = VH / zoom; cam.x = clamp((W / 2) * TS - vw / 2 + Math.sin(time * .04) * 260, 0, Math.max(0, W * TS - vw)); if (vw >= W * TS) cam.x = (W * TS - vw) / 2; cam.y = SURF * TS - vh * .8; return; }
+  if (!$('#title').hidden) { const vw = VW / zoom, vh = VH / zoom; cam.x = clamp((W / 2) * TS - vw / 2 + Math.sin(time * .025) * 160, 0, Math.max(0, W * TS - vw)); if (vw >= W * TS) cam.x = (W * TS - vw) / 2; cam.y = SURF * TS - vh * .8; return; }
   const skyK = clamp((player.y / TS - SURF) / 6, 0, 1), tx = player.x + player.w / 2 + player.lookX - VW / zoom / 2, ty = player.y + player.h / 2 - VH / zoom * lerp(.66, 1 / 2.2, skyK);
   const k = snap ? 1 : 1 - Math.pow(.002, dt);
   cam.x = lerp(cam.x, tx, k); cam.y = lerp(cam.y, ty, k);
@@ -2160,14 +2158,11 @@ document.fonts?.ready?.then(() => { });
 bakeTiles(); resize();
 // ───────────── 타이틀 화면 연출 ─────────────
 function buildTitle() {
-  // 떠다니는 픽셀 상자들과 가운데 발굴사
-  const stage = $('#tStage'), mk = (w, h, cls) => { const c = document.createElement('canvas'); c.width = w; c.height = h; if (cls) c.className = cls; stage.appendChild(c); return c; };
-  const chestCv = (type, side) => { const c = mk(96, 80, side ? 't-side' : ''), x = c.getContext('2d'); x.imageSmoothingEnabled = false; drawChest(x, type, 48, 44, 2.6, { t: 1 }); c.style.filter = `drop-shadow(0 0 14px ${CHESTS[type].glow}aa)`; return c; };
-  chestCv('pirate', 1); chestCv('crystal');
-  const hc = mk(108, 114), hx = hc.getContext('2d'), hs = heroSprite(), pk = pickSprite(6), k = 6; hx.imageSmoothingEnabled = false; hc.id = 'hero';
-  hx.save(); hx.translate(14.5 * k - 6, 15.5 * k); hx.rotate(.6); hx.drawImage(pk, -6.5 * k * .8, -9 * k * .8, pk.width * k * .8, pk.height * k * .8); hx.restore();
-  hx.drawImage(hs, 0, 0, hs.width * k, hs.height * k);
-  chestCv('royal'); chestCv('void', 1);
+  // 가운데에 상징 하나: 일곱 봉인에 둘러싸인 셀레스타의 심장
+  const hc = document.createElement('canvas'); hc.width = 180; hc.height = 170; $('#tStage').appendChild(hc);
+  const hx = hc.getContext('2d'); hx.imageSmoothingEnabled = false;
+  const drawHeartIcon = t => { hx.clearRect(0, 0, 180, 170); drawChest(hx, 'heart', 90, 84, 3.6, { t, glow: .45, beat: 1.1, cage: .28 }); };
+  drawHeartIcon(0);
   // 마법진의 일곱 봉인
   const cols = ['#7bd36a', '#efe2c0', '#cfe8ff', '#ff7a2a', '#d8b25a', '#ffd36b', '#9a5cff'];
   $('#seals').innerHTML = cols.map((c, i) => { const a = i / 7 * Math.PI * 2 - Math.PI / 2, x = Math.cos(a) * 78, y = Math.sin(a) * 78; return `<g transform="translate(${x.toFixed(1)} ${y.toFixed(1)})"><circle r="7" fill="${c}22" stroke="${c}" stroke-width=".8"/><path d="M0-4L3.5-2V2L0 4L-3.5 2V-2Z" fill="${c}"/></g>`; }).join('');
@@ -2180,9 +2175,10 @@ function buildTitle() {
     if ($('#title').hidden) return;
     const dt = Math.min(.05, (now - lt) / 1000); lt = now;
     const w = innerWidth, h = innerHeight;
-    if (ps.length < 90 && Math.random() < .7) ps.push({ x: Math.random() * w, y: h + 10, vx: (Math.random() - .5) * 14, vy: -(20 + Math.random() * 46), life: 4 + Math.random() * 5, t: 0, s: Math.random() < .25 ? 3 : 2, c: Math.random() < .6 ? '#ffcf7a' : '#ffefc4', k: 'e' });
-    if (Math.random() < dt * .5) ps.push({ x: w * (.2 + Math.random() * .9), y: Math.random() * h * .3, vx: -(500 + Math.random() * 300), vy: 200 + Math.random() * 120, life: .9, t: 0, k: 's' });
-    if (Math.random() < dt * 5) ps.push({ x: Math.random() * w, y: Math.random() * h * .6, vx: 0, vy: 0, life: .7, t: 0, k: 'w' });
+    drawHeartIcon(now / 1000);
+    if (ps.length < 28 && Math.random() < .2) ps.push({ x: Math.random() * w, y: h + 10, vx: (Math.random() - .5) * 14, vy: -(20 + Math.random() * 46), life: 4 + Math.random() * 5, t: 0, s: Math.random() < .25 ? 3 : 2, c: Math.random() < .6 ? '#ffcf7a' : '#ffefc4', k: 'e' });
+    if (Math.random() < dt * .07) ps.push({ x: w * (.2 + Math.random() * .9), y: Math.random() * h * .3, vx: -(500 + Math.random() * 300), vy: 200 + Math.random() * 120, life: .9, t: 0, k: 's' });
+    if (Math.random() < dt * 1.2) ps.push({ x: Math.random() * w, y: Math.random() * h * .5, vx: 0, vy: 0, life: .9, t: 0, k: 'w' });
     x.setTransform(DPR, 0, 0, DPR, 0, 0); x.clearRect(0, 0, w, h);
     for (let i = ps.length - 1; i >= 0; i--) {
       const p = ps[i]; p.t += dt; if (p.t > p.life) { ps.splice(i, 1); continue; }
