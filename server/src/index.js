@@ -18,7 +18,9 @@ const low = s => String(s || '').trim().toLowerCase();
 const colorOf = name => { let h = 0; for (const ch of low(name)) h = (h * 31 + ch.charCodeAt(0)) >>> 0; return COLORS[h % COLORS.length]; };
 const hex = buf => [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, '0')).join('');
 const randHex = n => hex(crypto.getRandomValues(new Uint8Array(n)));
-const weekNo = (t = Date.now()) => Math.floor((t / 864e5 + 3) / 7); // 월요일 0시(UTC)에 바뀐다
+// 모든 서버의 지형은 10분마다 새로 생긴다(다 캐도 다시 놀 수 있게). 시각 기준이라 방마다 같은 때 바뀐다
+const RESET_MS = 10 * 60000;
+const epochNo = (t = Date.now()) => Math.floor(t / RESET_MS), nextReset = () => (epochNo() + 1) * RESET_MS;
 function hashSeed(s) { let h = 2166136261; for (const ch of s) h = Math.imul(h ^ ch.charCodeAt(0), 16777619); return (h >>> 0) % 1e9; }
 function cleanText(m) {
   let s = String(m || '').replace(/[\u0000-\u001f\u007f]/g, '').trim().slice(0, 120);
@@ -319,7 +321,7 @@ export class Room extends DurableObject {
     ctx.blockConcurrencyWhile(async () => {
       this.meta = await ctx.storage.get('meta') || null;
       this.seed = await ctx.storage.get('seed');
-      this.week = await ctx.storage.get('week');
+      this.epoch = await ctx.storage.get('epoch'); this.base = await ctx.storage.get('base'); this.warned = '';
       this.chat = await ctx.storage.get('chat') || [];
       for (const [, arr] of await ctx.storage.list({ prefix: 'm:' })) for (const i of arr) this.mods.add(i);
       this.nextId = 1; for (const ws of ctx.getWebSockets()) { const a = ws.deserializeAttachment(); if (a && a.id >= this.nextId) this.nextId = a.id + 1; }
@@ -331,11 +333,15 @@ export class Room extends DurableObject {
   players() { return this.sockets().map(ws => { const a = ws.deserializeAttachment(); return { id: a.id, name: a.name, color: a.color, d: this.pos.get(a.id) || null }; }); }
   async ensureWorld(info) {
     if (!this.meta || (info && (this.meta.name !== info.name || this.meta.owner !== info.owner))) { this.meta = { id: info.id, kind: info.kind, name: info.name, owner: info.owner || null }; await this.ctx.storage.put('meta', this.meta); }
-    if (this.meta.kind === 'pub') {
-      const wk = weekNo();
-      if (this.week !== wk) { this.week = wk; this.seed = hashSeed(this.meta.id + ':' + wk); await this.resetMods(); await this.ctx.storage.put({ week: wk, seed: this.seed }); return true; }
-    } else if (this.seed == null) { this.seed = info && info.seed != null ? info.seed : Math.floor(Math.random() * 1e9); await this.ctx.storage.put('seed', this.seed); }
+    if (this.base == null) { this.base = this.meta.kind === 'pub' ? hashSeed(this.meta.id) : info && info.seed != null ? info.seed : Math.floor(Math.random() * 1e9); await this.ctx.storage.put('base', this.base); }
+    const ep = epochNo();
+    if (this.epoch !== ep) { this.epoch = ep; this.seed = hashSeed(this.base + ':' + ep); await this.resetMods(); await this.ctx.storage.put({ epoch: ep, seed: this.seed }); return true; }
     return false;
+  }
+  // 다음 알람: 1분마다 접속 상태 갱신 · 리셋 1분 전/10초 전 예고 · 리셋 시각
+  async schedule() {
+    const now = Date.now(), nr = nextReset(), c = [now + 60000, nr - 60000, nr - 10000, nr + 200].filter(x => x > now + 300);
+    await this.ctx.storage.setAlarm(Math.min(...c));
   }
   async resetMods() { this.mods.clear(); this.dirty.clear(); const keys = [...(await this.ctx.storage.list({ prefix: 'm:' })).keys()]; for (let i = 0; i < keys.length; i += 128) await this.ctx.storage.delete(keys.slice(i, i + 128)); }
   markMod(i) { this.mods.add(i); this.dirty.add(Math.floor(i / 512)); this.ctx.storage.getAlarm().then(a => { if (!a || a > Date.now() + 5000) this.ctx.storage.setAlarm(Date.now() + 3000); }); }
@@ -351,10 +357,17 @@ export class Room extends DurableObject {
   }
   async alarm() {
     await this.flush();
-    if (this.meta && this.meta.kind === 'pub' && this.week !== weekNo() && await this.ensureWorld()) this.bcast({ t: 'world', seed: this.seed, mods: [] , msg: '새로운 주가 시작돼 공개 서버의 지형이 새로 생겨났어요.' });
+    if (this.meta) {
+      if (await this.ensureWorld()) this.bcast({ t: 'world', seed: this.seed, mods: [], resetAt: nextReset(), msg: '10분이 지나 지형이 새로 생겨났어요!' });
+      else {
+        const left = nextReset() - Date.now();
+        for (const s2 of [60, 10]) { const key = this.epoch + ':' + s2; if (left <= s2 * 1000 + 1500 && left > (s2 === 60 ? 11000 : 0) && !this.warned.includes(key)) { this.warned += key + ','; this.bcast({ t: 'sys', k: 'reset', s: Math.round(left / 1000) }); } }
+      }
+    }
     await this.report();
-    if (this.sockets().length) await this.ctx.storage.setAlarm(Date.now() + 60000);
+    if (this.sockets().length) await this.schedule();
   }
+
 
   async fetch(req) {
     const p = new URL(req.url).pathname;
@@ -381,10 +394,10 @@ export class Room extends DurableObject {
     this.ctx.acceptWebSocket(server);
     const a = { id: this.nextId++, name: j.user.name, color: j.user.color, at: Date.now() };
     server.serializeAttachment(a);
-    this.send(server, { t: 'init', me: a.id, room: { ...this.meta, n: this.sockets().length }, seed: this.seed, mods: [...this.mods], players: this.players().filter(x => x.id !== a.id), chat: this.chat.slice(-30), now: Date.now() });
+    this.send(server, { t: 'init', me: a.id, room: { ...this.meta, n: this.sockets().length }, seed: this.seed, resetAt: nextReset(), mods: [...this.mods], players: this.players().filter(x => x.id !== a.id), chat: this.chat.slice(-30), now: Date.now() });
     this.bcast({ t: 'join', p: { id: a.id, name: a.name, color: a.color, d: null } }, server);
     await this.report();
-    if (!(await this.ctx.storage.getAlarm())) await this.ctx.storage.setAlarm(Date.now() + 60000);
+    await this.schedule();
     return new Response(null, { status: 101, webSocket: client });
   }
 

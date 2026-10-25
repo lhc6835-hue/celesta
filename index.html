@@ -196,6 +196,7 @@ button.mini{padding:2px 8px;font-size:12px}
 .ntop{grid-template-columns:repeat(auto-fill,minmax(200px,1fr))}.ntop .tr{display:flex;gap:8px;font-size:13px}.ntop .tr span:first-child{width:18px;color:var(--brass)}.ntop .tr em{flex:1;font-style:normal;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .nplayers .card{display:flex;flex-direction:column;gap:6px}.nplayers .card button{padding:5px 8px;font-size:12px}
 #netBadge{position:fixed;left:50%;transform:translateX(-50%);top:calc(env(safe-area-inset-top,0px) + 12px);z-index:7;background:#1d1510dd;border:1px solid var(--brass-d);border-radius:999px;padding:4px 12px;font-size:12px;color:var(--parch);pointer-events:none;white-space:nowrap;display:flex;align-items:center;gap:6px}
+#netBadge .rst{color:#9fe6d8}#netBadge .rst.warn{color:#ffb07a;animation:blink .6s infinite alternate}
 #netBadge i{width:8px;height:8px;border-radius:50%;background:#7bd389;box-shadow:0 0 6px #7bd389}#netBadge i.y{background:#ffd166;box-shadow:0 0 6px #ffd166}#netBadge i.r{background:#ff6b6b;box-shadow:0 0 6px #ff6b6b}
 #netAnn{position:fixed;left:50%;top:calc(env(safe-area-inset-top,0px) + 40%);transform:translate(-50%,-50%);z-index:9;pointer-events:none;font-family:var(--f-display);font-size:clamp(18px,3vw,28px);color:#fff;text-align:center;text-shadow:0 0 18px var(--c),0 2px 0 #000;padding:12px 28px;background:linear-gradient(90deg,transparent,#000a 20%,#000a 80%,transparent);border-top:1px solid var(--c);border-bottom:1px solid var(--c);width:min(760px,92vw)}
 #netAnn.go{animation:annIn 5.2s ease-out forwards}
@@ -213,6 +214,51 @@ button.mini{padding:2px 8px;font-size:12px}
 #chat.open .cbar input{display:block}#chat.emo-on .emo{display:flex}
 body.touch #chat{bottom:calc(env(safe-area-inset-bottom,0px) + 214px)}
 @media (max-width:640px){#netBadge{left:auto;right:max(56px,calc(env(safe-area-inset-right,0px) + 56px));transform:none;top:calc(env(safe-area-inset-top,0px) + 64px);font-size:11px}}
+.sheet.camp{width:min(880px,100%);height:min(780px,100%);display:flex;flex-direction:column;padding:0;overflow:hidden}
+.camp-head{display:flex;align-items:center;gap:12px;padding:16px 18px 10px;background:linear-gradient(#ffffff08,transparent)}
+.camp-ico{position:static!important;inset:auto;width:44px;height:44px;flex:0 0 auto;image-rendering:pixelated}
+.camp-head .ttl{flex:1;min-width:0}.camp-head h2{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cls-cur .tag{display:inline-block;margin:0 8px 4px 0;vertical-align:middle}.camp-head .ttl small{font-family:var(--f-px);font-size:10px;letter-spacing:.28em;color:#9fe6d8}.camp-head h2{margin:0;font-size:26px}
+.camp-gold{display:flex;align-items:center;gap:6px;background:#0006;border:1px solid var(--brass-d);border-radius:999px;padding:6px 14px 6px 8px}
+.camp-gold b{font-family:var(--f-impact);font-size:18px;color:#ffd66b;font-variant-numeric:tabular-nums}.camp-gold small{font-size:11px;color:var(--muted)}
+.camp-gold i,i.coin{display:inline-block;width:18px;height:18px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff2b0,#e8a83a 45%,#a06a1a);box-shadow:inset 0 0 0 2px #7a4a10;vertical-align:-4px;margin-right:2px;font-style:normal}
+button .coin{width:14px;height:14px;margin-right:6px;vertical-align:-2px}
+.camp-x{width:38px;height:38px;padding:0;border-radius:50%;font-size:16px;flex:0 0 auto}
+.camp-tabs{display:flex;gap:4px;padding:0 14px;border-bottom:2px solid #ffffff12;overflow-x:auto;scrollbar-width:none;flex:0 0 auto}
+.camp-tabs::-webkit-scrollbar{display:none}
+.camp-tabs button{background:none;border:none;box-shadow:none;border-radius:10px 10px 0 0;padding:10px 14px;color:var(--muted);white-space:nowrap;position:relative;display:flex;align-items:center;gap:6px}
+.camp-tabs button span{font-size:16px;filter:grayscale(.6);opacity:.8}
+.camp-tabs button:hover{color:var(--parch);background:#ffffff08}
+.camp-tabs button.on{color:#ffe39a;background:#ffffff0c}.camp-tabs button.on span{filter:none;opacity:1}
+.camp-tabs button.on::after{content:"";position:absolute;left:10px;right:10px;bottom:-2px;height:3px;border-radius:3px;background:linear-gradient(90deg,#e7c063,#ffe39a)}
+.camp-body{flex:1;overflow:auto;padding:16px 18px 20px;overscroll-behavior:contain}
+.camp-body>p.sub:first-child{margin:0 0 14px;padding:10px 14px;border-left:3px solid var(--brass);background:#0003;border-radius:0 10px 10px 0;font-style:italic;max-width:none}
+.camp-bar{display:flex;align-items:center;gap:14px;flex-wrap:wrap;background:#0004;border:1px solid #ffffff14;border-radius:14px;padding:12px 14px;margin-bottom:14px}
+.camp-bar>div:first-child{flex:1;min-width:180px}.camp-bar b{font-family:var(--f-display);font-weight:400;font-size:18px}.camp-bar p{margin:2px 0 0;font-size:12px;color:var(--muted)}
+.camp-bar .sum{text-align:right}.camp-bar .sum small{display:block;font-size:11px;color:var(--muted)}.camp-bar .sum b{font-family:var(--f-impact);font-size:22px;color:#ffd66b}
+.grid.items{grid-template-columns:repeat(auto-fill,minmax(136px,1fr))}
+.card.item b small{font-family:var(--f-body);font-size:12px;color:var(--muted)}
+.card.item button{margin-top:auto;padding:6px 8px;font-size:13px}
+.empty{text-align:center;padding:40px 10px;color:var(--muted)}.empty b{font-family:var(--f-display);font-weight:400;font-size:20px;color:var(--parch)}
+.upg-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px}
+.upg{display:flex;flex-direction:column;gap:8px;background:linear-gradient(#ffffff08,#0004);border:1px solid #ffffff16;border-radius:14px;padding:14px}
+.upg.max{border-color:#ffd36b66}
+.upg-h{display:flex;align-items:center;gap:10px}.upg-h .ico{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;background:#0006;border:1px solid var(--brass-d)}
+.upg-h b{flex:1;font-family:var(--f-display);font-weight:400;font-size:18px}.upg-h .lv{font-family:var(--f-impact);color:#ffd66b;font-size:16px}.upg-h .lv small{font-size:12px;color:var(--muted)}
+.seg{display:flex;gap:3px}.seg i{flex:1;height:6px;border-radius:3px;background:#0007;border:1px solid #ffffff10}.seg i.f{background:linear-gradient(90deg,#e7c063,#ffe39a);border-color:#ffe39a55}
+.upg p{margin:0;font-size:12.5px;line-height:1.5;color:var(--muted)}.upg p span{display:inline-block;min-width:34px;margin-right:6px;font-size:11px;color:#9fe6d8}.upg p.next{color:#e8dcc0}
+.upg button{margin-top:auto}
+.board{display:flex;flex-direction:column;gap:14px}
+.board .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.board .stats div{background:#0004;border:1px solid #ffffff14;border-radius:12px;padding:10px 12px}
+.board .stats small{display:block;font-size:11px;color:var(--muted)}.board .stats b{font-family:var(--f-impact);font-size:20px;color:#ffd66b}
+.board .heart{margin:0;text-align:center;color:#ff8fb0;font-family:var(--f-display)}
+.board section{background:#0003;border:1px solid #ffffff10;border-radius:14px;padding:12px 14px}.board h3{margin:0 0 8px;font-family:var(--f-display);font-weight:400;font-size:17px;color:var(--brass)}
+.board ul{margin:0;padding-left:18px;font-size:13px;line-height:1.8;color:#e8dcc0}
+.board .layers{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:6px}.board .layers div{display:flex;align-items:baseline;gap:8px;padding:6px 8px;border-radius:8px;background:#0003}
+.board .layers .rn{font-family:var(--f-cap);font-size:12px;color:var(--brass);width:24px}.board .layers b{font-weight:400;font-size:14px}.board .layers small{margin-left:auto;font-size:11px;color:var(--muted)}.board .layers .q b{color:#776a58}
+.board .lore{margin:0;font-size:13px;line-height:1.8;color:var(--muted)}
+.board .danger button{border-color:#8a3a2a;color:#ffb8a8}
+@media (max-width:560px){.camp-head{gap:8px;padding:12px 12px 8px}.camp-ico{width:34px;height:34px}.camp-gold{padding:4px 10px 4px 6px}.camp-gold small{display:none}.camp-head h2{font-size:20px}.camp-head .ttl small{display:none}.camp-gold b{font-size:15px}.board .stats{grid-template-columns:repeat(2,1fr)}.camp-tabs button{padding:9px 10px;font-size:13px}.camp-body{padding:12px}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 @media (max-width:560px){.layer-name{font-size:15px}.gold{font-size:17px}.btns button{padding:8px 10px;font-size:13px}}
 </style>
@@ -299,6 +345,7 @@ const ease = {
   inCubic: t => t * t * t,
   inOut: t => t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2,
   outBack: t => { const c = 1.9; return 1 + (c + 1) * Math.pow(t - 1, 3) + c * Math.pow(t - 1, 2); },
+  inBack: t => 2.70158 * t * t * t - 1.70158 * t * t,
   outElastic: t => t === 0 || t === 1 ? t : Math.pow(2, -10 * t) * Math.sin((t * 10 - .75) * TAU / 3) + 1,
 };
 const seg = (t, a, b) => clamp((t - a) / (b - a), 0, 1);
@@ -1655,14 +1702,14 @@ function updatePlayer(dt) {
 function rescue() {
   const fee = Math.floor(G.gold * .15);
   G.oil = maxOil(); player.faint = 0;
-  transition('dirt', () => { G.gold -= fee; spawn(); G.oil = maxOil(); camUpdate(0, true); updHUD(); save(); });
+  transition('dirt', () => { G.gold -= fee; spawn(); G.oil = maxOil(); camUpdate(0, true); updHUD(); save(); }, null, '조합 구조대 출동!');
   toast(fee ? `조합 구조대가 끌어올려 줬어요. 구조비 ${fee} 셀라를 냈어요.` : '조합 구조대가 끌어올려 줬어요. 다음엔 기름을 꼭 확인하세요!');
 }
 function recall() {
   if (opening || player.faint > 0 || transBusy) return;
   if (Math.floor(player.y / TS) <= SURF) { openCamp(); return; }
   S.whoosh(.8);
-  transition('keyhole', () => { spawn(); player.vx = player.vy = 0; G.oil = maxOil(); camUpdate(0, true); save(); updHUD(); }, [(player.x + 9 - cam.x) * zoom, (player.y + 13 - cam.y) * zoom]).then(() => toast('귀환 두루마리를 펼쳐 야영지로 돌아왔어요.'));
+  transition('keyhole', () => { spawn(); player.vx = player.vy = 0; G.oil = maxOil(); camUpdate(0, true); save(); updHUD(); }, [(player.x + 9 - cam.x) * zoom, (player.y + 13 - cam.y) * zoom], '야영지로 귀환').then(() => toast('귀환 두루마리를 펼쳐 야영지로 돌아왔어요.'));
 }
 
 // ───────────── 파티클 · 텍스트 ─────────────
@@ -3474,39 +3521,92 @@ function updCompass(dt) {
 // 열쇠구멍(금고 문) · 흙더미 와이프 · 지층 진입 배너
 let transBusy = false;
 function keyholePath(x, cx, cy, s) { x.beginPath(); x.arc(cx, cy - s * .35, s * .42, 0, TAU); x.moveTo(cx - s * .2, cy - s * .2); x.lineTo(cx + s * .2, cy - s * .2); x.lineTo(cx + s * .38, cy + s * .75); x.lineTo(cx - s * .38, cy + s * .75); x.closePath(); }
-function transition(kind, mid, at) {
+// 화면 전환: 큼직한 픽셀 블록으로 화면을 덮었다가(가운데 문장·글귀) 다시 걷어 낸다
+// vault(열쇠구멍 자리로 금고 문 타일이 모여든다) · dirt(흙더미가 쏟아졌다 무너진다) · world(지형 재생성)
+const easeBounce = t => { const n = 7.5625, d = 2.75; if (t < 1 / d) return n * t * t; if (t < 2 / d) return n * (t -= 1.5 / d) * t + .75; if (t < 2.5 / d) return n * (t -= 2.25 / d) * t + .9375; return n * (t -= 2.625 / d) * t + .984375; };
+function transition(kind, mid, at, label) {
   if (transBusy) { mid && mid(); return Promise.resolve(); }
   transBusy = true;
   const c = $('#trans'), x = c.getContext('2d'); c.hidden = false; c.width = VW * DPR; c.height = VH * DPR;
-  const cx = at ? at[0] : VW / 2, cy = at ? at[1] : VH / 2, big = Math.hypot(VW, VH) * 2.2;
-  const cols = Math.ceil(VW / 28), rowsN = Math.ceil(VH / 28) + 1, pal = LAYERS.slice(0, 6).map(l => [l.dirt, l.dark, l.rock]);
-  const dur = kind === 'open' ? [0, .05, .6] : [.5, .12, .55];
-  let t0 = performance.now(), midDone = false;
+  const cs = Math.max(16, Math.round(Math.min(VW, VH) / 16)), cols = Math.ceil(VW / cs) + 1, rows = Math.ceil(VH / cs) + 1;
+  const ox = at ? at[0] : VW / 2, oy = at ? at[1] : VH / 2;
+  const dirt = kind === 'dirt' || kind === 'world', C = dirt ? .8 : .62, Hd = .6, O = dirt ? .8 : .62;
+  let maxD = 0; for (const [a, b] of [[0, 0], [VW, 0], [0, VH], [VW, VH]]) maxD = Math.max(maxD, Math.hypot(a - ox, b - oy));
+  const pal = kind === 'world' ? ['#3a2a5a', '#2a1e44', '#5a4a8a', '#8c7dff'] : ['#7b5434', '#4e321e', '#6d6458', '#c98a4b'];
+  const t0 = performance.now(); let midDone = false, thud = false;
+  S.whoosh(.5);
+  // 블록 하나: 바깥 테두리 · 밝은 윗면 · 어두운 아랫면 · 칸마다 다른 무늬
+  const block = (px, py, sz, i, j, a) => {
+    if (sz < 1) return;
+    const h = hash2(i, j, 17), p = Math.max(1, Math.round(sz / 8));
+    x.globalAlpha = a;
+    if (dirt) {
+      const deep = j / rows, base = j === 0 && kind === 'dirt' ? '#4ec05a' : deep > .7 ? pal[2] : pal[0];
+      x.fillStyle = PX_OUT; x.fillRect(px, py, sz, sz);
+      x.fillStyle = base; x.fillRect(px + p, py + p, sz - 2 * p, sz - 2 * p);
+      x.fillStyle = pal[1]; x.fillRect(px + p, py + sz - 3 * p, sz - 2 * p, 2 * p);
+      x.fillStyle = 'rgba(255,255,255,.12)'; x.fillRect(px + p, py + p, sz - 2 * p, p);
+      for (let k = 0; k < 3; k++) { const hx = hash2(i, j, 30 + k), hy = hash2(j, i, 40 + k); x.fillStyle = k === 2 && h > .75 ? pal[3] : pal[1]; x.fillRect(px + p * (1 + Math.floor(hx * 5)), py + p * (1 + Math.floor(hy * 4)), p * 1.5, p); }
+    } else {
+      x.fillStyle = PX_OUT; x.fillRect(px, py, sz, sz);
+      x.fillStyle = h > .5 ? '#241a2c' : '#20172a'; x.fillRect(px + p, py + p, sz - 2 * p, sz - 2 * p);
+      x.fillStyle = '#382a44'; x.fillRect(px + p, py + p, sz - 2 * p, p); x.fillRect(px + p, py + p, p, sz - 2 * p);
+      x.fillStyle = '#120c18'; x.fillRect(px + p, py + sz - 2 * p, sz - 2 * p, p);
+      if (h > .93) { x.fillStyle = '#8a6a2a'; x.fillRect(px + sz / 2 - p, py + sz / 2 - p, 2 * p, 2 * p); x.fillStyle = '#ffd36b'; x.fillRect(px + sz / 2 - p, py + sz / 2 - p, p, p); }
+      else if (h < .06) { x.fillStyle = '#8fe3ff'; x.fillRect(px + 2 * p, py + 3 * p, p, p); }
+    }
+    x.globalAlpha = 1;
+  };
+  // 가운데 문장: 황동 나침반(금고 전환) 또는 엇갈린 곡괭이(구조) · 아래 글귀
+  const emblem = (k, t) => {
+    if (k <= 0) return;
+    const sc = ease.outBack(k), cx = VW / 2, cy = VH / 2 - 16, p = Math.max(3, Math.round(cs / 6)) * sc, R2 = 11;
+    x.save(); x.translate(cx, cy);
+    x.globalCompositeOperation = 'lighter'; glowDot(x, 0, 0, 70 * sc, dirt ? '#ffb33a' : '#ffd36b', .35 * k); x.globalCompositeOperation = 'source-over';
+    if (!dirt) {
+      for (let a = 0; a < 48; a++) { const an = a / 48 * TAU, xx = Math.round(Math.cos(an) * R2), yy = Math.round(Math.sin(an) * R2); x.fillStyle = PX_OUT; x.fillRect((xx - .5) * p - p * .5, (yy - .5) * p - p * .5, p * 2, p * 2); }
+      for (let a = 0; a < 48; a++) { const an = a / 48 * TAU, xx = Math.round(Math.cos(an) * R2), yy = Math.round(Math.sin(an) * R2); x.fillStyle = yy < 0 ? '#ffe39a' : '#d2a94e'; x.fillRect((xx - .5) * p, (yy - .5) * p, p, p); }
+      for (const an of [0, Math.PI / 2, Math.PI, Math.PI * 1.5]) { x.fillStyle = '#ffd36b'; x.fillRect(Math.round(Math.cos(an) * (R2 + 3)) * p - p / 2, Math.round(Math.sin(an) * (R2 + 3)) * p - p / 2, p, p); }
+      x.rotate(Math.sin(t * 7) * .5 + t * 1.5);
+      for (let d = -8; d <= 8; d++) { const w2 = Math.max(0, 2 - Math.floor(Math.abs(d) / 3)); x.fillStyle = d < 0 ? '#e04848' : '#e8eef8'; x.fillRect(-w2 * p / 2 - p / 2, d * p - p / 2, (w2 + 1) * p, p); }
+      x.fillStyle = PX_OUT; x.fillRect(-p, -p, 2 * p, 2 * p);
+    } else {
+      for (const r of [-.78, .78]) { x.save(); x.rotate(r); const pk = pickSprite('rusty'); x.imageSmoothingEnabled = false; x.drawImage(pk, -pk.width * p / 2, -pk.height * p / 2, pk.width * p, pk.height * p); x.restore(); }
+    }
+    x.restore();
+    if (label) { x.globalAlpha = Math.min(1, k * 1.5); x.font = `${Math.max(15, Math.min(24, VW * .045))}px "Song Myung","Nanum Myeongjo",serif`; x.textAlign = 'center'; x.fillStyle = '#000'; const ly = cy + (dirt ? 14 : 16) * Math.max(3, Math.round(cs / 6)) + 18; x.fillText(label, VW / 2 + 2, ly + 2); x.fillStyle = '#f6ecd4'; x.fillText(label, VW / 2, ly); x.globalAlpha = 1; }
+  };
   return new Promise(res => {
     const step = now => {
-      const t = (now - t0) / 1000; x.setTransform(DPR, 0, 0, DPR, 0, 0); x.clearRect(0, 0, VW, VH);
-      let k; // 0 = 열림, 1 = 완전히 닫힘
-      if (t < dur[0]) k = ease.inCubic(t / dur[0]); else if (t < dur[0] + dur[1]) k = 1; else k = 1 - ease.outCubic(Math.min(1, (t - dur[0] - dur[1]) / dur[2]));
-      if (!midDone && t >= dur[0]) { midDone = true; mid && mid(); S.whoosh(.4); }
-      if (kind === 'dirt') {
-        const opening2 = t >= dur[0] + dur[1];
-        for (let i = 0; i < cols; i++) {
-          const delay = hash2(i, 3, 9) * .35, kk = opening2 ? clamp((t - dur[0] - dur[1] - delay * .6) / .45, 0, 1) : clamp((t - delay * .6) / .4, 0, 1);
-          for (let j = 0; j < rowsN; j++) {
-            const yy = opening2 ? j * 28 + ease.inCubic(kk) * (VH + 60) : (j - rowsN) * 28 + ease.outCubic(kk) * rowsN * 28;
-            const p2 = pal[Math.min(5, Math.floor(j / rowsN * 6))], h0 = hash2(i, j, 4);
-            x.fillStyle = PX_OUT; x.fillRect(i * 28, yy, 28, 28); x.fillStyle = h0 > .8 ? p2[2] : p2[0]; x.fillRect(i * 28 + 1, yy + 1, 26, 26); x.fillStyle = p2[1]; x.fillRect(i * 28 + 1, yy + 22, 26, 5); x.fillStyle = 'rgba(255,255,255,.1)'; x.fillRect(i * 28 + 1, yy + 1, 26, 3);
-          }
+      const t = (now - t0) / 1000; x.setTransform(DPR, 0, 0, DPR, 0, 0); x.clearRect(0, 0, VW, VH); x.imageSmoothingEnabled = false;
+      const closing = t < C, holding = t >= C && t < C + Hd, tc = t, to = t - C - Hd;
+      if (!midDone && t >= C) { midDone = true; mid && mid(); }
+      if (!thud && t >= C - .05) { thud = true; S.clunk(); if (dirt) S.land(); }
+      for (let i = 0; i < cols; i++) for (let j = 0; j < rows; j++) {
+        const px = i * cs, py = j * cs, cx2 = px + cs / 2, cy2 = py + cs / 2;
+        if (dirt) {
+          // 흙더미: 기둥마다 조금씩 늦게 떨어져 통통 튀며 쌓이고, 걷힐 땐 위에서부터 아래로 쏟아진다
+          const del = hash2(i, 3, 9) * .22 + (rows - j) * .012;
+          let y;
+          if (!(t >= C + Hd)) { const k = clamp((tc - del) / (C - .24), 0, 1); y = lerp(py - VH - cs * 2, py, easeBounce(k)); }
+          else { const k = clamp((to - (j / rows) * .25 - hash2(i, j, 5) * .12) / .5, 0, 1); y = py + ease.inCubic(k) * (VH + cs * 2); }
+          block(px, Math.round(y), cs, i, j, 1);
+        } else {
+          // 금고 문 타일: 바깥부터 모여들어 닫히고, 가운데부터 흩어지며 열린다
+          const dn = Math.hypot(cx2 - ox, cy2 - oy) / maxD;
+          let sc;
+          if (!(t >= C + Hd)) sc = ease.outBack(clamp((tc - (1 - dn) * (C - .2)) / .2, 0, 1));
+          else sc = 1 - ease.inBack(clamp((to - dn * (O - .2)) / .2, 0, 1));
+          sc = clamp(sc, 0, 1.12); const sz = Math.round(cs * sc);
+          block(Math.round(cx2 - sz / 2), Math.round(cy2 - sz / 2), sz, i, j, 1);
         }
-      } else {
-        // 열쇠구멍: 검은 금고 문이 닫혔다 열린다
-        const s = Math.max(.001, (1 - k)) * big;
-        x.fillStyle = '#07040a'; x.fillRect(0, 0, VW, VH);
-        x.globalCompositeOperation = 'destination-out'; keyholePath(x, cx, cy, s); x.fill(); x.globalCompositeOperation = 'source-over';
-        if (k > .02) { x.strokeStyle = rgba('#ffd36b', Math.min(1, k * 2)); x.lineWidth = 3; keyholePath(x, cx, cy, s); x.stroke(); x.strokeStyle = rgba('#8a6a2a', Math.min(1, k * 2)); x.lineWidth = 8; x.globalAlpha = .4; keyholePath(x, cx, cy, s + 10); x.stroke(); x.globalAlpha = 1; }
-        if (k >= .99) { x.fillStyle = '#ffd36b'; x.font = '12px Silkscreen, monospace'; x.textAlign = 'center'; x.fillText('· · ·', VW / 2, VH / 2 + 4); }
       }
-      if (t < dur[0] + dur[1] + dur[2] + (kind === 'dirt' ? .5 : 0)) requestAnimationFrame(step);
+      // 빛줄기가 덮인 화면을 한 번 훑고 지나간다
+      if (holding || (t > C - .1 && t < C + Hd + .15)) { const k = clamp((t - C + .1) / (Hd + .25), 0, 1), sx = lerp(-VW * .3, VW * 1.3, k); const q = x.createLinearGradient(sx - 80, 0, sx + 80, 0); q.addColorStop(0, 'rgba(255,240,200,0)'); q.addColorStop(.5, 'rgba(255,240,200,.09)'); q.addColorStop(1, 'rgba(255,240,200,0)'); x.fillStyle = q; x.fillRect(0, 0, VW, VH); }
+      const ek = t < C ? clamp((t - C + .22) / .22, 0, 1) : t < C + Hd ? 1 : 1 - clamp((t - C - Hd) / .2, 0, 1);
+      emblem(ek, t);
+      if (t >= C + Hd && !step.w) { step.w = 1; S.whoosh(.35); }
+      if (t < C + Hd + O + (dirt ? .35 : .1)) requestAnimationFrame(step);
       else { c.hidden = true; transBusy = false; res(); }
     };
     requestAnimationFrame(step);
@@ -3555,7 +3655,7 @@ const TUT = [
   { t: '오른쪽 위치 바', b: '화면 오른쪽 세로 바는 세계 전체의 단면이에요. 로마 숫자가 지층 번호이고, <b>리오 얼굴</b>이 지금 내 위치, 점선이 지금까지 가장 깊이 간 곳, 맨 아래 하트가 셀레스타의 심장이에요. 아직 가 보지 않은 지층은 어둡게 보여요. 나중에 온라인 기능이 생기면 다른 발굴사들도 색 점으로 여기에 나타나요.', art: 'bar' },
   { t: '보물 나침반', b: '왼쪽 위 다이얼은 <b>가장 가까운 상자</b>를 가리켜요. 바늘 색이 그 상자의 등급 색이에요. 야영지에서 나침반을 강화하면 탐지 반경이 넓어지고, Lv2부터 거리와 등급, Lv3부터 다음 후보 두 개(테두리의 작은 점)와 봉인된 금고까지 알려 줘요. 상자 바로 옆에 오면 다이얼이 빛나요.', art: 'compass' },
   { t: '도감 · 계정 · 저장', b: '<kbd>C</kbd> 도감에는 찾은 상자·보물·곡괭이가 모여요. 한 번 연 상자는 도감에서 눌러 개봉 연출을 다시 볼 수 있어요. 진행은 브라우저에 자동 저장되고, 로그인하면 서버에 클라우드 저장돼서 다른 기기에서도 이어서 할 수 있어요.', art: 'codex' },
-  { t: '온라인 · 친구', b: '<kbd>O</kbd> 또는 🌐 버튼으로 온라인 창을 열어요. <b>공개 서버</b>는 누구나 들어와 같은 땅을 함께 파는 곳이고 매주 월요일 지형이 새로 생겨요. <b>개인 서버</b>는 처음엔 나 혼자지만 친구를 <b>초대</b>하거나 <b>초대 코드</b>를 알려 주면 함께할 수 있고, 지형이 계속 남아요. 상자는 <b>먼저 친 사람</b>이 열어요. 서버 안에서는 <kbd>Enter</kbd> 채팅, <kbd>1</kbd>~<kbd>8</kbd> 이모트를 써요. 다른 발굴사는 오른쪽 위치 바에 색 점으로도 보여요. 곡괭이·셀라·도감은 혼자 할 때와 똑같이 이어져요.', art: 'online' },
+  { t: '온라인 · 친구', b: '<kbd>O</kbd> 또는 🌐 버튼으로 온라인 창을 열어요. <b>공개 서버</b>는 누구나 들어와 같은 땅을 함께 파는 곳이에요. <b>개인 서버</b>는 처음엔 나 혼자지만 친구를 <b>초대</b>하거나 <b>초대 코드</b>를 알려 주면 함께할 수 있어요. 온라인 서버의 지형은 <b>10분마다 새로 생겨나요</b>(위쪽 표시에 남은 시간이 보여요). 다 캐도 곧 새 땅이 열려요. 상자는 <b>먼저 친 사람</b>이 열어요. 서버 안에서는 <kbd>Enter</kbd> 채팅, <kbd>1</kbd>~<kbd>8</kbd> 이모트를 써요. 다른 발굴사는 오른쪽 위치 바에 색 점으로도 보여요. 곡괭이·셀라·도감은 혼자 할 때와 똑같이 이어져요.', art: 'online' },
   { t: '준비됐어요!', b: '처음엔 발밑의 나무상자부터 열어 보세요. 원석과 보물을 팔아 곡괭이를 강화하고, 모루에서 좋은 곡괭이를 노리세요. 이 설명은 언제든 <kbd>H</kbd> 또는 오른쪽 아래 ❔ 버튼으로 다시 볼 수 있어요.', art: 'end' },
 ];
 let tutPage = 0;
@@ -3602,43 +3702,67 @@ const modalOpen = () => !$('#netM').hidden || !$('#campM').hidden || !$('#codexM
 function iconCanvas(drawFn, size = 120) { const c = document.createElement('canvas'); c.width = size * 2; c.height = size * 2; const x = c.getContext('2d'); x.scale(2, 2); drawFn(x, size); return c; }
 let campTab = 'sell', confirmNew = false;
 function openCamp() { if (opening) return; campTab = campTab || 'sell'; confirmNew = false; renderCamp(); $('#campM').hidden = false; }
+const CAMP_TABS = [['sell', '💰', '판매'], ['up', '⬆', '강화'], ['forge', '⚒', '운명의 모루'], ['class', '🎭', '직업 계약소'], ['board', '📜', '게시판']];
+const CAMP_NPC = { sell: '조합장 모르덴이 파이프를 물고 장부를 넘깁니다. “살아 돌아왔구먼. 캐 온 걸 보여 보게.”', up: '조합 기술자 피오가 공구 상자를 엽니다. “강화는 수치만 올려 줘요. 곡괭이 자체는 모루에서!”', board: '게시판에는 조합 공고와 오래된 연대기가 빼곡히 붙어 있습니다.' };
+const UPG_ICON = { pick: '⛏', lantern: '🏮', luck: '🍀', jet: '🔥', jetre: '🔋', compass: '🧭' };
 function renderCamp() {
   classAnim++;
-  const s = $('#campS'); s.innerHTML = '';
-  s.insertAdjacentHTML('beforeend', `<h2>황동 나침반 조합 천막</h2><p class="sub">조합장 모르덴이 파이프를 물고 장부를 넘깁니다. “살아 돌아왔구먼. 캐 온 걸 보여 보게.”</p>
-  <div class="tabs"><button type="button" data-t="sell">보물 감정·판매</button><button type="button" data-t="up">장비 강화</button><button type="button" data-t="forge">⚒ 운명의 모루</button><button type="button" data-t="class">🎭 직업 계약소</button><button type="button" data-t="board">조합 게시판</button><button type="button" id="cClose" style="margin-left:auto">닫기 (Esc)</button></div><div id="campBody"></div>`);
-  s.querySelectorAll('[data-t]').forEach(b => { b.classList.toggle('on', b.dataset.t === campTab); b.onclick = () => { campTab = b.dataset.t; renderCamp(); }; });
+  const s = $('#campS'); s.className = 'sheet camp'; s.innerHTML = `
+  <div class="camp-head"><canvas class="camp-ico" id="campIco" width="64" height="64"></canvas>
+    <div class="ttl"><small>BRASS COMPASS GUILD</small><h2>조합 천막</h2></div>
+    <div class="camp-gold"><i></i><b>${G.gold.toLocaleString()}</b><small>셀라</small></div>
+    <button type="button" class="camp-x" id="cClose" aria-label="닫기 (Esc)">✕</button></div>
+  <nav class="camp-tabs">${CAMP_TABS.map(([k, ic, nm]) => `<button type="button" data-t="${k}" class="${campTab === k ? 'on' : ''}"><span>${ic}</span>${nm}</button>`).join('')}</nav>
+  <div class="camp-body" id="campBody"></div>`;
+  { const c = $('#campIco'), x = c.getContext('2d'), t = tentSpr(); x.imageSmoothingEnabled = false; const k = Math.min(64 / t.width, 64 / t.height); x.drawImage(t, (64 - t.width * k) / 2, 64 - t.height * k, t.width * k, t.height * k); }
+  s.querySelectorAll('[data-t]').forEach(b => b.onclick = () => { campTab = b.dataset.t; renderCamp(); $('#campBody').scrollTop = 0; });
   $('#cClose').onclick = closeModals;
   const body = $('#campBody');
+  if (CAMP_NPC[campTab]) body.insertAdjacentHTML('beforeend', `<p class="sub">${CAMP_NPC[campTab]}</p>`);
   if (campTab === 'sell') {
     const counts = {}; G.bag.forEach(i => counts[i] = (counts[i] || 0) + 1);
     const total = G.bag.reduce((a, i) => a + TREASURES[i][2], 0);
-    body.innerHTML = G.bag.length ? `<p class="sub">가방 속 보물 ${G.bag.length}점. 팔아도 도감 기록은 그대로 남아요.</p><div class="bag">${Object.entries(counts).sort((a, b) => TREASURES[b[0]][1] - TREASURES[a[0]][1]).map(([i, n]) => `<span style="color:${RARITY[TREASURES[i][1]].c}">${TREASURES[i][0]} ×${n}</span>`).join('')}</div><div class="row"><button class="primary" type="button" id="sellAll">전부 팔기 · ${total.toLocaleString()} 셀라</button></div>` : `<p class="sub">가방이 비었어요. 땅속 상자를 열어 보물을 찾아오세요. 원석은 캐는 즉시 셀라로 바뀌어요.</p>`;
-    const b = $('#sellAll'); if (b) b.onclick = () => { G.gold += total; G.bag = []; S.buy(); S.coin(); updHUD(); save(); toast(`보물을 팔아 ${total.toLocaleString()} 셀라를 받았어요.`); renderCamp(); };
+    if (!G.bag.length) { body.insertAdjacentHTML('beforeend', '<div class="empty"><b>가방이 비어 있어요</b><p>땅속 상자에서 찾은 보물을 여기서 셀라로 바꿀 수 있어요.</p></div>'); return; }
+    body.insertAdjacentHTML('beforeend', `<div class="camp-bar"><div><b>가방 속 보물 ${G.bag.length}점</b><p>팔아도 도감 기록은 그대로 남아요</p></div><div class="sum"><small>모두 팔면</small><b>${total.toLocaleString()}</b></div><button class="primary" type="button" id="sellAll">전부 팔기</button></div><div class="grid items" id="itemGrid"></div>`);
+    const grid = $('#itemGrid');
+    Object.entries(counts).sort((a, b) => TREASURES[b[0]][1] - TREASURES[a[0]][1] || TREASURES[b[0]][2] - TREASURES[a[0]][2]).forEach(([i, n]) => {
+      const T0 = TREASURES[i], r = T0[1], el = document.createElement('div'); el.className = 'card item';
+      el.appendChild(iconCanvas((x, sz) => drawIcon(x, T0[3], T0[4], sz / 2, sz / 2, sz * .5, 0), 90));
+      el.insertAdjacentHTML('beforeend', `<span class="tag" style="color:${RARITY[r].prism ? '#fff' : RARITY[r].c}">${RARITY[r].name}</span><b>${T0[0]}${n > 1 ? ` <small>×${n}</small>` : ''}</b><p>개당 ${T0[2].toLocaleString()} 셀라</p>`);
+      const b = document.createElement('button'); b.type = 'button'; b.textContent = n > 1 ? `${n}개 팔기` : '팔기';
+      b.onclick = () => { const v = T0[2] * n; G.gold += v; G.bag = G.bag.filter(x => x !== +i); S.coin(); updHUD(); save(); toast(`${T0[0]}${n > 1 ? ` ${n}개` : ''}를 ${v.toLocaleString()} 셀라에 팔았어요.`); renderCamp(); };
+      el.appendChild(b); grid.appendChild(el);
+    });
+    $('#sellAll').onclick = () => { G.gold += total; G.bag = []; S.buy(); S.coin(); updHUD(); save(); toast(`보물을 팔아 ${total.toLocaleString()} 셀라를 받았어요.`); renderCamp(); };
   } else if (campTab === 'class') { renderClassTab(body);
   } else if (campTab === 'forge') { renderForge(body);
   } else if (campTab === 'up') {
-    body.insertAdjacentHTML('beforeend', '<p class="sub">강화는 수치만 올려요. 곡괭이 자체를 바꾸려면 ⚒ 운명의 모루에서 벼려 보세요.</p>');
+    const grid = document.createElement('div'); grid.className = 'upg-grid'; body.appendChild(grid);
     for (const [k, U0] of Object.entries(UPG)) {
-      const lv = G.upg[k], maxed = lv >= U0.max, cost = maxed ? 0 : U0.cost[lv];
-      const pips = Array.from({ length: U0.max - (k === 'pick' || k === 'lantern' ? 0 : 0) }, (_, i) => `<i class="${i < lv ? 'f' : ''}"></i>`).join('');
-      const el = document.createElement('div'); el.className = 'up';
-      el.innerHTML = `<div><b>${U0.name}</b><span class="pips">${pips}</span><p>현재: ${lv ? U0.desc(lv) : '없음'}</p>${maxed ? '' : `<p style="color:#e8dcc0">다음: ${U0.desc(lv + 1)}</p>`}</div>`;
-      const btn = document.createElement('button'); btn.type = 'button'; btn.className = 'primary';
-      btn.textContent = maxed ? '최고 단계' : `${cost.toLocaleString()} 셀라`; btn.disabled = maxed || G.gold < cost;
-      btn.onclick = () => { if (G.gold < cost) { S.deny(); return; } G.gold -= cost; G.upg[k]++; if (k === 'lantern') G.oil = maxOil(); if (k === 'jet') player.jet = null; S.buy(); updHUD(); save(); toast(`${U0.name} 강화 완료! Lv${G.upg[k]}`); renderCamp(); };
-      el.appendChild(btn); body.appendChild(el);
+      const lv = G.upg[k] || 0, maxed = lv >= U0.max, cost = maxed ? 0 : U0.cost[lv];
+      const el = document.createElement('div'); el.className = 'upg' + (maxed ? ' max' : '');
+      el.innerHTML = `<div class="upg-h"><span class="ico">${UPG_ICON[k] || '★'}</span><b>${U0.name}</b><span class="lv">Lv ${lv}<small>/${U0.max}</small></span></div>
+        <div class="seg">${Array.from({ length: U0.max }, (_, i) => `<i class="${i < lv ? 'f' : ''}"></i>`).join('')}</div>
+        <p class="now"><span>지금</span>${lv ? U0.desc(lv) : '아직 없음'}</p>${maxed ? '<p class="next"><span>완성</span>더 강화할 수 없는 최고 단계예요</p>' : `<p class="next"><span>다음</span>${U0.desc(lv + 1)}</p>`}`;
+      const btn = document.createElement('button'); btn.type = 'button'; btn.className = maxed ? '' : 'primary';
+      btn.innerHTML = maxed ? '최고 단계' : `<i class="coin"></i>${cost.toLocaleString()} 셀라`; btn.disabled = maxed || G.gold < cost;
+      btn.onclick = () => { if (G.gold < cost) { S.deny(); return; } G.gold -= cost; G.upg[k] = lv + 1; if (k === 'lantern') G.oil = maxOil(); if (k === 'jet') player.jet = null; S.buy(); updHUD(); save(); toast(`${U0.name} 강화 완료! Lv${G.upg[k]}`); renderCamp(); };
+      el.appendChild(btn); grid.appendChild(el);
     }
   } else {
     const nC = Object.keys(G.foundC).length, nT = Object.keys(G.foundT).length;
-    body.innerHTML = `<p class="sub"><b style="color:#d2a94e">대낙하 연대기</b><br>삼백 년 전 하늘섬 왕국 셀레스타는 심장석의 힘으로 구름 위를 떠다녔습니다. 어느 밤 금지된 ‘공허의 함’이 열리자 심장이 멎었고, 왕국은 통째로 대지에 떨어져 지층 아래로 가라앉았죠. 왕국의 일곱 금고지기 가문(숲의 베르데, 뼈의 오스, 서리의 히엠, 불꽃의 이그나, 태엽의 크로노스, 왕가의 아우렐, 별의 스텔라)은 보물을 각자의 상자에 봉인하고, 심장은 일곱 겹 봉인과 함께 가장 깊은 왕좌의 금고에 숨겼습니다.</p>
-    <p class="sub"><b style="color:#d2a94e">조합 공고</b><br>· 층이 바뀔 때마다 땅이 단단해지니 곡괭이를 미리 강화할 것.<br>· 벽돌로 둘러싸인 ‘봉인된 금고’ 방의 상자는 보상이 한 단계 좋음.<br>· 나무상자, 철테궤, 금화궤처럼 생긴 미믹 주의. 물리기 싫으면 배를 문질러 달랠 것.<br>· 기름이 떨어지면 구조대가 출동하지만 구조비 15%를 받음. 귀환 두루마리(R)는 공짜.</p>
-    <div class="up"><div><b>발굴 기록</b><p>연 상자 ${G.opened}개 · 상자 도감 ${nC}/${CHEST_ORDER.length} · 보물 도감 ${nT}/${TREASURES.length} · 최고 깊이 ${Math.max(0, (G.deepest - SURF) * 2)}m${G.heart ? ' · <span style="color:#ff5f8f">셀레스타의 심장 발견!</span>' : ''}</p></div></div>
-    <div class="up"><div><b>지층 안내</b>${LAYERS.map((Ly, i) => `<p>${(G.seen || []).includes(i) || i === 0 ? `<span style="color:#e8dcc0">${Ly.name}</span> (${(Ly.from - SURF) * 2}m~) · 곡괭이 Lv${Ly.pick}` : `??? (${(Ly.from - SURF) * 2}m~) · 곡괭이 Lv${Ly.pick}`}</p>`).join('')}</div></div>
-    <div class="row" style="margin-top:12px"><button type="button" id="newGame">${confirmNew ? '정말 처음부터? 한 번 더 누르면 지워져요' : '새 세계에서 처음부터'}</button></div>`;
+    body.insertAdjacentHTML('beforeend', `<div class="board">
+      <div class="stats">${[['연 상자', G.opened.toLocaleString() + '개'], ['상자 도감', `${nC}/${CHEST_ORDER.length}`], ['보물 도감', `${nT}/${TREASURES.length}`], ['최고 깊이', Math.max(0, (G.deepest - SURF) * 2) + 'm']].map(([a, b]) => `<div><small>${a}</small><b>${b}</b></div>`).join('')}</div>
+      ${G.heart ? '<p class="heart">✦ 셀레스타의 심장을 찾아냈어요 ✦</p>' : ''}
+      <section><h3>조합 공고</h3><ul>${NOTICES.map(n => `<li>${n}</li>`).join('')}</ul></section>
+      <section><h3>지층 안내</h3><div class="layers">${LAYERS.map((Ly, i) => { const seen = (G.seen || []).includes(i) || i === 0; return `<div class="${seen ? '' : 'q'}"><span class="rn">${ROMAN[i]}</span><b>${seen ? Ly.name : '???'}</b><small>${(Ly.from - SURF) * 2}m~ · 곡괭이 Lv${Ly.pick}</small></div>`; }).join('')}</div></section>
+      <section><h3>대낙하 연대기</h3><p class="lore">${CHRONICLE}</p></section>
+      <div class="row danger"><button type="button" id="newGame">${confirmNew ? '정말 처음부터? 한 번 더 누르면 지워져요' : '새 세계에서 처음부터'}</button></div></div>`);
     $('#newGame').onclick = () => { if (!confirmNew) { confirmNew = true; renderCamp(); return; } store.set('celesta-save-v1', null); store.set('celesta-save-v2', null); G.gold = 0; G.bag = []; G.foundT = {}; G.foundC = {}; G.upg = { pick: 1, lantern: 1, luck: 0, compass: 0 }; G.opened = 0; G.heart = false; G.deepest = 0; G.seen = []; G.picks = { rusty: 1 }; G.pickEq = 'rusty'; G.pity = 0; G.pulls = 0; closeModals(); transition('dirt', () => { genWorld(Math.floor(Math.random() * 1e9)); spawn(); G.oil = maxOil(); camUpdate(0, true); save(); updHUD(); }).then(() => toast('새로운 지층이 펼쳐졌어요.')); };
   }
 }
+const NOTICES = ["층이 바뀔 때마다 땅이 단단해지니 곡괭이를 미리 강화할 것.", "벽돌로 둘러싸인 ‘봉인된 금고’ 방의 상자는 보상이 한 단계 좋음.", "나무상자, 철테궤, 금화궤처럼 생긴 미믹 주의. 물리기 싫으면 배를 문질러 달랠 것.", "기름이 떨어지면 구조대가 출동하지만 구조비 15%를 받음. 귀환 두루마리(R)는 공짜."];
+const CHRONICLE = "삼백 년 전 하늘섬 왕국 셀레스타는 심장석의 힘으로 구름 위를 떠다녔습니다. 어느 밤 금지된 ‘공허의 함’이 열리자 심장이 멎었고, 왕국은 통째로 대지에 떨어져 지층 아래로 가라앉았죠. 왕국의 일곱 금고지기 가문(숲의 베르데, 뼈의 오스, 서리의 히엠, 불꽃의 이그나, 태엽의 크로노스, 왕가의 아우렐, 별의 스텔라)은 보물을 각자의 상자에 봉인하고, 심장은 일곱 겹 봉인과 함께 가장 깊은 왕좌의 금고에 숨겼습니다.";
 let codexTab = 'chest';
 function openCodex() { if (opening) return; renderCodex(); $('#codexM').hidden = false; }
 function renderCodex() {
@@ -3901,14 +4025,21 @@ function netMsg(raw) {
     return;
   }
   if (m.t === 'pong') { NET.ping = Math.round(performance.now() - m.c); netBadge(); return; }
-  if (m.t === 'sys') { if (m.k === 'slow') chatSys('조금 천천히 말해 주세요.'); return; }
+  if (m.t === 'sys') { if (m.k === 'slow') chatSys('조금 천천히 말해 주세요.'); if (m.k === 'reset') { const txt = m.s > 30 ? '1분 뒤 이 서버의 지형이 새로 생겨나요. 캐던 걸 마무리하세요!' : `${m.s}초 뒤 지형이 새로 생겨나요!`; toast(txt); chatSys(txt); S.chain(); } return; }
   if (m.t === 'note') {
     const txt = { freq: `${m.from}님이 친구 신청을 보냈어요.`, friend: `${m.from}님과 친구가 됐어요!`, invite: `${m.from}님이 「${m.name}」에 초대했어요.` }[m.k];
     if (txt) { toast(txt); S.sparkle(4); NET.badge++; netBtn(); }
     NET.socialT = 0; if (!$('#netM').hidden) netRefresh();
     return;
   }
-  if (m.t === 'world') { netWorld(m.seed, m.mods, true); toast(m.msg || '서버의 지형이 새로 생겨났어요.'); return; }
+  if (m.t === 'world') {
+    NET.resetAt = m.resetAt || NET.resetAt; NET.seed = m.seed; NET.claim = null;
+    const go = () => { netWorld(m.seed, m.mods, true); G.oil = maxOil(); lastLayer = -2; };
+    if (opening) { go(); toast(m.msg || '서버의 지형이 새로 생겨났어요.'); }
+    else { closeModals(); transition('world', go, null, '새 지형이 솟아올라요').then(() => toast(m.msg || '서버의 지형이 새로 생겨났어요.')); }
+    chatSys('지형이 새로 생겨났어요. 다음 초기화까지 10분!');
+    return;
+  }
   if (m.t === 'kicked') {
     NET.quit = true;
     toast({ kick: '방장이 서버에서 내보냈어요.', elsewhere: '다른 곳에서 같은 계정으로 접속해서 여기 연결을 넘겼어요.', deleted: '방장이 서버를 없앴어요.' }[m.why] || '서버와 연결이 끊겼어요.');
@@ -3925,7 +4056,7 @@ function netWorld(seed, mods, respawn) {
 }
 function netInit(m) {
   const fresh = !NET.on || NET.room?.id !== m.room.id || NET.seed !== m.seed;
-  NET.me = m.me; NET.room = m.room; NET.retry = 0; NET.self = { emote: null, say: null };
+  NET.me = m.me; NET.room = m.room; NET.retry = 0; NET.resetAt = m.resetAt || 0; NET.skew = (m.now || Date.now()) - Date.now(); NET.self = { emote: null, say: null };
   NET.players.clear(); for (const p of m.players) netAddPlayer(p);
   NET.chat = m.chat || [];
   const enter = () => {
@@ -3937,7 +4068,7 @@ function netInit(m) {
     Sound.setDrone(layerAt(Math.floor(player.y / TS)));
     $('#netM').hidden = true; $('#chat').hidden = false; renderChat(); netBadge();
   };
-  if (fresh) { closeModals(); S.whoosh(.8); transition('keyhole', enter).then(() => { toast(`${m.room.name}에 들어왔어요 · 지금 ${NET.players.size + 1}명`); }); }
+  if (fresh) { closeModals(); transition('keyhole', enter, null, m.room.name).then(() => { toast(`${m.room.name}에 들어왔어요 · 지금 ${NET.players.size + 1}명`); }); }
   else { netWorld(m.seed, m.mods, false); netBadge(); chatSys('다시 연결됐어요.'); }
 }
 function netLeave() {
@@ -3952,7 +4083,7 @@ function netLeave() {
     if (!load()) { genWorld(Math.floor(Math.random() * 1e9)); spawn(); }
     NET.solo = null; G.oil = maxOil(); lastLayer = -2; camUpdate(0, true); updHUD(); save();
     $('#chat').hidden = true; netBadge('');
-  }).then(() => toast('혼자 하던 내 발굴지로 돌아왔어요.'));
+  }, null, '내 발굴지로').then(() => toast('혼자 하던 내 발굴지로 돌아왔어요.'));
 }
 // 파기는 먼저 화면에서 처리하고(예측) 서버에 알린다. 이미 누가 판 칸이면 서버가 무시한다
 function netDig(i) { if (!netSend({ t: 'dig', i })) NET.queue.push(i); }
@@ -3992,6 +4123,7 @@ function netUpdate(dt) {
     if (s !== NET.last || NET.idleT <= 0) { if (netSend(s)) { NET.last = s; NET.idleT = 2; } }
   }
   if (NET.pingT <= 0) { NET.pingT = 5; netSend({ t: 'ping', c: now }); }
+  NET.badgeT = (NET.badgeT || 0) - dt; if (NET.badgeT <= 0 && NET.ws && NET.ws.readyState === 1) { NET.badgeT = 1; netBadge(); }
   const rt = now - 100;
   for (const o of NET.players.values()) {
     if (o.say) { o.say.t -= dt; if (o.say.t <= 0) o.say = null; }
@@ -4071,7 +4203,8 @@ function netBadge(text) {
   const el = $('#netBadge'); if (!el) return;
   if (text === '') { el.hidden = true; return; }
   el.hidden = false;
-  el.innerHTML = text != null ? esc(text) : `<i class="${NET.ping < 120 ? 'g' : NET.ping < 250 ? 'y' : 'r'}"></i>${esc(NET.room ? NET.room.name : '')} · ${NET.players.size + 1}명${NET.ping ? ` · ${NET.ping}ms` : ''}`;
+  const left = NET.resetAt ? Math.max(0, Math.ceil((NET.resetAt - Date.now() - (NET.skew || 0)) / 1000)) : 0;
+  el.innerHTML = text != null ? esc(text) : `<i class="${NET.ping < 120 ? 'g' : NET.ping < 250 ? 'y' : 'r'}"></i>${esc(NET.room ? NET.room.name : '')} · ${NET.players.size + 1}명${NET.ping ? ` · ${NET.ping}ms` : ''}${left ? ` · <span class="rst${left <= 60 ? ' warn' : ''}">⟳ ${Math.floor(left / 60)}:${String(left % 60).padStart(2, '0')}</span>` : ''}`;
 }
 function openNet(tab) {
   if (opening) return;
@@ -4101,7 +4234,7 @@ async function netDo(action, p, okMsg) {
 function renderNet() {
   const s = $('#netS'), so = NET.social, sv = NET.servers, tab = NET.tab;
   const here = NET.on && NET.room;
-  const head = `<h2>온라인 발굴</h2><p class="sub">${here ? `지금 <b>${esc(NET.room.name)}</b>에 있어요 · ${NET.players.size + 1}명 · 핑 ${NET.ping || '–'}ms` : '공개 서버는 누구나 함께 파는 넓은 발굴지(매주 월요일 새 지형), 개인 서버는 내가 초대한 사람만 들어오는 나만의 발굴지예요. 곡괭이·셀라·도감은 어디서든 그대로예요.'}</p>
+  const head = `<h2>온라인 발굴</h2><p class="sub">${here ? `지금 <b>${esc(NET.room.name)}</b>에 있어요 · ${NET.players.size + 1}명 · 핑 ${NET.ping || '–'}ms` : '공개 서버는 누구나 함께 파는 넓은 발굴지, 개인 서버는 내가 초대한 사람만 들어오는 나만의 발굴지예요. 온라인 서버의 지형은 10분마다 새로 생겨나요. 곡괭이·셀라·도감은 어디서든 그대로예요.'}</p>
     <div class="tabs">${[['servers', '서버'], ...(here ? [['room', '이 서버']] : []), ['friends', `친구${so && so.reqIn.length ? ` (${so.reqIn.length})` : ''}`], ['top', '순위']].map(([k, n]) => `<button type="button" data-nt="${k}" class="${tab === k ? 'on' : ''}">${n}</button>`).join('')}<button type="button" id="nClose" style="margin-left:auto">닫기 (Esc)</button></div>`;
   let body = '';
   const roomRow = (r, extra = '') => `<div class="up"><div><b>${esc(r.name)}</b><p>${r.kind === 'pub' ? '공개 서버' : `개인 서버${r.owner ? ` · 방장 ${esc(r.owner)}` : ''}`} · ${r.n}/${r.max}명${r.code ? ` · 초대 코드 <code>${r.code}</code>` : ''}</p></div><div class="row" style="flex:0 0 auto">${extra}${NET.on && NET.room.id === r.id ? '<button type="button" disabled>접속 중</button>' : `<button class="primary" type="button" data-join="${r.id}"${r.n >= r.max ? ' disabled' : ''}>입장</button>`}</div></div>`;
@@ -4236,7 +4369,7 @@ function startGame() {
   transition('keyhole', () => {
     $('#title').hidden = true; $('#hud').hidden = false; $('#btns').hidden = false; $('#depthBar').hidden = false; $('#compassDial').hidden = false;
     lastLayer = -2; camUpdate(0, true); updHUD(); Sound.setDrone(layerAt(Math.floor(player.y / TS)));
-  }).then(() => {
+  }, null, '발굴 시작').then(() => {
     if (!store.get('celesta-tut')) openTut(0);
     else if (!G.opened) toast(document.body.classList.contains('touch') ? '천막 오른쪽 발굴터로 가서 조이스틱을 아래로 겨누고 ⛏를 눌러 파 내려가 보세요!' : '천막 오른쪽 발굴터로 가서 ↓로 겨누고 X를 눌러 파 내려가 보세요!');
     if (migrated) toast('세계가 넓어져 지층 열 개짜리 새 대지가 생겼어요. 셀라·도감·강화는 그대로예요.');
