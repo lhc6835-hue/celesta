@@ -40,9 +40,23 @@ button:active{transform:translateY(2px);box-shadow:0 1px 0 #0009}
 button:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
 button.primary{background:linear-gradient(#e7c063,#a37b2c);color:#2a1a08;border-color:#ffe39a;font-weight:700}
 button[disabled]{opacity:.45;cursor:not-allowed;filter:none}
-.pad{position:fixed;left:max(12px,env(safe-area-inset-left,0px));bottom:calc(env(safe-area-inset-bottom,0px) + 12px);display:none;grid-template-columns:repeat(3,58px);grid-template-rows:repeat(2,58px);gap:6px;z-index:6}
+.pad-old{position:fixed;left:max(12px,env(safe-area-inset-left,0px));bottom:calc(env(safe-area-inset-bottom,0px) + 12px);display:none;grid-template-columns:repeat(3,58px);grid-template-rows:repeat(2,58px);gap:6px;z-index:6}
 .pad button{padding:0;font-size:22px;border-radius:14px;background:#2d2119cc}
-.touch .pad{display:grid}
+.touch .pad-old{display:grid}
+#stick{display:none;position:fixed;left:max(18px,env(safe-area-inset-left,0px));bottom:calc(env(safe-area-inset-bottom,0px) + 70px);width:132px;height:132px;z-index:6;touch-action:none}
+.touch #stick{display:block}
+#stick .ring{position:absolute;inset:0;border-radius:50%;background:radial-gradient(circle,#2d2119aa 0 55%,#1d1510cc 56% 100%);border:3px solid var(--brass-d);box-shadow:inset 0 0 0 2px #0008,0 4px 14px #0008}
+#stick .arr{position:absolute;width:0;height:0;border:7px solid transparent;opacity:.55;transition:opacity .1s}
+#stick .arr.u{left:calc(50% - 7px);top:8px;border-bottom:9px solid var(--brass);border-top:0}
+#stick .arr.d{left:calc(50% - 7px);bottom:8px;border-top:9px solid var(--brass);border-bottom:0}
+#stick .arr.l{top:calc(50% - 7px);left:8px;border-right:9px solid var(--brass);border-left:0}
+#stick .arr.r{top:calc(50% - 7px);right:8px;border-left:9px solid var(--brass);border-right:0}
+#stick .arr.on{opacity:1;filter:drop-shadow(0 0 4px #ffd36b)}
+#stick .knob{position:absolute;left:50%;top:50%;width:58px;height:58px;margin:-29px 0 0 -29px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#6a5040,#3a2b22);border:3px solid var(--brass);box-shadow:0 4px 0 #0009,inset 0 2px 0 #ffffff22;will-change:transform}
+#stick.on .knob{border-color:#ffe39a;background:radial-gradient(circle at 35% 30%,#8a6a50,#4a372b)}
+#jumpBtn{display:none;position:fixed;right:max(112px,calc(env(safe-area-inset-right,0px) + 112px));bottom:calc(env(safe-area-inset-bottom,0px) + 70px);width:66px;height:66px;border-radius:50%;padding:0;z-index:6;color:#f6ecd4;background:radial-gradient(circle at 35% 30%,#5a8ac0,#2a4a7a);border-color:#9fd0ff;box-shadow:0 4px 0 #0009,0 0 14px #6ab0ff33;align-items:center;justify-content:center}
+.touch #jumpBtn{display:flex}
+#jumpBtn:active{transform:translateY(3px) scale(.96)}
 #digBtn{display:none;position:fixed;right:max(16px,env(safe-area-inset-right,0px));bottom:calc(env(safe-area-inset-bottom,0px) + 78px);width:84px;height:84px;border-radius:50%;font-size:34px;padding:0;z-index:6;background:radial-gradient(circle at 35% 30%,#e7c063,#a37b2c);border-color:#ffe39a;box-shadow:0 4px 0 #0009,0 0 18px #ffd36b44}
 .touch #digBtn{display:block}
 #digBtn:active{transform:translateY(3px) scale(.96)}
@@ -183,7 +197,7 @@ button.mini{padding:2px 8px;font-size:12px}
 #chat .emo{display:none;gap:4px;flex-wrap:wrap;pointer-events:auto}#chat .emo button{padding:4px 7px;font-size:17px}
 #chat.open #chatLog{max-height:260px;overflow:auto;background:#0008;border-radius:8px;padding:6px 8px;pointer-events:auto}#chat.open #chatLog p.old{opacity:1}
 #chat.open .cbar input{display:block}#chat.emo-on .emo{display:flex}
-body.touch #chat{bottom:calc(env(safe-area-inset-bottom,0px) + 170px)}
+body.touch #chat{bottom:calc(env(safe-area-inset-bottom,0px) + 214px)}
 @media (max-width:640px){#netBadge{left:auto;right:max(56px,calc(env(safe-area-inset-right,0px) + 56px));transform:none;top:calc(env(safe-area-inset-top,0px) + 64px);font-size:11px}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 @media (max-width:560px){.layer-name{font-size:15px}.gold{font-size:17px}.btns button{padding:8px 10px;font-size:13px}}
@@ -216,10 +230,8 @@ body.touch #chat{bottom:calc(env(safe-area-inset-bottom,0px) + 170px)}
   <button id="bSound" type="button">🔊</button>
 </div>
 <button type="button" id="digBtn" data-k="dig" aria-label="캐기">⛏</button>
-<div class="pad" id="pad">
-  <span></span><button type="button" data-k="up" aria-label="위">▲</button><span></span>
-  <button type="button" data-k="left" aria-label="왼쪽">◀</button><button type="button" data-k="down" aria-label="아래">▼</button><button type="button" data-k="right" aria-label="오른쪽">▶</button>
-</div>
+<button type="button" id="jumpBtn" data-k="jump" aria-label="점프"><svg viewBox="0 0 24 24" width="30" height="30" aria-hidden="true"><path d="M12 4l7 8h-4.5v7h-5v-7H5z" fill="currentColor"/></svg></button>
+<div id="stick" aria-label="조이스틱"><div class="ring"></div><i class="arr u"></i><i class="arr d"></i><i class="arr l"></i><i class="arr r"></i><div class="knob" id="knob"></div></div>
 <div id="toast"></div>
 <div id="netBadge" hidden></div>
 <div id="netAnn" hidden></div>
@@ -1379,7 +1391,7 @@ const player = { x: 0, y: 0, vx: 0, vy: 0, w: 18, h: 26, face: 1, ground: false,
   sq: 0, sqv: 0, faceS: 1, lean: 0, coy: 0, jbuf: 0, upPrev: false, wasGround: true, dustT: 0, hit: null, scarf: 1.2, scarfV: 0, lookX: 0 };
 let hitStop = 0, shakeA = 0;
 const kick = (sq, sh = 0) => { player.sqv += sq * 18; shakeA = Math.max(shakeA, sh); };
-const keys = { left: false, right: false, up: false, down: false, dig: false };
+const keys = { left: false, right: false, up: false, down: false, dig: false, jump: false };
 function spawn() { player.x = (W / 2 + .5) * TS - player.w / 2; player.y = SURF * TS - player.h; player.vx = player.vy = 0; }
 const solid = v => v !== T.AIR;
 function solidAt(px, py) { return solid(tileAt(Math.floor(px / TS), Math.floor(py / TS))); }
@@ -1464,7 +1476,7 @@ function updatePlayer(dt) {
     p.vx = clamp(p.vx, -maxv, maxv); p.face = mv;
   } else { const d = dec * dt; p.vx = Math.abs(p.vx) <= d ? 0 : p.vx - Math.sign(p.vx) * d; }
   p.walk += Math.abs(p.vx) * dt / 13;
-  if (keys.up && !p.upPrev) p.jbuf = .13; p.upPrev = keys.up; p.jbuf -= dt;
+  if (keys.jump && !p.upPrev) p.jbuf = .13; p.upPrev = keys.jump; p.jbuf -= dt;
   p.coy = p.ground ? .1 : p.coy - dt;
   // 방향키로 겨누고(↓ 아래 · ↑ 위 · 그 밖엔 바라보는 쪽) 캐기 버튼(X/J · 마우스 · ⛏)을 눌러야 판다
   let digging = false;
@@ -1476,11 +1488,11 @@ function updatePlayer(dt) {
   // 빈 곳을 겨누고 눌러도 허공에 한 번씩 휘두른다
   if (keys.dig && !digging && !p.dig) { p.swingDir = aim.dir; if (p.swing <= 0 && !isDrill(G.pickEq)) { p.swing = SWING_T; S.whoosh(.12); } }
   if (!digging) { p.dig = null; p.hit = null; }
-  if ((p.jbuf > 0 || keys.up) && p.coy > 0 && !digging && !(keys.dig && aim.dir === 3)) {
+  if ((p.jbuf > 0 || keys.jump) && p.coy > 0 && !digging && !(keys.dig && aim.dir === 3)) {
     p.vy = -480; p.ground = false; p.coy = 0; p.jbuf = 0; S.jump(); kick(.32); dust(p.x + p.w / 2, p.y + p.h, 4);
   }
   // 누른 만큼 높이: 일찍 떼면 빨리 떨어지고, 정점에선 잠깐 떠 있는다
-  const gm = p.vy < 0 && !keys.up ? 2.4 : Math.abs(p.vy) < 90 ? .55 : p.vy > 0 ? 1.22 : 1;
+  const gm = p.vy < 0 && !keys.jump ? 2.4 : Math.abs(p.vy) < 90 ? .55 : p.vy > 0 ? 1.22 : 1;
   p.vy = Math.min(p.vy + 1500 * gm * dt, 900);
   const vyPre = p.vy;
   p.x += p.vx * dt; collideX();
@@ -2872,7 +2884,7 @@ function drawWorldMap(cv, opt = {}) {
 const TUT = [
   { t: '셀레스타에 오신 걸 환영해요', b: '삼백 년 전 하늘에서 떨어진 왕국 셀레스타가 이 땅 아래 잠들어 있어요. 견습 발굴사인 당신의 목표는 <b>열 개의 지층</b>을 파 내려가 맨 밑바닥 <b>왕좌의 금고</b>에 있는 <b>셀레스타의 심장</b>을 여는 거예요. 왼쪽은 지금 세계의 실제 지형 지도예요. 흰 점이 상자, 금색이 봉인된 금고, 노란 선이 지금 위치예요.', art: 'map' },
   { t: '열 개의 지층', b: '깊이 내려갈수록 땅이 단단해지고, 더 높은 등급의 상자가 나와요. 지층마다 들어가려면 <b>곡괭이 강화 단계</b>가 필요해요(오른쪽 표의 Lv). 층마다 풍경과 음악, 원석, 상자 종류가 달라요.', art: 'map2' },
-  { t: '파는 법', b: '<kbd>←</kbd><kbd>→</kbd>로 걷고 <kbd>↑</kbd>/<kbd>Space</kbd>로 점프해요(누른 만큼 높이). 파려면 <b>방향키로 겨누고 캐기 버튼</b>을 눌러요. 그냥 서 있으면 바라보는 쪽, <kbd>↓</kbd>를 누르고 있으면 발밑, <kbd>↑</kbd>를 누르고 있으면 머리 위를 겨눠요. 겨눈 칸에 하얀 괄호가 보이고, <kbd>X</kbd>·<kbd>J</kbd>·마우스 왼쪽 버튼(모바일은 오른쪽 아래 ⛏)을 누르는 동안 곡괭이가 내리꽂힐 때마다 블록이 깎여요. 야영지 바닥은 기반암이라 천막 옆 발굴터에서 파 내려가요. 블록마다 단단함이 달라서 돌·벽돌은 오래 걸려요. 원석을 캐면 바로 셀라(돈)가 들어와요. 모바일은 왼쪽 아래 방향 버튼으로 겨눠요.', art: 'dig' },
+  { t: '파는 법', b: '<kbd>←</kbd><kbd>→</kbd>로 걷고 <kbd>↑</kbd>/<kbd>Space</kbd>로 점프해요(누른 만큼 높이). 파려면 <b>방향키로 겨누고 캐기 버튼</b>을 눌러요. 그냥 서 있으면 바라보는 쪽, <kbd>↓</kbd>를 누르고 있으면 발밑, <kbd>↑</kbd>를 누르고 있으면 머리 위를 겨눠요. 겨눈 칸에 하얀 괄호가 보이고, <kbd>X</kbd>·<kbd>J</kbd>·마우스 왼쪽 버튼(모바일은 왼쪽 아래 조이스틱으로 겨누고 오른쪽 아래 ⛏)을 누르는 동안 곡괭이가 내리꽂힐 때마다 블록이 깎여요. 야영지 바닥은 기반암이라 천막 옆 발굴터에서 파 내려가요. 블록마다 단단함이 달라서 돌·벽돌은 오래 걸려요. 원석을 캐면 바로 셀라(돈)가 들어와요. 모바일은 왼쪽 아래 조이스틱으로 걷고 겨누며, 점프는 ⛏ 옆 파란 버튼이에요.', art: 'dig' },
   { t: '랜턴 기름과 귀환', b: '땅속에서는 랜턴 기름이 계속 줄고, 블록을 팔 때도 줄어요. 기름이 떨어지면 정신을 잃고 조합 구조대가 끌어올리지만 <b>구조비 15%</b>를 내야 해요. 그 전에 <kbd>R</kbd> <b>귀환 두루마리</b>를 쓰면 공짜로 야영지에 돌아와요. 지상에서는 기름이 저절로 채워져요.', art: 'oil' },
   { t: '상자와 열한 개의 등급', b: '상자를 곡괭이로 치면 열려요. 기를 모으는 동안 빛깔이 한 칸씩 오르며 안에 든 <b>최고 등급</b>을 미리 알려 줘요. 벽돌로 둘러싸인 <b>봉인된 금고</b>는 보상이 더 좋고, 평범한 상자처럼 생긴 <b>미믹</b>은 화면을 연타해 달래야 해요. <b>셀레스타</b> 등급은 심장 하나만을 위한 특별한 등급이에요.', art: 'rarity' },
   { t: '야영지 · 강화 · 운명의 모루', b: '지상의 조합 천막(<kbd>E</kbd>)에서 보물을 팔고 장비를 강화해요. <b>강화는 수치만</b> 올려요(파는 힘, 기름, 행운, 나침반). 곡괭이 자체는 <b>⚒ 운명의 모루</b>에서 셀라를 내고 벼려야 바뀌어요. 곡괭이는 24종이고 등급이 높을수록 빠르고, 행운·기름 절약·원석 보너스가 붙어요.', art: 'picks' },
@@ -3346,7 +3358,7 @@ setInterval(() => { if (ACCT.token && document.visibilityState === 'visible' && 
 addEventListener('pagehide', () => { if (NET.ws) { NET.quit = true; try { NET.ws.close(1000); } catch (e) { } } });
 
 // ───────────── 입력 · 루프 ─────────────
-const KEYMAP = { ArrowLeft: 'left', KeyA: 'left', ArrowRight: 'right', KeyD: 'right', ArrowUp: 'up', KeyW: 'up', Space: 'up', ArrowDown: 'down', KeyS: 'down', KeyX: 'dig', KeyJ: 'dig' };
+const KEYMAP = { ArrowLeft: ['left'], KeyA: ['left'], ArrowRight: ['right'], KeyD: ['right'], ArrowUp: ['up', 'jump'], KeyW: ['up', 'jump'], Space: ['jump'], ArrowDown: ['down'], KeyS: ['down'], KeyX: ['dig'], KeyJ: ['dig'] };
 addEventListener('keydown', e => {
   Sound.init();
   if (!$('#acctM').hidden) { if (e.code === 'Escape') closeAcct(); return; }
@@ -3356,7 +3368,7 @@ addEventListener('keydown', e => {
   if (e.code === 'Escape') { closeModals(); return; }
   if (!$('#title').hidden) { if (e.code === 'Enter' || e.code === 'Space') { startGame(); e.preventDefault(); } return; }
   if (modalOpen()) return;
-  if (KEYMAP[e.code]) { keys[KEYMAP[e.code]] = true; e.preventDefault(); }
+  if (KEYMAP[e.code]) { for (const k of KEYMAP[e.code]) keys[k] = true; e.preventDefault(); }
   if (e.code === 'KeyR') recall();
   if (e.code === 'KeyC') openCodex();
   if (e.code === 'KeyH') openTut(0);
@@ -3365,16 +3377,31 @@ addEventListener('keydown', e => {
   if (NET.on && /^Digit[1-8]$/.test(e.code)) sendEmote(+e.code.slice(5) - 1);
   if (e.code === 'KeyE' && Math.floor(player.y / TS) <= SURF) openCamp();
 });
-addEventListener('keyup', e => { if (KEYMAP[e.code]) keys[KEYMAP[e.code]] = false; });
+addEventListener('keyup', e => { if (KEYMAP[e.code]) for (const k of KEYMAP[e.code]) keys[k] = false; });
 addEventListener('blur', () => { for (const k in keys) keys[k] = false; });
 fxc.addEventListener('pointerdown', e => { e.preventDefault(); openingTap(); });
 // 마우스 왼쪽 버튼을 누르고 있으면 캐기
 cv.addEventListener('pointerdown', e => { if (e.button === 0 && e.pointerType === 'mouse' && !modalOpen() && !opening) { Sound.init(); keys.dig = true; } });
 addEventListener('pointerup', e => { if (e.pointerType === 'mouse') keys.dig = false; });
-document.querySelectorAll('#pad [data-k], #digBtn').forEach(b => {
+document.querySelectorAll('#digBtn, #jumpBtn').forEach(b => {
   const k = b.dataset.k, on = e => { e.preventDefault(); Sound.init(); keys[k] = true; b.setPointerCapture?.(e.pointerId); }, off = () => keys[k] = false;
   b.addEventListener('pointerdown', on); b.addEventListener('pointerup', off); b.addEventListener('pointercancel', off); b.addEventListener('lostpointercapture', off);
 });
+// 가상 조이스틱: 좌우로 걷고(바라보는 쪽을 겨눔), 위·아래로 머리 위·발밑을 겨눈다. 점프는 따로 버튼
+(() => {
+  const st = $('#stick'), kn = $('#knob'), arr = k => st.querySelector('.arr.' + k);
+  let id = null, cx = 0, cy = 0;
+  const set = (dx, dy) => {
+    const r = st.clientWidth * .38, d = Math.hypot(dx, dy), k = d > r ? r / d : 1, nx = dx * k / r, ny = dy * k / r;
+    kn.style.transform = `translate(${dx * k}px,${dy * k}px)`;
+    keys.left = nx < -.38; keys.right = nx > .38; keys.down = ny > .5; keys.up = ny < -.5;
+    arr('l').classList.toggle('on', keys.left); arr('r').classList.toggle('on', keys.right); arr('u').classList.toggle('on', keys.up); arr('d').classList.toggle('on', keys.down);
+  };
+  const end = () => { id = null; st.classList.remove('on'); set(0, 0); };
+  st.addEventListener('pointerdown', e => { e.preventDefault(); Sound.init(); id = e.pointerId; st.setPointerCapture?.(id); const b = st.getBoundingClientRect(); cx = b.left + b.width / 2; cy = b.top + b.height / 2; st.classList.add('on'); set(e.clientX - cx, e.clientY - cy); });
+  st.addEventListener('pointermove', e => { if (e.pointerId === id) set(e.clientX - cx, e.clientY - cy); });
+  for (const ev of ['pointerup', 'pointercancel', 'lostpointercapture']) st.addEventListener(ev, e => { if (e.pointerId === id) end(); });
+})();
 $('#bCamp').onclick = openCamp; $('#bReturn').onclick = recall; $('#bCodex').onclick = openCodex;
 $('#bSound').onclick = () => { Sound.init(); const on = Sound.toggle(); $('#bSound').textContent = on ? '🔊' : '🔇'; if (on) Sound.setDrone(layerAt(Math.floor(player.y / TS))); };
 for (const m of ['#campM', '#codexM', '#acctM', '#tutM', '#netM']) $(m).addEventListener('pointerdown', e => { if (e.target === $(m)) closeModals(); });
@@ -3387,7 +3414,7 @@ function startGame() {
     lastLayer = -2; camUpdate(0, true); updHUD(); Sound.setDrone(layerAt(Math.floor(player.y / TS)));
   }).then(() => {
     if (!store.get('celesta-tut')) openTut(0);
-    else if (!G.opened) toast('천막 오른쪽 발굴터로 가서 ↓로 겨누고 X(모바일은 ⛏)를 눌러 파 내려가 보세요!');
+    else if (!G.opened) toast(document.body.classList.contains('touch') ? '천막 오른쪽 발굴터로 가서 조이스틱을 아래로 겨누고 ⛏를 눌러 파 내려가 보세요!' : '천막 오른쪽 발굴터로 가서 ↓로 겨누고 X를 눌러 파 내려가 보세요!');
     if (migrated) toast('세계가 넓어져 지층 열 개짜리 새 대지가 생겼어요. 셀라·도감·강화는 그대로예요.');
   });
 }
