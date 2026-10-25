@@ -2563,7 +2563,7 @@ const BOSSES = [
   { id: 'king', name: '타락한 금고지기 왕', en: 'THE FALLEN VAULT KING', col: '#ffd36b', mode: 'ground', hit: [140, 212], pat: ['slam', 'rain', 'beam', 'summon'], shot: 'gold', minion: 'knight',
     lore: '셀레스타의 심장을 지키던 첫 금고지기. 왕좌의 금고에서 삼백 년을 버티다 금빛 탐욕에 삼켜졌다.' },
 ];
-const BOSS_LIFT = { bone: 60, drake: 30, eye: 54, kraken: 84, void: 18 };
+const BOSS_LIFT = { bone: 28, drake: 30, eye: 54, kraken: 84, void: 18 };
 BOSSES.forEach((b, i) => { b.L = i; b.lift = BOSS_LIFT[b.id] || 0; b.hp = Math.round(700 * Math.pow(1.55, i)); b.reward = Math.round(400 * Math.pow(1.85, i)); });
 // 픽셀 합성기: 도형으로 글자 격자를 칠한 뒤 buildSprite가 테두리·명암을 넣는다
 function pxArt(w, h, fn) {
@@ -2595,7 +2595,8 @@ function pxArt(w, h, fn) {
 const bspr = (key, w, h, fn, base, ov) => cspr('boss' + key, () => buildSprite(pxArt(w, h, fn), base, ov));
 const snap = v => Math.round(v / BP) * BP;
 const bfr = v => v - Math.floor(v), bhash = (i, s) => bfr(Math.sin(i * 127.1 + s * 311.7) * 43758.5453);
-function addG(fn) { const o = g.globalCompositeOperation; g.globalCompositeOperation = 'lighter'; fn(); g.globalCompositeOperation = o; }
+let BOSS_MASKING = false;
+function addG(fn) { if (BOSS_MASKING) return; const o = g.globalCompositeOperation; g.globalCompositeOperation = 'lighter'; fn(); g.globalCompositeOperation = o; }
 const bglow = (x, y, r, c, a) => addG(() => glowDot(g, x, y, r, c, a));
 const bsq = (x, y, s, c) => { g.fillStyle = c; g.fillRect(snap(x), snap(y), s, s); };
 // 떠오르는 빛 알갱이(포자·불씨·금가루). 시간만으로 정해져서 초상에서도 똑같이 움직인다
@@ -3309,6 +3310,27 @@ function buildArena(L) {
 }
 const dunFloorY = () => world.arena.fy * TS;
 // reach=true: 캐기 판정. 떠 있는 보스는 아래로 늘어진 부위(촉수·꼬리)까지 캘 수 있게 바닥 쪽으로 늘린다
+// ── 보스 판정: 실제로 그려진 픽셀 ──
+// 보스를 1/4 크기 판정용 캔버스에 한 번 더 그린다(빛·잔광은 빼고). 진한 픽셀(불투명도 70% 이상)이 있는 곳만 몸이다.
+// 몸통이든 다리든 촉수든 그림이 있는 곳을 쳐야 맞고, 반투명한 유령살이나 빛무리는 맞지 않는다.
+const BM_S = .25, BM_W = 760, BMASK = { c: null, x: null, at: -1, b: null, ox: 0, oy: 0, d: null };
+function bossMask() {
+  const b = DUN.b; if (!b) return null;
+  if (BMASK.b === b && time - BMASK.at >= 0 && time - BMASK.at < .05) return BMASK;
+  const n = Math.round(BM_W * BM_S);
+  if (!BMASK.c) { BMASK.c = document.createElement('canvas'); BMASK.c.width = BMASK.c.height = n; BMASK.x = BMASK.c.getContext('2d', { willReadFrequently: true }); }
+  const B = BOSSES[b.L], ox = b.x - BM_W / 2, oy = b.y - (B.mode === 'ground' ? BM_W * .8 : BM_W / 2), x = BMASK.x;
+  x.setTransform(1, 0, 0, 1, 0, 0); x.globalAlpha = 1; x.globalCompositeOperation = 'source-over'; x.clearRect(0, 0, n, n);
+  x.setTransform(BM_S, 0, 0, BM_S, -ox * BM_S, -oy * BM_S); x.imageSmoothingEnabled = false;
+  const g0 = g; g = x; BOSS_MASKING = true; try { BOSS_DRAW[B.id](b, time); } finally { g = g0; BOSS_MASKING = false; }
+  BMASK.d = x.getImageData(0, 0, n, n).data; BMASK.at = time; BMASK.b = b; BMASK.ox = ox; BMASK.oy = oy; return BMASK;
+}
+function bossHitRect(r) {
+  const m = bossMask(); if (!m) return false;
+  const n = Math.round(BM_W * BM_S), x0 = Math.max(0, Math.floor((r[0] - m.ox) * BM_S)), y0 = Math.max(0, Math.floor((r[1] - m.oy) * BM_S)), x1 = Math.min(n - 1, Math.ceil((r[0] + r[2] - m.ox) * BM_S)), y1 = Math.min(n - 1, Math.ceil((r[1] + r[3] - m.oy) * BM_S));
+  for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) if (m.d[(y * n + x) * 4 + 3] > 178) return true;
+  return false;
+}
 function bossBox(b, reach) { const [w, h] = BOSSES[b.L].hit; return BOSSES[b.L].mode === 'ground' ? [b.x - w / 2, b.y - h, w, h] : [b.x - w / 2, b.y - h / 2, w, h + (reach ? BOSSES[b.L].lift + 6 : 0)]; }
 const boxHit = (a, b2) => a[0] < b2[0] + b2[2] && a[0] + a[2] > b2[0] && a[1] < b2[1] + b2[3] && a[1] + a[3] > b2[1];
 const pBox = () => [player.x + 2, player.y + 2, player.w - 4, player.h - 4];
@@ -3373,7 +3395,7 @@ function applyBossDamage(v) {
 function dunTarget(aim) {
   if (!DUN.b || DUN.state === 'win') return null;
   const tb = [aim.tx * TS - 4, aim.ty * TS - 4, TS + 8, TS + 8];
-  if (boxHit(tb, bossBox(DUN.b, true))) return { boss: 1 };
+  if (bossHitRect(tb)) return { boss: 1 };
   for (const m of DUN.mins) if (m.hp > 0 && boxHit(tb, [m.x - 14, m.y - 28, 28, 28])) return { min: m.id };
   return null;
 }
@@ -3393,7 +3415,7 @@ function dunPickHit(h) {
 function dunSkillHit(tx, ty, opt) {
   if (!DUN.b) return;
   const tb = [tx * TS, ty * TS, TS, TS], now = performance.now();
-  if (boxHit(tb, bossBox(DUN.b, true)) && now - (DUN.lastSk || 0) > 40) { DUN.lastSk = now; damageBoss(pickPower() * 1.4 * (opt.ore || 1), tx * TS + 16, ty * TS + 16, true); }
+  if (bossHitRect(tb) && now - (DUN.lastSk || 0) > 40) { DUN.lastSk = now; damageBoss(pickPower() * 1.4 * (opt.ore || 1), tx * TS + 16, ty * TS + 16, true); }
   for (const m of DUN.mins) if (m.hp > 0 && boxHit(tb, [m.x - 14, m.y - 28, 28, 28])) hitMinion(m, pickPower() * 2);
 }
 function hitMinion(m, v) {
@@ -3506,7 +3528,7 @@ function updateDungeon(dt) {
   // 몸통·쫄병과 부딪히면 아프다
   if (b && DUN.state === 'fight') {
     const pb = pBox();
-    if (boxHit(pb, bossBox(b))) dunHurt(b.pat && b.pat.k === 'charge' && b.pat.t > b.pat.tele ? 24 : 12, b.x);
+    if (bossHitRect(pb)) dunHurt(b.pat && b.pat.k === 'charge' && b.pat.t > b.pat.tele ? 24 : 12, b.x);
     for (const m of DUN.mins) { m.flash = Math.max(0, m.flash - dt); m.t += dt; if (boxHit(pb, [m.x - 12, m.y - 24, 24, 24])) dunHurt(10, m.x); }
   }
   // 탄·충격파·경고
