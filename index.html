@@ -2563,7 +2563,7 @@ const BOSSES = [
   { id: 'king', name: '타락한 금고지기 왕', en: 'THE FALLEN VAULT KING', col: '#ffd36b', mode: 'ground', hit: [140, 212], pat: ['slam', 'rain', 'beam', 'summon'], shot: 'gold', minion: 'knight',
     lore: '셀레스타의 심장을 지키던 첫 금고지기. 왕좌의 금고에서 삼백 년을 버티다 금빛 탐욕에 삼켜졌다.' },
 ];
-const BOSS_LIFT = { bone: 14, drake: 30, eye: 54, kraken: 84, void: 18 };
+const BOSS_LIFT = { bone: 60, drake: 30, eye: 54, kraken: 84, void: 18 };
 BOSSES.forEach((b, i) => { b.L = i; b.lift = BOSS_LIFT[b.id] || 0; b.hp = Math.round(700 * Math.pow(1.55, i)); b.reward = Math.round(400 * Math.pow(1.85, i)); });
 // 픽셀 합성기: 도형으로 글자 격자를 칠한 뒤 buildSprite가 테두리·명암을 넣는다
 function pxArt(w, h, fn) {
@@ -2618,9 +2618,99 @@ function faceFrame(b, fn) { g.save(); g.translate(Math.round(b.x), Math.round(b.
 function bdraw(s, x, y, rot = 0, sx = 1, ax = .5, ay = .5) { g.save(); g.translate(snap(x), snap(y)); if (rot) g.rotate(rot); if (sx !== 1) g.scale(sx, 1); g.drawImage(s, -Math.round(s.width * ax) * BP, -Math.round(s.height * ay) * BP, s.width * BP, s.height * BP); g.restore(); }
 const plin = (x0, y0, x1, y1, th, col, out = true) => strand([[x0, y0], [x1, y1]], th, th, col, null, out);
 
+// ── 보스 리깅: 스프링 · 두 관절 IK · 밧줄(버릿) 물리 ──
+// 패턴 코드는 armUp 같은 값을 뚝뚝 바꾼다. 그림은 그 값을 스프링으로 따라가서
+// 예비 동작 → 동작 → 여운(살짝 넘쳤다 돌아옴)이 생기고, 부위마다 늦게 따라와 겹침 동작이 된다.
+function bossAnim(b, t) {
+  let A = b.anim;
+  if (!A) A = b.anim = { t, dt: 0, s: {}, rig: {}, px: b.x, py: b.y, vx: 0, vy: 0, walk: 0 };
+  A.dt = clamp(t - A.t, 0, 1 / 20); A.t = t;
+  const dt = A.dt;
+  if (dt > 0) {
+    const ivx = (b.x - A.px) / dt, ivy = (b.y - A.py) / dt;
+    if (Math.abs(b.x - A.px) > 300 || Math.abs(b.y - A.py) > 300) { A.vx = A.vy = 0; A.rig = {}; }
+    else { A.vx = lerp(A.vx, ivx, Math.min(1, dt * 10)); A.vy = lerp(A.vy, ivy, Math.min(1, dt * 10)); A.walk += Math.abs(b.x - A.px); }
+  }
+  A.px = b.x; A.py = b.y;
+  // 돌아설 때: 몸이 납작해졌다가 반대로 펴진다
+  const fs = bspring(A, 'fs', b.face < 0 ? -1 : 1, 260, .85);
+  A.sx = Math.abs(fs) < .18 ? (fs < 0 ? -.18 : .18) : clamp(fs, -1, 1);
+  A.f = A.sx < 0 ? -1 : 1;
+  return A;
+}
+// 2차 스프링(k: 단단함, z: 감쇠 — 1보다 작으면 살짝 넘친다)
+function bspring(A, key, target, k = 80, z = .6) {
+  const s = A.s[key] || (A.s[key] = { x: target, v: 0 }), dt = A.dt;
+  if (dt > 0) { const n = Math.ceil(dt * 240), h = dt / n, w = Math.sqrt(k); for (let i = 0; i < n; i++) { s.v += (k * (target - s.x) - 2 * z * w * s.v) * h; s.x += s.v * h; } }
+  return s.x;
+}
+// 내려치기 스프링: 들어 올릴 땐 천천히(예비 동작), 내려칠 땐 빠르게 꽂히고 살짝 튕긴다
+function bstrike(A, key, target, kUp = 40, kDown = 320, z = .38) { const s = A.s[key]; return bspring(A, key, target, s && target < s.x ? kDown : kUp, z); }
+// 두 관절 IK: 어깨(엉덩이) → 손(발) 사이 팔꿈치(무릎). bend 부호로 꺾이는 쪽을 고른다
+function ik2(ax, ay, bx, by, l1, l2, bend) {
+  const dx = bx - ax, dy = by - ay, d = clamp(Math.hypot(dx, dy), 1, l1 + l2 - .5), a = Math.atan2(dy, dx), c = clamp((l1 * l1 + d * d - l2 * l2) / (2 * l1 * d), -1, 1), th = a + bend * Math.acos(c);
+  return [ax + Math.cos(th) * l1, ay + Math.sin(th) * l1];
+}
+// 밧줄: 첫 마디는 anchor에 붙고 나머지는 관성·중력·힘을 받아 흐늘거린다(월드 좌표)
+function brope(A, key, n, len, anchor, o = {}) {
+  let r = A.rig[key];
+  if (!r || r.p.length !== n) { r = A.rig[key] = { p: [], q: [] }; const d = o.dir || [0, 1]; for (let i = 0; i < n; i++) { const p = [anchor[0] + d[0] * len * i, anchor[1] + d[1] * len * i]; r.p.push(p); r.q.push([...p]); } }
+  const dt = A.dt, P = r.p, Q = r.q;
+  P[0][0] = anchor[0]; P[0][1] = anchor[1]; Q[0][0] = anchor[0]; Q[0][1] = anchor[1];
+  if (dt > 0) {
+    const gx = o.gx || 0, gy = o.g ?? 500, damp = Math.pow(o.damp ?? .9, dt * 60);
+    for (let i = 1; i < n; i++) {
+      const p = P[i], q = Q[i], vx = (p[0] - q[0]) * damp, vy = (p[1] - q[1]) * damp; q[0] = p[0]; q[1] = p[1];
+      const f = o.force ? o.force(i, p) : null;
+      p[0] += vx + (gx + (f ? f[0] : 0)) * dt * dt; p[1] += vy + (gy + (f ? f[1] : 0)) * dt * dt;
+    }
+    for (let it = 0; it < (o.it || 4); it++) {
+      P[0][0] = anchor[0]; P[0][1] = anchor[1];
+      for (let i = 1; i < n; i++) {
+        const a = P[i - 1], p = P[i], dx = p[0] - a[0], dy = p[1] - a[1], d = Math.hypot(dx, dy) || 1, k = (d - len) / d;
+        if (i === 1) { p[0] -= dx * k; p[1] -= dy * k; } else { p[0] -= dx * k * .5; p[1] -= dy * k * .5; a[0] += dx * k * .5; a[1] += dy * k * .5; }
+        // 굽힘 강성: 앞 마디 방향을 조금 이어 가려 한다(국수처럼 늘어지지 않게)
+        if (o.stiff && i >= 2) { const z = P[i - 2], tx = a[0] + (a[0] - z[0]), ty = a[1] + (a[1] - z[1]); p[0] = lerp(p[0], tx, o.stiff); p[1] = lerp(p[1], ty, o.stiff); }
+        if (o.rest && i >= 1) { const [rx, ry] = o.rest(i); p[0] = lerp(p[0], a[0] + rx * len, o.restK || .05); p[1] = lerp(p[1], a[1] + ry * len, o.restK || .05); }
+      }
+      if (o.floor != null) for (let i = 1; i < n; i++) if (P[i][1] > o.floor) P[i][1] = o.floor;
+    }
+  }
+  return P;
+}
+// 머리를 따라오는 사슬(등뼈·꼬리): 앞 마디를 따라가며 쉴 때는 물결 모양으로 돌아간다
+function bfollow(A, key, n, len, head, rest) {
+  let r = A.rig[key];
+  if (!r || r.length !== n) { r = A.rig[key] = []; for (let i = 0; i < n; i++) { const [rx, ry] = rest(i); r.push([head[0] + rx * len * i, head[1] + ry * len * i]); } }
+  r[0][0] = head[0]; r[0][1] = head[1];
+  for (let i = 1; i < n; i++) {
+    const a = r[i - 1], p = r[i], [rx, ry] = rest(i), k = Math.min(1, A.dt * 4.5);
+    p[0] = lerp(p[0], a[0] + rx * len, k); p[1] = lerp(p[1], a[1] + ry * len, k);
+    const dx = p[0] - a[0], dy = p[1] - a[1], d = Math.hypot(dx, dy) || 1; p[0] = a[0] + dx / d * len; p[1] = a[1] + dy / d * len;
+  }
+  return r;
+}
+// 몸 전체 변환: 돌아서기(가로 비율) · 기울기 · 찌그러짐(바닥 기준). sq>0 납작, sq<0 길쭉
+function rigM(A, o = {}) { const sq = o.sq || 0; A.M = { l: o.lean || 0, sx: 1 + sq * .16, sy: 1 - sq * .22, piv: o.piv || 0 }; return A.M; }
+function rigFrame(b, A, fn) {
+  const m = A.M || rigM(A);
+  g.save(); g.translate(Math.round(b.x), Math.round(b.y) + m.piv); if (m.l) g.rotate(m.l); g.scale(A.sx * m.sx, m.sy); g.translate(0, -m.piv);
+  try { fn(); } finally { g.restore(); }
+}
+// 웅크림(찌그러짐) 목표: 착지·예비 동작은 납작, 공중에서 올라갈 땐 길쭉
+const bcrouch = (b, A) => (b.squash > 0 ? b.squash : -(b.squash || 0) * .7) - (b.onGround === false ? clamp(-A.vy / 2400, -.12, .28) : 0);
+// 로컬(오른쪽 보는 그림) → 월드
+function bw(b, A, x, y) { const m = A.M || rigM(A), X = x * A.sx * m.sx, Y = (y - m.piv) * m.sy, c = Math.cos(m.l), s2 = Math.sin(m.l); return [b.x + X * c - Y * s2, b.y + m.piv + X * s2 + Y * c]; }
+// 두 해 중 고르기: score가 큰 쪽(팔꿈치는 바깥, 무릎은 위)
+function ik2p(ax, ay, bx, by, l1, l2, score) { const p = ik2(ax, ay, bx, by, l1, l2, 1), q = ik2(ax, ay, bx, by, l1, l2, -1); return score(p) >= score(q) ? p : q; }
+const eio = x => x < .5 ? 2 * x * x : 1 - (-2 * x + 2) ** 2 / 2;
+// 회전·뒤집기 틀(머리·꼬리처럼 방향을 따라 도는 부위)
+function frameAt(x, y, ang, fn) { const fl = Math.cos(ang) < 0; g.save(); g.translate(snap(x), snap(y)); g.rotate(fl ? ang - Math.PI : ang); if (fl) g.scale(-1, 1); try { fn(); } finally { g.restore(); } }
+
 // ── 보스별 그리기: (보스 상태 b, 시간 t). 지상형은 b.x,b.y가 발밑 가운데, 부유형은 몸 가운데 ──
+// 그림은 모두 오른쪽을 보는 기준으로 그리고, bossAnim이 돌아서기·기울기·찌그러짐을 입힌다.
 const BOSS_DRAW = {
-  // I. 고목 뿌리왕: 구부정한 거목, 가지 뿔 왕관, 가슴에 박힌 얼굴과 수액빛 눈
+  // I. 고목 뿌리왕: 구부정한 거목, 가지 뿔 왕관, 가슴에 박힌 얼굴. 긴 팔은 IK로 휘두르고 덩굴이 흔들린다
   root(b, t) {
     const en = b.enraged, E = en ? '#ff4a2a' : '#ffb02e';
     const ov = { a: '#5a3e28', d: '#2e1d0e', n: '#86643f', g: '#5a9a3e', l: '#2f5a2a', k: '#0e0804', w: E, h: '#dcc89c', y: en ? '#ff8a5a' : '#ffd36b', v: '#3f7a34' };
@@ -2633,12 +2723,10 @@ const BOSS_DRAW = {
       P.ell(9, 15, 6, 2.4, 'g'); P.ell(35, 15, 6, 2.4, 'g'); P.ell(22, 11, 10, 2, 'g');
       for (const x of [4, 6, 9, 12]) P.line(x, 16, x - .5, 18 + (x % 3) * 2, 'v');
       for (const x of [32, 35, 38, 40]) P.line(x, 16, x + .5, 18 + (x % 3) * 2, 'v');
-      // 깊은 눈두덩과 찢어진 눈
       P.poly([[11, 16], [21, 19], [21, 22], [11, 20]], 'k'); P.poly([[33, 16], [23, 19], [23, 22], [33, 20]], 'k');
       P.line(12, 18, 19, 20, 'w'); P.line(32, 18, 25, 20, 'w'); P.set(18, 20, 'W'); P.set(26, 20, 'W');
       P.line(10, 15, 21, 18, 'n'); P.line(34, 15, 23, 18, 'n');
       P.lineIn(22, 20, 22, 25, 'd'); P.lineIn(21, 24, 23, 24, 'd');
-      // 톱니 이빨 사이로 수액빛이 샌다
       P.poly([[14, 27], [30, 27], [28, 33], [16, 33]], 'k'); P.rect(17, 29, 11, 2, 'w');
       for (let x = 15; x <= 29; x += 3) P.tri(x - 1, 27, x + 1, 27, x, 30, 'h');
       for (let x = 17; x <= 27; x += 3) P.tri(x - 1, 33, x + 1, 33, x, 30, 'h');
@@ -2653,26 +2741,34 @@ const BOSS_DRAW = {
       for (const [x, y] of [[9, 14], [35, 14], [22, 16], [13, 6], [31, 6], [5, 9], [39, 9], [18, 8], [26, 8]]) P.ell(x, y, 2, 1.3, 'l');
       for (const [x, y] of [[3, 4], [41, 4], [22, 2], [12, 1], [32, 1], [1, 8], [43, 8]]) P.set(x, y, 'y');
     }, '#5a3e28', ov);
-    const up = b.armUp || 0, sq = (b.squash || 0) * 10, br = Math.sin(t * 1.8) * 3;
-    faceFrame(b, () => {
-      motes(0, -10, 240, 230, 16, en ? '#ff8a4a' : '#d8ff8a', t, 16, 3);
-      const arm = side => {
-        const sx = side * 40, sy = -122 + br + sq, sw = Math.sin(t * 1.8 + side) * 6;
-        const el = [lerp(sx + side * 30, sx + side * 26, up), lerp(-76 + sw, -176, up) + sq], ha = [lerp(sx + side * 36, sx + side * 8, up), lerp(-30 + sw, -222, up) + sq];
-        strand([[sx, sy], el, ha], 24, 13, '#5a3e28', '#86643f');
-        for (let k = 0; k < 4; k++) { const dx = (k - 1.5) * 7, dir = up > .5 ? -1 : 1; strand([ha, [ha[0] + dx * 1.2 + side * 3, ha[1] + dir * 16], [ha[0] + dx * 1.8 + side * 6, ha[1] + dir * 30]], 7, 3, '#cbb68a', '#efe2c0'); }
-        strand([[sx - side * 4, sy + 6], [el[0] + side * 4, el[1] + 18], [el[0] + side * 2, el[1] + 40]], 3, 3, '#4f8a3a', null, false);
-      };
-      arm(-1);
-      bdraw(body, 0, 3 + sq * .4, 0, 1, .5, 1);
-      bdraw(crown, Math.sin(t * 1.3) * 2, -138 + br * .6 + sq, Math.sin(t * 1.3) * .03, 1, .5, 1);
+    const A = bossAnim(b, t), up = clamp(bstrike(A, 'up', b.armUp || 0, 50, 300), -.12, 1.15), sq = bspring(A, 'sq', bcrouch(b, A), 200, .38);
+    const sp = Math.min(1, Math.abs(A.vx) / 60), ph = A.walk * .045, rock = Math.sin(ph) * .035 * sp, lean = bspring(A, 'ln', clamp(A.vx / 900, -.08, .08), 28, .7) + rock, br = Math.sin(t * 1.6) * 3;
+    rigM(A, { lean, sq });
+    const arms = {};
+    for (const s of [-1, 1]) {
+      const sh = [s * 40, -122 + br * .6], idle = [s * 80 + Math.sin(ph + (s > 0 ? 0 : Math.PI)) * 22 * sp, -26 + Math.sin(t * 1.6 + s) * 4], top = [s * 42, -224];
+      const ha = [bspring(A, 'hx' + s, lerp(idle[0], top[0], up), 90, .55), bspring(A, 'hy' + s, lerp(idle[1], top[1], up), 90, .55)];
+      arms[s] = { sh, ha, el: ik2p(sh[0], sh[1], ha[0], ha[1], 54, 56, p => p[0] * s + p[1] * .6) };
+    }
+    const arm = s => {
+      const { sh, el, ha } = arms[s], ang = Math.atan2(ha[1] - el[1], ha[0] - el[0]);
+      strand([sh, el, ha], 24, 14, '#5a3e28', '#86643f');
+      for (let k = 0; k < 4; k++) { const a1 = ang + (k - 1.5) * .3, a2 = a1 + s * .35 * (up > .5 ? -1 : 1); const p1 = [ha[0] + Math.cos(a1) * 16, ha[1] + Math.sin(a1) * 16]; strand([ha, p1, [p1[0] + Math.cos(a2) * 15, p1[1] + Math.sin(a2) * 15]], 7, 3, '#cbb68a', '#efe2c0'); }
+    };
+    const vines = s => { const { el, ha } = arms[s]; for (const [i, at] of [[0, el], [1, [lerp(el[0], ha[0], .5), lerp(el[1], ha[1], .5)]]]) { const v = brope(A, 'v' + s + i, 4 + i, 8, bw(b, A, at[0], at[1] + 6), { g: 1100, damp: .86 }); strand(v, 3, 3, '#4f8a3a', null); bsq(v[v.length - 1][0] - 2, v[v.length - 1][1], BP, '#7ac05a'); } };
+    motes(b.x, b.y - 10, 240, 230, 16, en ? '#ff8a4a' : '#d8ff8a', t, 16, 3);
+    rigFrame(b, A, () => arm(-1)); vines(-1);
+    rigFrame(b, A, () => {
+      bdraw(body, 0, 3, 0, 1, .5, 1);
+      const cr = bspring(A, 'cr', lean * 1.8 + Math.sin(t * 1.25) * .035, 22, .32);
+      bdraw(crown, cr * 40, -138 + br * .6, cr, 1, .5, 1);
       arm(1);
       const pul = .7 + Math.sin(t * 3) * .15;
-      for (const ex of [-21, 21]) bglow(ex, -123 + sq * .4, 18, E, pul);
-      bglow(0, -90 + sq * .4, 26, E, .45 * pul); bglow(0, -54, 20, E, .35 * pul);
+      addG(() => { for (const ex of [-21, 21]) glowDot(g, ex, -123, 18, E, pul); glowDot(g, 0, -90, 26, E, .45 * pul); glowDot(g, 0, -54, 20, E, .35 * pul); });
     });
+    vines(1);
   },
-  // II. 해골 하늘고래: 볏이 솟은 긴 두개골, 유령빛 살결 속을 헤엄치는 등뼈와 갈비
+  // II. 해골 하늘고래: 머리가 앞서 헤엄치고 등뼈 사슬이 물결처럼 따라온다. 돌아설 땐 머리부터 크게 돈다
   bone(b, t) {
     const en = b.enraged, C = en ? '#ff6a8a' : '#7fd0ff', ov = { a: '#e4d8bc', d: '#9a8a6a', k: '#0c0814', w: C, h: '#fff6e0' };
     const skull = bspr('bl' + (en ? 1 : 0), 40, 24, P => {
@@ -2685,35 +2781,34 @@ const BOSS_DRAW = {
     }, '#e4d8bc', ov);
     const jaw = bspr('blj', 36, 10, P => { P.poly([[0, 4], [30, 4], [35, 6], [30, 9], [6, 9], [0, 7]], 'a'); P.lineIn(4, 7, 28, 7, 'd'); for (let x = 10; x <= 32; x += 3) P.tri(x - 1, 4, x + 1, 4, x, 1, 'h'); }, '#e4d8bc', ov);
     const vert = bspr('blv', 8, 12, P => { P.rect(1, 6, 6, 5, 'a'); P.tri(2, 6, 6, 6, 0, 0, 'a'); P.lineIn(1, 8, 6, 8, 'd'); }, '#e4d8bc', ov);
-    faceFrame(b, () => {
-      const n = 8, pts = []; for (let i = 0; i <= n; i++) pts.push([70 - i * 25, Math.sin(t * 2.2 - i * .7) * (5 + i * 1.6)]);
-      const rad = i => Math.max(8, 44 - i * 4.6);
-      // 유령 살결: 등뼈를 따라 반투명한 고래 몸
-      g.beginPath(); pts.forEach(([x, y], i) => (i ? g.lineTo : g.moveTo).call(g, x, y - rad(i) * .7)); for (let i = n; i >= 0; i--) g.lineTo(pts[i][0], pts[i][1] + rad(i)); g.closePath();
-      g.fillStyle = rgba(C, .22); g.fill(); g.strokeStyle = rgba(C, .7); g.lineWidth = BP; g.stroke();
-      bglow(0, 0, 190, C, .2);
-      // 유령 지느러미
-      const fin = (i, len, ph) => { const [x, y] = pts[i], ang = .9 + Math.sin(t * 2.2 + ph) * .25, tip = [x - Math.cos(ang) * len * .4, y + Math.sin(ang) * len]; g.beginPath(); g.moveTo(x + 10, y + 10); g.lineTo(tip[0], tip[1]); g.lineTo(x - 30, y + 12); g.closePath(); g.fillStyle = rgba(C, .16); g.fill(); for (let r = 0; r < 3; r++) strand([[x + 6 - r * 12, y + 10], [lerp(x + 6 - r * 12, tip[0], .6), lerp(y + 10, tip[1], .6)], [tip[0] + r * 6, tip[1] - r * 6]], 5, 3, '#d8ccb0', null); };
-      fin(2, 70, 0);
-      // 갈비뼈
-      for (let i = 1; i <= 5; i++) { const [x, y] = pts[i], L2 = 1 - i * .12, sw = Math.sin(t * 2.2 - i * .7 + 1) * 3; strand([[x, y + 4], [x - 6, y + 22 * L2 + sw], [x - 14, y + 38 * L2 + sw], [x - 24, y + 46 * L2 + sw]], 8, 4, '#d8ccb0', '#f4ecd8'); }
-      for (let i = 0; i < n; i++) bglow(pts[i][0], pts[i][1] + 6, rad(i) * 1.3, C, .14);
-      strand(pts, 13, 6, '#c8bc9c', '#ece2c8');
-      for (let i = 1; i < n; i++) bdraw(vert, pts[i][0], pts[i][1] - 6, 0, 1, .5, .5);
-      // 꼬리지느러미
-      const [tx, ty] = pts[n], fl = Math.sin(t * 2.2 - n * .7) * 10;
-      g.beginPath(); g.moveTo(tx, ty); g.lineTo(tx - 44, ty - 40 + fl); g.lineTo(tx - 26, ty); g.lineTo(tx - 44, ty + 40 + fl); g.closePath(); g.fillStyle = rgba(C, .2); g.fill();
-      strand([[tx, ty], [tx - 22, ty - 18 + fl], [tx - 44, ty - 40 + fl]], 7, 3, '#d8ccb0', null); strand([[tx, ty], [tx - 22, ty + 18 + fl], [tx - 44, ty + 40 + fl]], 7, 3, '#d8ccb0', null);
-      fin(1, 56, 2);
-      const hx = pts[0][0] + 34, hy = pts[0][1] - 4, jw = (b.jaw || 0) + Math.max(0, Math.sin(t * 1.3)) * .15;
-      bdraw(jaw, hx - 6, hy + 26, jw * .45, 1, .05, .3);
-      bdraw(skull, hx, hy, 0, 1, .5, .5);
-      const ex = hx + 18, ey = hy + 3;
-      addG(() => { for (let k = 0; k < 7; k++) { const p = bfr(t * 1.6 + k / 7); g.globalAlpha = (1 - p) * .8; bsq(ex - 6 - p * 70, ey + Math.sin(t * 4 + k) * 4 - p * 6, BP, C); } g.globalAlpha = 1; });
-      bglow(ex, ey, 26, C, .95);
+    const A = bossAnim(b, t), hox = bspring(A, 'hox', b.face * 78, 14, .85), dirx = hox >= 0 ? -1 : 1, n = 9;
+    const turn = 1 - Math.min(1, Math.abs(hox) / 78), head = [b.x + hox, b.y + Math.sin(t * 1.7) * 9 + bspring(A, 'hy', clamp(A.vy * .03, -20, 20), 30, .6) - Math.sin(turn * Math.PI / 2) * 70];
+    const pts = bfollow(A, 'sp', n, 25, head, i => { const a = Math.sin(t * 2.1 - i * .75) * (.18 + i * .025); return [Math.cos(a) * dirx, Math.sin(a)]; });
+    const rad = i => Math.max(8, 44 - i * 4.6), nrm = i => { const a = pts[Math.max(0, i - 1)], c = pts[Math.min(n - 1, i + 1)]; let dx = c[0] - a[0], dy = c[1] - a[1]; const d = Math.hypot(dx, dy) || 1; let nx = -dy / d, ny = dx / d; if (ny < 0) { nx = -nx; ny = -ny; } return [nx, ny, dx / d, dy / d]; };
+    // 유령 살결
+    g.beginPath(); pts.forEach((p, i) => { const [nx, ny] = nrm(i); (i ? g.lineTo : g.moveTo).call(g, p[0] - nx * rad(i) * .7, p[1] - ny * rad(i) * .7); }); for (let i = n - 1; i >= 0; i--) { const [nx, ny] = nrm(i); g.lineTo(pts[i][0] + nx * rad(i), pts[i][1] + ny * rad(i)); } g.closePath();
+    g.fillStyle = rgba(C, .2); g.fill(); g.strokeStyle = rgba(C, .65); g.lineWidth = BP; g.stroke();
+    bglow(pts[3][0], pts[3][1], 200, C, .18);
+    for (let i = 0; i < n - 1; i++) bglow(pts[i][0], pts[i][1] + 6, rad(i) * 1.3, C, .12);
+    const fin = (i, len, ph) => { const [nx, ny, tx, ty] = nrm(i), p = pts[i], fl = Math.sin(t * 2.1 + ph) * .35, ca = Math.cos(fl), sa = Math.sin(fl), dx = nx * ca - tx * sa * .2, dy = ny * ca - ty * sa * .2, tip = [p[0] + (dx * .8 + tx * .6) * len, p[1] + (dy * .8 + ty * .6) * len];
+      g.beginPath(); g.moveTo(p[0] + nx * 10 - tx * 8, p[1] + ny * 10 - ty * 8); g.lineTo(tip[0], tip[1]); g.lineTo(p[0] + nx * 12 + tx * 30, p[1] + ny * 12 + ty * 30); g.closePath(); g.fillStyle = rgba(C, .18); g.fill();
+      for (let r = 0; r < 3; r++) { const s0 = [p[0] + nx * 10 + tx * (r * 12 - 8), p[1] + ny * 10 + ty * (r * 12 - 8)]; strand([s0, [lerp(s0[0], tip[0], .6), lerp(s0[1], tip[1], .6)], [tip[0] + tx * r * 6, tip[1] + ty * r * 6]], 5, 3, '#d8ccb0', null); } };
+    fin(2, 72, 0);
+    for (let i = 1; i <= 5; i++) { const [nx, ny, tx, ty] = nrm(i), p = pts[i], L2 = 1 - i * .12, w = Math.sin(t * 2.1 - i * .75 + 1) * 3; strand([[p[0] + nx * 4, p[1] + ny * 4], [p[0] + nx * 22 * L2 + tx * 6, p[1] + ny * 22 * L2 + ty * 6 + w], [p[0] + nx * 38 * L2 + tx * 14, p[1] + ny * 38 * L2 + ty * 14 + w], [p[0] + nx * 46 * L2 + tx * 24, p[1] + ny * 46 * L2 + ty * 24 + w]], 8, 4, '#d8ccb0', '#f4ecd8'); }
+    strand(pts, 13, 6, '#c8bc9c', '#ece2c8');
+    for (let i = 1; i < n - 1; i++) bdraw(vert, pts[i][0], pts[i][1] - 6, 0, 1, .5, .5);
+    const tp = pts[n - 1], [nx, ny, tx, ty] = nrm(n - 1), fl = Math.sin(t * 2.1 - n * .75) * 12, f1 = [tp[0] + tx * 44 - nx * (40 + fl), tp[1] + ty * 44 - ny * (40 + fl)], f2 = [tp[0] + tx * 44 + nx * (40 - fl), tp[1] + ty * 44 + ny * (40 - fl)];
+    g.beginPath(); g.moveTo(tp[0], tp[1]); g.lineTo(f1[0], f1[1]); g.lineTo(tp[0] + tx * 26, tp[1] + ty * 26); g.lineTo(f2[0], f2[1]); g.closePath(); g.fillStyle = rgba(C, .22); g.fill();
+    strand([tp, [lerp(tp[0], f1[0], .5), lerp(tp[1], f1[1], .5)], f1], 7, 3, '#d8ccb0', null); strand([tp, [lerp(tp[0], f2[0], .5), lerp(tp[1], f2[1], .5)], f2], 7, 3, '#d8ccb0', null);
+    fin(1, 58, 2);
+    const fx = pts[0][0] - pts[1][0], fy = pts[0][1] - pts[1][1], ang = Math.atan2(fy, fx), d = Math.hypot(fx, fy) || 1, jw = bspring(A, 'jw', (b.jaw || 0) + (b.wide || 0) * .6, 90, .5) + Math.max(0, Math.sin(t * 1.3)) * .12;
+    frameAt(pts[0][0] + fx / d * 34, pts[0][1] + fy / d * 34 - 4, ang, () => {
+      bdraw(jaw, -6, 26, jw * .45, 1, .05, .3);
+      bdraw(skull, 0, 0, 0, 1, .5, .5);
+      addG(() => { for (let k = 0; k < 7; k++) { const p = bfr(t * 1.6 + k / 7); g.globalAlpha = (1 - p) * .8; bsq(12 - p * 70, 3 + Math.sin(t * 4 + k) * 4 - p * 6, BP, C); } g.globalAlpha = 1; glowDot(g, 18, 3, 26, C, .95); });
     });
   },
-  // III. 수정 거미 여왕: 수정 군집이 솟은 장갑 배, 여덟 개의 붉은 눈과 송곳니, 날카롭게 꺾인 긴 다리
+  // III. 수정 거미 여왕: 다리 여덟 개가 앞뒤로 고르게 뻗고, 발은 땅에 박혀 있다가 범위를 벗어나면 대각선 조끼리 한 걸음씩 옮긴다
   spider(b, t) {
     const en = b.enraged, R2 = en ? '#ffffff' : '#ff3a5a', ov = { a: '#3e3a66', d: '#1e1c3a', v: '#8fe3ff', r: R2, h: '#d8e8f0', k: '#08060e', c: '#e8ffff' };
     const abd = bspr('sq' + (en ? 1 : 0), 46, 38, P => {
@@ -2730,26 +2825,40 @@ const BOSS_DRAW = {
       for (const [x, y, s] of [[20, 7, 1], [23, 9, 1], [17, 7, 0], [21, 10, 0], [24, 12, 0], [18, 10, 0], [15, 9, 0], [25, 7, 0]]) { if (s) { P.rect(x, y, 2, 2, 'r'); P.set(x, y, 'R'); } else P.set(x, y, 'r'); }
       P.line(19, 16, 21, 19, 'h', 2); P.line(21, 19, 19, 21, 'h'); P.line(24, 15, 26, 18, 'h', 2); P.line(26, 18, 25, 21, 'h');
     }, '#3e3a66', ov);
-    const by = -66 + Math.sin(t * 5) * 2 + (b.squash || 0) * 8;
-    faceFrame(b, () => {
-      motes(-30, by - 30, 160, 140, 10, '#bff4ff', t, 22, 7);
-      bglow(-36, by - 50, 80, '#8fe3ff', .22 + Math.sin(t * 3) * .07);
-      const leg = (k, side) => {
-        const hipX = 14 - k * 10, hipY = by + 6, ph = t * (b.walking ? 9 : 1.8) + k * 1.7 + (side > 0 ? Math.PI : 0);
-        const footX = [104, 62, -58, -110][k] + side * 10, footY = -Math.max(0, Math.sin(ph)) * 12 - (side < 0 ? 6 : 0), kneeX = lerp(hipX, footX, .45), kneeY = by - [40, 54, 50, 34][k] + Math.sin(ph) * 4 - (side < 0 ? 10 : 0), ankX = lerp(kneeX, footX, .8), ankY = footY - 26;
-        const c = side < 0 ? '#28264a' : '#3e3a66', hi = side < 0 ? '#3a3866' : '#625e96';
-        strand([[hipX, hipY], [kneeX, kneeY]], 11, 9, c, hi); strand([[kneeX, kneeY], [ankX, ankY]], 8, 6, c, hi); strand([[ankX, ankY], [footX, footY]], 5, 3, '#8fe3ff', '#e8ffff');
-        bsq(kneeX - 3, kneeY - 6, BP * 2, '#8fe3ff');
-      };
-      for (let k = 0; k < 4; k++) leg(k, -1);
-      for (let k = 0; k < 4; k++) leg(k, 1);
-      bdraw(abd, -44, by + 4, Math.sin(t * 1.4) * .03, 1, .5, .78);
-      bdraw(head, 34, by + 8, 0, 1, .5, .5);
-      for (const [x, y] of [[46, by - 2], [54, by + 4]]) bglow(x, y, 14, R2, .8);
-      for (let i = 0; i < 3; i++) bglow(-40 + (i - 1) * 16, by - 42 - i * 4, 22, '#bff4ff', .3 + Math.sin(t * 4 + i * 2) * .15);
+    const A = bossAnim(b, t), f = A.f, dt = A.dt, sq = bspring(A, 'sq', bcrouch(b, A), 190, .42);
+    // [엉덩이 x, 쉬는 발 x, 허벅지, 정강이, 가까운 쪽?] 앞 두 쌍은 앞으로, 뒤 두 쌍은 뒤로
+    const LEG = [[30, 172, 108, 112, 1], [20, 98, 72, 74, 1], [4, -90, 80, 82, 1], [-8, -172, 120, 124, 1], [26, 140, 92, 96, 0], [16, 60, 58, 60, 0], [0, -58, 64, 66, 0], [-12, -140, 100, 104, 0]];
+    const grp = i => (i === 0 || i === 2 || i === 5 || i === 7) ? 0 : 1;
+    const legs = A.rig.legs || (A.rig.legs = LEG.map(L => ({ x: b.x + L[1] * f, y: b.y, t: 1 })));
+    const grounded = b.onGround !== false && Math.abs(A.vy) < 80;
+    const busy = [0, 1].map(gq => legs.some((l, i) => grp(i) === gq && l.t < 1));
+    let lift = 0;
+    const by0 = b.y - 64 + sq * 18 + Math.sin(t * 2.2) * 2;
+    legs.forEach((l, i) => {
+      const L = LEG[i], hip = [b.x + L[0] * A.sx, by0 + (L[4] ? 8 : 2)], tx = b.x + L[1] * f + clamp(A.vx, -400, 400) * .16;
+      if (!grounded) { const k = Math.min(1, dt * 10); l.x = lerp(l.x, hip[0] + L[1] * f * .5, k); l.y = lerp(l.y, hip[1] + 46, k); l.t = 1; return; }
+      if (l.t < 1) { l.t = Math.min(1, l.t + dt / .15); const e = eio(l.t); l.x = lerp(l.fx, l.tx, e); l.y = lerp(l.fy, b.y, e) - Math.sin(Math.PI * l.t) * 26; lift += Math.sin(Math.PI * l.t); }
+      else { const dd = Math.abs(l.x - tx) + Math.abs(l.y - b.y) * 2; if ((dd > 46 && !busy[1 - grp(i)]) || dd > 220) { l.t = 0; l.fx = l.x; l.fy = l.y; l.tx = tx; busy[grp(i)] = true; } }
     });
+    const by = by0 - lift * 2, abr = bspring(A, 'abr', clamp(-A.vx / 2200, -.12, .12) + Math.sin(t * 1.4) * .025, 26, .45), aby = bspring(A, 'aby', sq * 8, 40, .35);
+    const leg = i => {
+      const L = LEG[i], l = legs[i], hip = [b.x + L[0] * A.sx, by + (L[4] ? 8 : 2)], ft = [l.x, l.y], kn = ik2p(hip[0], hip[1], ft[0], ft[1], L[2], L[3], p => -p[1]);
+      const fd = Math.hypot(ft[0] - kn[0], ft[1] - kn[1]) || 1, an = [lerp(kn[0], ft[0], .8), lerp(kn[1], ft[1], .8)];
+      const c = L[4] ? '#3e3a66' : '#28264a', hi = L[4] ? '#625e96' : '#3a3866';
+      strand([hip, kn], 12, 9, c, hi); strand([kn, an], 8, 6, c, hi); strand([an, ft], 5, 3, '#8fe3ff', '#e8ffff');
+      bsq(kn[0] - 3, kn[1] - 5, BP * 2, L[4] ? '#8fe3ff' : '#5ab0d0');
+    };
+    motes(b.x - 30 * f, by - 30, 160, 140, 10, '#bff4ff', t, 22, 7);
+    bglow(b.x - 36 * A.sx, by - 50, 80, '#8fe3ff', .22 + Math.sin(t * 3) * .07);
+    for (const i of [4, 5, 6, 7]) leg(i);
+    for (const i of [2, 3]) leg(i);
+    bdraw(abd, b.x - 44 * A.sx, by + 4 + aby, abr, A.sx, .5, .78);
+    bdraw(head, b.x + 34 * A.sx, by + 8, bspring(A, 'hr', clamp((b.lookY || 0) / 1500, -.1, .1), 40, .6) * A.f, A.sx, .5, .5);
+    for (const i of [0, 1]) leg(i);
+    for (const x of [46, 54]) bglow(b.x + x * A.sx, by + (x > 50 ? 4 : -2), 14, R2, .8);
+    for (let i = 0; i < 3; i++) bglow(b.x + (-44 + (i - 1) * 16) * A.sx, by - 38 - i * 4 + aby, 22, '#bff4ff', .3 + Math.sin(t * 4 + i * 2) * .15);
   },
-  // IV. 잿불 드레이크: 뿔이 뒤로 젖혀진 와이번, 찢긴 막 날개, 용암 균열이 흐르는 비늘
+  // IV. 잿불 드레이크: 내려칠 땐 빠르고 올릴 땐 느린 날갯짓, 날갯짓에 맞춰 몸이 떠오르고 꼬리가 늦게 따라온다
   drake(b, t) {
     const en = b.enraged, ov = { a: '#7a1e10', d: '#3a0c06', b: '#d8782a', h: '#e8d8b8', m: '#ffb02e', w: en ? '#ffffff' : '#fff2a0', k: '#120404' };
     const body = bspr('dk' + (en ? 1 : 0), 60, 36, P => {
@@ -2774,25 +2883,29 @@ const BOSS_DRAW = {
       P.line(W0[0], W0[1], wr[0], wr[1], 'd', 2); for (const tp of tips) P.line(wr[0], wr[1], tp[0], tp[1], 'd');
       P.tri(wr[0] - 1, wr[1], wr[0] + 1, wr[1], wr[0] - 3, wr[1] - 5, 'h');
     }, '#6a1a10', { m: '#5a140c', d: '#b8401c', h: '#e8d8b8' });
-    const fl = Math.sin(t * (en ? 9 : 5.5));
-    faceFrame(b, () => {
-      motes(-20, 50, 220, 200, 16, '#ffb02e', t, 40, 11);
-      bglow(0, 0, 150, '#ff5a1a', .16);
-      bdraw(wing, -6, -14, -.35 + fl * .4, -1, .04, .95);
-      let px = -50, py = 12;
-      const tl = [[px, py]]; for (let i = 0; i < 8; i++) { px -= 15; py += Math.sin(t * 3 + i * .8) * 6 + 2; tl.push([px, py]); }
-      strand(tl, 22, 5, '#7a1e10', '#a8361a');
-      for (let i = 1; i < 7; i++) { const [x, y] = tl[i]; bsq(x - 2, y - (22 - i * 2.4) / 2 - 8, BP * 2, '#e8d8b8'); }
-      addG(() => { for (let k = 0; k < 5; k++) { const p = bfr(t * 2 + k / 5); g.globalAlpha = 1 - p; bsq(px - 6 + Math.sin(t * 9 + k) * 5, py - p * 30, BP * 2, k % 2 ? '#ffb02e' : '#fff2a0'); } g.globalAlpha = 1; });
-      bglow(px, py, 26, '#ffb02e', .8);
-      bdraw(body, 0, 0, 0, 1, .5, .5);
-      bdraw(wing, 12, -12, -.05 + fl * .5, -1, .04, .95);
-      bglow(-18, 4, 30, '#ff7a1a', .3 + Math.sin(t * 4) * .1);
-      bglow(62, -26, 14, ov.w, .7);
-      if (b.breath) { bglow(86, -16, 34, '#fff2b0', .9); addG(() => { for (let k = 0; k < 6; k++) { const p = bfr(t * 4 + k / 6); g.globalAlpha = 1 - p; bsq(84 + p * 50, -16 + Math.sin(t * 20 + k) * p * 14, BP * 2, '#ffd36b'); } g.globalAlpha = 1; }); }
+    const A = bossAnim(b, t);
+    A.fp = (A.fp || 0) + A.dt * (en ? 2.1 : 1.4) * (1 + Math.min(1, Math.abs(A.vx) / 500) * .6);
+    const p = bfr(A.fp), w = p < .36 ? 1 - 2 * eio(p / .36) : -1 + 2 * eio((p - .36) / .64);
+    const bob = bspring(A, 'bob', w * 9, 70, .5), lean = bspring(A, 'ln', clamp(A.vx / 1000, -.28, .28) + clamp((b.lookY || 0) / 1400, -.12, .12) * A.f, 26, .65);
+    const wb = bspring(A, 'wb', w, 320, .55), wf = bspring(A, 'wf', w, 200, .5);
+    rigM(A, { lean });
+    motes(b.x - 20 * A.sx, b.y + 50, 220, 200, 16, '#ffb02e', t, 40, 11);
+    bglow(b.x, b.y, 150, '#ff5a1a', .16);
+    rigFrame(b, A, () => { bdraw(wing, -6, -14 + bob, -.3 + wb * .55, -1, .04, .95); });
+    const tail = bfollow(A, 'tail', 9, 15, bw(b, A, -50, 12 + bob), i => { const a = Math.sin(t * 2.6 - i * .6) * .3 + .22; return [-A.f * Math.cos(a), Math.sin(a)]; });
+    strand(tail, 22, 5, '#7a1e10', '#a8361a');
+    for (let i = 1; i < 7; i++) { const [x, y] = tail[i]; bsq(x - 2, y - (22 - i * 2.4) / 2 - 8, BP * 2, '#e8d8b8'); }
+    const [px, py] = tail[8];
+    addG(() => { for (let k = 0; k < 5; k++) { const q = bfr(t * 2 + k / 5); g.globalAlpha = 1 - q; bsq(px - 6 + Math.sin(t * 9 + k) * 5, py - q * 30, BP * 2, k % 2 ? '#ffb02e' : '#fff2a0'); } g.globalAlpha = 1; glowDot(g, px, py, 26, '#ffb02e', .8); });
+    rigFrame(b, A, () => {
+      bdraw(body, 0, bob, 0, 1, .5, .5);
+      bdraw(wing, 12, -12 + bob, -.02 + wf * .6, -1, .04, .95);
+      addG(() => { glowDot(g, -18, 4 + bob, 30, '#ff7a1a', .3 + Math.sin(t * 4) * .1); glowDot(g, 62, -26 + bob, 14, ov.w, .7); });
+      const br = bspring(A, 'br', b.breath || 0, 120, .6);
+      if (br > .05) addG(() => { glowDot(g, 86, -16 + bob, 34 * br, '#fff2b0', .9 * br); for (let k = 0; k < 6; k++) { const q = bfr(t * 4 + k / 6); g.globalAlpha = (1 - q) * br; bsq(84 + q * 50, -16 + bob + Math.sin(t * 20 + k) * q * 14, BP * 2, '#ffd36b'); } g.globalAlpha = 1; });
     });
   },
-  // V. 유적 수호 거상: 견갑이 부서진 돌거인, 룬 회로와 심장석, 마법으로 떠 있는 팔 마디
+  // V. 유적 수호 거상: 무거운 걸음(다리 번갈아 들기), 떠 있는 팔 마디가 마디마다 늦게 따라와 묵직하게 출렁인다
   golem(b, t) {
     const en = b.enraged, W2 = en ? '#ff6a5a' : '#5affd0', ov = { a: '#5e5a6e', d: '#302c3c', w: W2, c: en ? '#ffd8c8' : '#e0fff8', k: '#0a0810', m: '#4a6a4a' };
     const torso = bspr('gt' + (en ? 1 : 0), 44, 36, P => {
@@ -2808,29 +2921,40 @@ const BOSS_DRAW = {
     const blk = bspr('gb' + (en ? 1 : 0), 16, 16, P => { P.poly([[1, 0], [15, 1], [16, 14], [0, 15]], 'a'); P.lineIn(1, 6, 15, 7, 'd'); P.line(5, 10, 11, 10, 'w'); P.set(8, 3, 'w'); }, '#5e5a6e', ov);
     const fist = bspr('gf' + (en ? 1 : 0), 20, 20, P => { P.poly([[1, 2], [19, 0], [20, 17], [0, 19]], 'a'); for (const x of [5, 10, 15]) P.lineIn(x, 1, x, 7, 'd'); P.lineIn(1, 7, 19, 6, 'd'); P.poly([[10, 10], [13, 13], [10, 16], [7, 13]], 'w'); }, '#5e5a6e', ov);
     const rune = bspr('gr' + (en ? 1 : 0), 6, 6, P => { P.poly([[3, 0], [6, 3], [3, 6], [0, 3]], 'a'); P.set(3, 3, 'w'); P.set(3, 2, 'w'); }, '#5e5a6e', ov);
-    const hov = Math.sin(t * 1.8) * 4, up = b.armUp || 0, sq = (b.squash || 0) * 10;
-    faceFrame(b, () => {
-      motes(0, -30, 240, 240, 12, W2, t, 20, 5);
-      bglow(0, -130 + sq, 120, W2, .12);
-      for (let i = 0; i < 5; i++) { const a = t * .8 + i / 5 * TAU, x = Math.cos(a) * 100, y = -150 + Math.sin(a) * 28 + sq; if (Math.sin(a) < 0) bdraw(rune, x, y); }
-      bdraw(leg, -26, 3, 0, 1, .5, 1); bdraw(leg, 26, 3, 0, 1, .5, 1);
-      const arm = side => {
-        const sx = side * 78, sy = -150 + hov - up * 60 * (side > 0 ? 1 : .35) + sq, a2 = [sx + side * 8, sy + 54 + Math.sin(t * 2 + side) * 3 - up * 20], a3 = [sx + side * 12, sy + 108 + Math.sin(t * 2.4 + side) * 4 - up * 40];
-        addG(() => { g.strokeStyle = rgba(W2, .35); g.lineWidth = BP; g.beginPath(); g.moveTo(side * 54, -168 + sq); g.lineTo(sx, sy); g.lineTo(a2[0], a2[1]); g.lineTo(a3[0], a3[1]); g.stroke(); });
-        bdraw(blk, sx, sy, .1 * side); bdraw(blk, a2[0], a2[1], -.08 * side); bdraw(fist, a3[0], a3[1], .15 * side);
-        bglow(a3[0], a3[1], 22, W2, .35);
-      };
+    const A = bossAnim(b, t), up = clamp(bstrike(A, 'up', b.armUp || 0, 36, 220), -.12, 1.15), sq = bspring(A, 'sq', bcrouch(b, A), 150, .32);
+    const sp = Math.min(1, Math.abs(A.vx) / 60), ph = A.walk * .032, l1 = Math.max(0, Math.sin(ph)) * 12 * sp, l2 = Math.max(0, Math.sin(ph + Math.PI)) * 12 * sp;
+    const hov = Math.sin(t * 1.6) * 4, bob = -(l1 + l2) * .4 + (1 - Math.abs(Math.cos(ph))) * 3 * sp, lean = bspring(A, 'ln', clamp(A.vx / 1200, -.05, .05) + (l1 - l2) * .002, 25, .7);
+    rigM(A, { lean, sq });
+    const segs = {};
+    for (const s of [-1, 1]) {
+      const raise = up * 60 * (s > 0 ? 1 : .35), sw = Math.sin(ph + (s > 0 ? Math.PI : 0)) * 14 * sp;
+      const t1 = [s * 78 + sw * .3, -150 + hov - raise + bob], t2 = [t1[0] + s * 8 + sw * .6, t1[1] + 54 - up * 20 * (s > 0 ? 1 : .3)], t3 = [t1[0] + s * 12 + sw, t1[1] + 108 - up * 40 * (s > 0 ? 1 : .3)];
+      const P1 = [bspring(A, 'a1x' + s, t1[0], 70, .5), bspring(A, 'a1y' + s, t1[1], 70, .5)], P2 = [bspring(A, 'a2x' + s, t2[0], 42, .45), bspring(A, 'a2y' + s, t2[1], 42, .45)], P3 = [bspring(A, 'a3x' + s, t3[0], 26, .42), bspring(A, 'a3y' + s, t3[1], 26, .42)];
+      segs[s] = [P1, P2, P3, clamp((A.s['a3x' + s].v || 0) * .0025, -.4, .4)];
+    }
+    const arm = s => {
+      const [P1, P2, P3, rv] = segs[s];
+      addG(() => { g.strokeStyle = rgba(W2, .35); g.lineWidth = BP; g.beginPath(); g.moveTo(s * 54, -168 + bob); g.lineTo(P1[0], P1[1]); g.lineTo(P2[0], P2[1]); g.lineTo(P3[0], P3[1]); g.stroke(); });
+      bdraw(blk, P1[0], P1[1], .1 * s); bdraw(blk, P2[0], P2[1], -.08 * s + rv * .5); bdraw(fist, P3[0], P3[1], .15 * s + rv);
+      addG(() => glowDot(g, P3[0], P3[1], 22, W2, .35));
+    };
+    motes(b.x, b.y - 30, 240, 240, 12, W2, t, 20, 5);
+    rigFrame(b, A, () => {
+      addG(() => glowDot(g, 0, -130, 120, W2, .12));
+      const orb = front => { for (let i = 0; i < 5; i++) { const a = t * .8 + i / 5 * TAU, x = Math.cos(a) * 100, y = -150 + Math.sin(a) * 28 + bob; if ((Math.sin(a) >= 0) === front) { bdraw(rune, x, y); if (front) addG(() => glowDot(g, x, y, 10, W2, .5)); } } };
+      orb(false);
+      bdraw(leg, -26, 3 - l1, 0, 1, .5, 1); bdraw(leg, 26, 3 - l2, 0, 1, .5, 1);
       arm(-1);
-      bdraw(torso, 0, -66 + hov * .4 + sq, 0, 1, .5, 1);
-      bdraw(head, 6, -174 + hov + sq, 0, 1, .5, 1);
+      bdraw(torso, 0, -66 + hov * .4 + bob, 0, 1, .5, 1);
+      const hx = bspring(A, 'hx', 6 + clamp((b.lookX || 0) / 60, -4, 4), 30, .5), hy = bspring(A, 'hy', -174 + hov + bob, 36, .42);
+      bdraw(head, hx, hy, bspring(A, 'hr', lean * 2, 20, .4), 1, .5, 1);
       arm(1);
-      for (let i = 0; i < 5; i++) { const a = t * .8 + i / 5 * TAU, x = Math.cos(a) * 100, y = -150 + Math.sin(a) * 28 + sq; if (Math.sin(a) >= 0) { bdraw(rune, x, y); bglow(x, y, 10, W2, .5); } }
-      const pul = .55 + Math.sin(t * 3) * .2;
-      bglow(0, -125 + hov * .4 + sq, 46, W2, pul); bglow(14, -205 + hov + sq, 24, W2, .7 + (b.eyeGlow || 0) * .3);
-      if (b.eyeGlow) bglow(14, -205 + hov, 60, W2, b.eyeGlow * .6);
+      orb(true);
+      const pul = .55 + Math.sin(t * 3) * .2, eg = bspring(A, 'eg', b.eyeGlow || 0, 90, .6);
+      addG(() => { glowDot(g, 0, -125 + hov * .4 + bob, 46, W2, pul); glowDot(g, hx + 8, hy - 31, 24, W2, .7 + eg * .3); if (eg > .05) glowDot(g, hx + 8, hy - 31, 60, W2, eg * .6); });
     });
   },
-  // VI. 심연의 눈: 가시 왕관을 두른 살덩이 속 세로 동공, 이빨 눈꺼풀, 주위를 도는 작은 눈들
+  // VI. 심연의 눈: 촉수는 밧줄 물리로 꿈틀대고, 눈동자는 부드럽게 나를 따라오며, 눈꺼풀은 빠르게 깜박인다
   eye(b, t) {
     const en = b.enraged, I2 = en ? '#ff3a5a' : '#9a5cff', ov = { a: '#3a1a40', d: '#1a0a20', s: '#f0e4c8', r: '#c0304a', k: '#050208', h: '#e8dcc0', i: I2 };
     const orb = bspr('eo', 56, 56, P => {
@@ -2841,36 +2965,35 @@ const BOSS_DRAW = {
     }, '#3a1a40', ov);
     const iris = bspr('ei' + (en ? 1 : 0), 18, 18, P => { P.ell(9, 9, 8.5, 8.5, 'i'); P.ell(9, 9, 6, 6, 'I'); P.ell(9, 9, 4.5, 4.5, 'i'); P.ell(9, 9, 1.4, 6.5, 'k'); P.rect(5, 4, 2, 2, 'x'); }, I2, ov);
     const mini = bspr('em' + (en ? 1 : 0), 12, 8, P => { P.poly([[0, 4], [6, 0], [12, 4], [6, 8]], 'a'); P.poly([[2, 4], [6, 2], [10, 4], [6, 6]], 's'); }, '#3a1a40', ov);
-    const open = clamp(1 - (b.blink || 0) + (b.wide || 0) * .25, .05, 1.2);
-    faceFrame(b, () => {
-      // 뒤에서 도는 룬 고리
-      addG(() => { for (let i = 0; i < 36; i++) { const a = i / 36 * TAU + t * .25, r = 120 + (i % 3 === 0 ? 6 : 0); g.globalAlpha = i % 3 === 0 ? .7 : .35; bsq(Math.cos(a) * r, Math.sin(a) * r, i % 3 === 0 ? BP * 2 : BP, I2); } g.globalAlpha = 1; });
-      bglow(0, 0, 170, I2, .22);
-      for (let i = 0; i < 6; i++) {
-        const base = (i - 2.5) * 22, pts = [[base, 50]]; let px = base, py = 50;
-        for (let k = 0; k < 7; k++) { px += Math.sin(t * 1.8 + i * 1.3 + k * .7) * 9 + (i - 2.5) * 2.4; py += 16; pts.push([px, py]); }
-        strand(pts, 15, 3, '#2a1236', '#4a2a5a');
-        for (let k = 1; k < 6; k += 2) bsq(pts[k][0] + 6, pts[k][1] - 3, BP, '#e8dcc0');
-      }
+    const A = bossAnim(b, t), lean = bspring(A, 'ln', clamp(A.vx / 900, -.22, .22), 28, .6);
+    const open = bspring(A, 'op', clamp(1 - (b.blink || 0) * 1.4 + (b.wide || 0) * .25, .04, 1.2), 520, .75);
+    rigM(A, { lean });
+    // 뒤에서 도는 룬 고리
+    addG(() => { for (let i = 0; i < 36; i++) { const a = i / 36 * TAU + t * .25, r = 120 + (i % 3 === 0 ? 6 : 0); g.globalAlpha = i % 3 === 0 ? .7 : .35; bsq(b.x + Math.cos(a) * r, b.y + Math.sin(a) * r, i % 3 === 0 ? BP * 2 : BP, I2); } g.globalAlpha = 1; glowDot(g, b.x, b.y, 170, I2, .22); });
+    for (let i = 0; i < 6; i++) {
+      const k0 = i - 2.5, r = brope(A, 'tn' + i, 9, 14, bw(b, A, k0 * 22, 46), { g: 120, damp: .93, stiff: .05, rest: j => { const a = k0 * .2 + Math.sin(t * 1.9 - j * .7 + i * 1.7) * (.25 + j * .09); return [Math.sin(a), Math.cos(a)]; }, restK: .12, force: (j) => [Math.sin(t * 2.3 - j * .6 + i * 1.3) * (40 + j * 30) - A.vx * .6, Math.cos(t * 1.7 - j * .5 + i) * 50] });
+      strand(r, 15, 3, '#2a1236', '#4a2a5a');
+      for (let j = 1; j < 8; j += 2) bsq(r[j][0] + 6, r[j][1] - 3, BP, '#e8dcc0');
+    }
+    rigFrame(b, A, () => {
       bdraw(orb, 0, 0);
-      // 눈알: 눈꺼풀이 열린 만큼만 보인다
-      const H = 9 * BP, Wd = 17 * BP, hgt = x => H * Math.sqrt(Math.max(0, 1 - (x / (Wd + BP)) ** 2)) * open;
+      const H = 9 * BP, Wd = 17 * BP, hgt = x => H * Math.sqrt(Math.max(0, 1 - (x / (Wd + BP)) ** 2)) * Math.min(1.15, open);
       g.save(); g.beginPath(); for (let x = -Wd; x <= Wd; x += BP) { const hh = snap(hgt(x)); if (hh > 0) g.rect(x, -hh, BP, hh * 2); } g.clip();
-      g.fillStyle = '#f0e4c8'; g.fillRect(-Wd - BP, -H - BP, Wd * 2 + BP * 3, H * 2 + BP * 2);
+      g.fillStyle = '#f0e4c8'; g.fillRect(-Wd - BP, -H - BP * 2, Wd * 2 + BP * 3, H * 2 + BP * 4);
       g.fillStyle = '#c0304a'; for (const [x0, y0, x1] of [[-Wd, -6, -Wd + 24], [-Wd, 9, -Wd + 18], [Wd, -9, Wd - 21], [Wd, 6, Wd - 27]]) for (let x = Math.min(x0, x1); x <= Math.max(x0, x1); x += BP) g.fillRect(snap(x), snap(y0 + Math.sin(x * .2) * 3), BP, BP);
-      const lx = clamp((b.lookX || 0) / 200, -1, 1) * 26, ly = clamp((b.lookY || 0) / 200, -1, 1) * 10;
+      const lx = bspring(A, 'lx', clamp((b.lookX || 0) / 200, -1, 1) * 26 * A.f, 70, .62), ly = bspring(A, 'ly', clamp((b.lookY || 0) / 200, -1, 1) * 10, 70, .62);
       bdraw(iris, lx, ly);
       g.restore();
-      // 이빨 눈꺼풀
       for (let x = -Wd + BP * 2; x <= Wd - BP * 2; x += BP * 3) { const hh = snap(hgt(x)); g.fillStyle = PX_OUT; g.fillRect(x - BP, -hh - BP, BP * 3, BP * 2); g.fillRect(x - BP, hh - BP, BP * 3, BP * 2); g.fillStyle = '#e8dcc0'; g.fillRect(x, -hh, BP, BP * 2); g.fillRect(x, hh - BP, BP, BP); }
-      bglow(lx, ly, 34, I2, .55 * open);
-      for (let i = 0; i < 5; i++) {
-        const a = t * .5 + i / 5 * TAU, x = Math.cos(a) * 96, y = Math.sin(a) * 84 - 4;
-        bdraw(mini, x, y); const px = clamp((b.lookX || 0) - x, -1, 1), py = clamp((b.lookY || 0) - y, -1, 1); bsq(x + px * 3 - 1, y + py * 1 - 1, BP, I2); bglow(x, y, 12, I2, .4);
-      }
+      addG(() => glowDot(g, lx, ly, 34, I2, .55 * Math.min(1, open)));
     });
+    for (let i = 0; i < 5; i++) {
+      const a = t * .5 + i / 5 * TAU, ox = Math.cos(a) * 96, oy = Math.sin(a) * 84 - 4 + Math.sin(t * 2.4 + i) * 5;
+      const x = bspring(A, 'mx' + i, b.x + ox, 40, .7), y = bspring(A, 'my' + i, b.y + oy, 40, .7);
+      bdraw(mini, x, y); const px = clamp(player.x - x, -1, 1), py = clamp(player.y - y, -1, 1); bsq(x + px * 3 - 1, y + py - 1, BP, I2); bglow(x, y, 12, I2, .4);
+    }
   },
-  // VII. 하늘바다 크라켄: 장갑 능선이 선 뾰족한 외투막, 사나운 눈, 갈고리 달린 다리와 곤봉 촉수
+  // VII. 하늘바다 크라켄: 외투막이 오므라들며 물을 뿜듯 솟고, 다리는 밧줄 물리로 흐물흐물 늘어지다 바닥에 닿으면 휘감긴다
   kraken(b, t) {
     const en = b.enraged, C = en ? '#ff5a8a' : '#5affe8', ov = { a: '#1f4a5c', d: '#0f2a38', c: C, k: '#040a10', w: en ? '#ffffff' : '#ffe36b', h: '#2a2a30', f: '#3a7a8a' };
     const mantle = bspr('km' + (en ? 1 : 0), 42, 48, P => {
@@ -2883,31 +3006,37 @@ const BOSS_DRAW = {
       P.line(8, 31, 18, 33, 'd'); P.line(34, 31, 24, 33, 'd');
       P.tri(17, 41, 25, 41, 21, 47, 'h');
     }, '#1f4a5c', ov);
-    faceFrame(b, () => {
-      motes(0, 120, 220, 230, 14, C, t, 18, 9);
-      bglow(0, 10, 160, C, .14);
-      const by = Math.sin(t * 2) * 4;
-      const tent = (i, back) => {
-        const n = 9, base = [(i - 3.5) * 11, by + 56], spread = (i - 3.5) * 6, pts = [base]; let [px, py] = base;
-        for (let k = 0; k < n; k++) { px += spread * (1 - k * .07) + Math.sin(t * 2.4 + i * .9 + k * .65) * (3 + k * 1.4); py += 16 - k * 1.1 - (k > 6 ? 5 : 0); pts.push([px, py]); }
-        strand(pts, 18, 4, back ? '#163a4a' : '#1f4a5c', back ? null : '#3a7a8a');
-        if (!back) for (let k = 1; k < n - 1; k += 2) { bsq(pts[k][0] - 2, pts[k][1] + 4, BP, '#f0a0b8'); bsq(pts[k][0] + (i < 4 ? -8 : 6), pts[k][1], BP, '#d8e8f0'); }
-      };
-      for (const i of [0, 7, 2, 5]) tent(i, true);
-      // 곤봉 촉수 두 개: 길게 뻗어 가시 곤봉을 흔든다
-      for (const side of [-1, 1]) {
-        const pts = [[side * 24, by + 50]]; for (let k = 1; k <= 8; k++) pts.push([side * (24 + k * 10) + Math.sin(t * 1.6 + k * .5 + side) * k * 2.4, by + 50 + k * 14 - Math.sin(t * 1.6 + side) * k * 2]);
-        strand(pts, 9, 6, '#1f4a5c', '#3a7a8a'); const [cx, cy] = pts[8];
-        strand([[cx, cy], [cx + side * 12, cy + 10]], 15, 15, '#2a5a6c', '#4a8a9a');
-        for (const [dx, dy] of [[-8, -6], [8, -6], [side * 20, 6], [side * 4, 20], [-side * 6, 14]]) bsq(cx + side * 6 + dx, cy + 5 + dy, BP * 2, '#d8e8f0');
-      }
-      for (const i of [1, 6, 3, 4]) tent(i, false);
-      bdraw(mantle, 0, by, Math.sin(t * 1.3) * .04, 1, .5, .62);
-      for (const ex of [-26, 26]) bglow(ex, by + 14, 16, ov.w, .7);
-      for (const [x, y] of [[-9, -42], [9, -30], [-15, -12], [15, -6]]) bglow(x, by + y, 10, C, .45 + Math.sin(t * 3 + x) * .2);
+    const A = bossAnim(b, t), per = en ? 1.7 : 2.5;
+    A.pt = (A.pt || 0) + A.dt; const ph = (A.pt % per) / per, pv = ph < .14 ? eio(ph / .14) : 1 - eio((ph - .14) / .86);
+    const jet = ph < .14 && (A.lastPh || 1) > ph; A.lastPh = ph;
+    const lean = bspring(A, 'ln', clamp(A.vx / 1100, -.22, .22), 22, .6), by = -pv * 10 + Math.sin(t * 1.4) * 3;
+    rigM(A, { lean, sq: -pv * .45 });
+    const floor = DUN.active && world.arena ? dunFloorY() - 6 : null;
+    motes(b.x, b.y + 120, 220, 230, 14, C, t, 18, 9);
+    bglow(b.x, b.y + 10, 160, C, .14);
+    const tent = (i, long) => {
+      const k0 = i - 3.5, n = long ? 14 : 10, len = long ? 13 : 14, key = (long ? 'L' : 'T') + i;
+      const sg = k0 < 0 ? -1 : 1, cw = .6 + .4 * Math.sin(t * .9 + i * 2.1);
+      const r = brope(A, key, n, len, bw(b, A, long ? k0 * 6 : k0 * 11, 52 + by), { g: 200, damp: .955, stiff: .03, it: 5, floor,
+        rest: j => { const u = j / n, a = k0 * (long ? .14 : .2) + sg * u * u * (long ? 1.1 : 2.2) * cw + Math.sin(t * 2.1 - j * .6 + i * 1.3) * .35 * u; return [Math.sin(a), Math.cos(a)]; }, restK: .1,
+        force: (j) => [Math.sin(t * 2.2 - j * .55 + i * 1.3) * (20 + j * 18) - A.vx * 1.2, Math.cos(t * 1.6 - j * .4 + i) * 30] });
+      if (jet) for (let j = 1; j < n; j++) { const q = A.rig[key].q[j]; q[0] -= k0 * 2.2 * (j / n) * 3; q[1] -= 7 * (j / n); }
+      return r;
+    };
+    const draw = (r, i, back, long) => {
+      strand(r, long ? 9 : 18, long ? 6 : 4, back ? '#163a4a' : '#1f4a5c', back ? null : '#3a7a8a');
+      if (!back) for (let k = 1; k < r.length - 2; k += 2) { bsq(r[k][0] - 2, r[k][1] + 4, BP, '#f0a0b8'); bsq(r[k][0] + (i < 4 ? -8 : 6), r[k][1], BP, '#d8e8f0'); }
+      if (long) { const [cx, cy] = r[r.length - 1], [qx, qy] = r[r.length - 3], a = Math.atan2(cy - qy, cx - qx); strand([[cx, cy], [cx + Math.cos(a) * 14, cy + Math.sin(a) * 14]], 15, 15, '#2a5a6c', '#4a8a9a'); for (let s = 0; s < 5; s++) { const sa = a + (s - 2) * .9; bsq(cx + Math.cos(a) * 7 + Math.cos(sa) * 12, cy + Math.sin(a) * 7 + Math.sin(sa) * 12, BP * 2, '#d8e8f0'); } }
+    };
+    for (const i of [0, 7, 2, 5]) draw(tent(i, false), i, true, false);
+    for (const i of [2, 5]) draw(tent(i, true), i, false, true);
+    for (const i of [1, 6, 3, 4]) draw(tent(i, false), i, false, false);
+    rigFrame(b, A, () => {
+      bdraw(mantle, 0, by, Math.sin(t * 1.3) * .03, 1, .5, .62);
+      addG(() => { for (const ex of [-26, 26]) glowDot(g, ex, by + 14, 16, ov.w, .7); for (const [x, y] of [[-9, -42], [9, -30], [-15, -12], [15, -6]]) glowDot(g, x, by + y, 10, C, .45 + Math.sin(t * 3 + x) * .2 + pv * .3); });
     });
   },
-  // VIII. 세계수의 정령: 가면 같은 긴 얼굴, 빛나는 가지 뿔, 잎 망토를 두른 창백한 나무 몸
+  // VIII. 세계수의 정령: 가지 팔은 IK로 우아하게 휘고, 왕관 가지는 몸보다 늦게 흔들리며, 팔에 걸린 잎줄기가 나부낀다
   tree(b, t) {
     const en = b.enraged, W2 = en ? '#ff8a5a' : '#b8ff8a', ov = { a: '#e0d6c0', d: '#6a5a48', g: '#3e8a3a', l: '#225a26', w: W2, f: '#ffb0d0', k: '#0a140a', y: W2 };
     const body = bspr('tb' + (en ? 1 : 0), 36, 62, P => {
@@ -2932,26 +3061,36 @@ const BOSS_DRAW = {
       for (const [x, y] of [[1, 3], [15, 1], [49, 3], [35, 1], [4, 20], [46, 20], [22, 14], [28, 14], [2, 14], [48, 14], [12, 8], [38, 8]]) { P.ell(x, y, 1.6, 1.2, 'l'); P.set(x, y, 'w'); }
       for (const [x, y] of [[8, 13], [42, 13], [16, 20], [34, 20], [25, 20]]) { P.set(x, y, 'f'); P.set(x + 1, y, 'f'); }
     }, '#e0d6c0', ov);
-    const sway = Math.sin(t * 1.4) * 2, hov = Math.sin(t * 1.8) * 3, up = b.armUp || 0;
-    faceFrame(b, () => {
-      motes(0, 0, 260, 260, 12, '#ffb0d0', t, 14, 13); motes(0, 0, 260, 260, 10, W2, t, 20, 17);
-      bglow(0, -150, 120, W2, .15);
-      const arm = side => {
-        const sx = side * 22, sy = -138 + hov, el = [sx + side * 34, sy + 30 - up * 60], ha = [sx + side * (58 - up * 14), sy + 62 - up * 130 + Math.sin(t * 2 + side) * 5];
-        strand([[sx, sy], el, ha], 10, 6, '#e0d6c0', '#f4ecdc');
-        for (let k = -1; k <= 1; k++) strand([ha, [ha[0] + side * 12 + k * 6, ha[1] + 10 - up * 22 + k * 8], [ha[0] + side * 22 + k * 10, ha[1] + 14 - up * 36 + k * 12]], 4, 3, '#d8ccb4', null);
-        if (side > 0) { bglow(ha[0] + side * 10, ha[1], 22, W2, .7); bsq(ha[0] + side * 10 - 3, ha[1] - 3, BP * 2, '#ffffff'); }
-        bsq(el[0] - 3, el[1] - 6, BP * 2, '#3e8a3a');
-      };
-      arm(-1);
+    const A = bossAnim(b, t), up = clamp(bstrike(A, 'up', b.armUp || 0, 46, 240, .45), -.12, 1.15), sq = bspring(A, 'sq', bcrouch(b, A), 180, .4);
+    const sp = Math.min(1, Math.abs(A.vx) / 60), ph = A.walk * .04, hov = Math.sin(t * 1.8) * 3, lean = bspring(A, 'ln', clamp(A.vx / 900, -.07, .07) + Math.sin(t * 1.1) * .012, 26, .7);
+    rigM(A, { lean, sq });
+    const arms = {};
+    for (const s of [-1, 1]) {
+      const sh = [s * 22, -138 + hov], idle = [s * 64 + Math.sin(ph + (s > 0 ? 0 : Math.PI)) * 12 * sp, -58 + Math.sin(t * 1.6 + s) * 6], top = [s * 40, -210 + Math.sin(t * 3) * 4];
+      const ha = [bspring(A, 'hx' + s, lerp(idle[0], top[0], up), 44, .5), bspring(A, 'hy' + s, lerp(idle[1], top[1], up), 44, .5)];
+      arms[s] = { sh, ha, el: ik2p(sh[0], sh[1], ha[0], ha[1], 46, 48, p => p[0] * s + p[1] * .4) };
+    }
+    const arm = s => {
+      const { sh, el, ha } = arms[s], ang = Math.atan2(ha[1] - el[1], ha[0] - el[0]);
+      strand([sh, el, ha], 10, 6, '#e0d6c0', '#f4ecdc');
+      for (let k = -1; k <= 1; k++) { const a1 = ang + k * .45, a2 = a1 + s * .4; const p1 = [ha[0] + Math.cos(a1) * 14, ha[1] + Math.sin(a1) * 14]; strand([ha, p1, [p1[0] + Math.cos(a2) * 14, p1[1] + Math.sin(a2) * 14]], 4, 3, '#d8ccb4', null); }
+      if (s > 0) { const o = [ha[0] + Math.cos(ang) * 12, ha[1] + Math.sin(ang) * 12]; addG(() => glowDot(g, o[0], o[1], 22, W2, .7)); bsq(o[0] - 3, o[1] - 3, BP * 2, '#ffffff'); }
+      bsq(el[0] - 3, el[1] - 6, BP * 2, '#3e8a3a');
+    };
+    const vine = s => { const { el } = arms[s], v = brope(A, 'vn' + s, 5, 9, bw(b, A, el[0], el[1]), { g: 700, damp: .9 }); strand(v, 5, 3, '#3e8a3a', null); bsq(v[4][0] - 3, v[4][1], BP * 2, '#ffb0d0'); };
+    motes(b.x, b.y, 260, 260, 12, '#ffb0d0', t, 14, 13); motes(b.x, b.y, 260, 260, 10, W2, t, 20, 17);
+    bglow(b.x, b.y - 150, 120, W2, .15);
+    rigFrame(b, A, () => arm(-1)); vine(-1);
+    rigFrame(b, A, () => {
       bdraw(body, 0, 3, 0, 1, .5, 1);
-      bdraw(crown, sway, -183 + hov, Math.sin(t * 1.4) * .03, 1, .5, 1);
+      const cr = bspring(A, 'cr', lean * 2.2 + Math.sin(t * 1.4) * .035, 20, .3);
+      bdraw(crown, cr * 50, -183 + hov, cr, 1, .5, 1);
       arm(1);
-      for (const ex of [-9, 9]) bglow(ex, -168 + hov * 0, 12, W2, .8);
-      bglow(0, -120, 22, W2, .55 + Math.sin(t * 3) * .15);
+      addG(() => { for (const ex of [-9, 9]) glowDot(g, ex, -168, 12, W2, .8); glowDot(g, 0, -120, 22, W2, .55 + Math.sin(t * 3) * .15); });
     });
+    vine(1);
   },
-  // IX. 공허의 집행자: 뾰족한 두건 속 두 개의 빛, 가시 견갑과 사슬, 빛나는 날의 큰 낫, 찢어진 망토 자락
+  // IX. 공허의 집행자: 망토 자락이 바람에 날리듯 늦게 따라오고, 낫은 뒤로 젖혔다가 크게 휘두른 뒤 여운을 남긴다
   void(b, t) {
     const en = b.enraged, W2 = en ? '#ff5a8a' : '#c99cff', ov = { a: '#1c1530', k: '#030206', w: W2, p: '#4a2a7a', b: '#8a8ea0', n: '#2a2030' };
     const cloak = bspr('vc' + (en ? 1 : 0), 40, 58, P => {
@@ -2971,22 +3110,23 @@ const BOSS_DRAW = {
       P.line(32, 10, 22, 9, 'w'); P.line(22, 9, 13, 9, 'w'); P.line(13, 9, 5, 11, 'w'); P.line(5, 11, 1, 15, 'w');
       P.tri(31, 5, 34, 6, 39, 0, 'b'); P.set(30, 7, 'w'); P.ell(6, 48, 1.5, 1.5, 'w');
     }, '#8a8ea0', ov);
-    const hov = Math.sin(t * 2.2) * 6, sw = b.swing || 0, ba = b.blinkA || 0;
-    faceFrame(b, () => {
-      bglow(0, 0, 150, W2, .18 + ba * .4);
-      for (let i = 0; i < 6; i++) { const a = t * .9 + i / 6 * TAU, r = 90 + Math.sin(t * 2 + i) * 8, x = Math.cos(a) * r, y = Math.sin(a) * r * .5 - 10; addG(() => { g.globalAlpha = .6; g.fillStyle = W2; g.beginPath(); g.moveTo(snap(x), snap(y - 9)); g.lineTo(snap(x + 4), snap(y)); g.lineTo(snap(x), snap(y + 9)); g.lineTo(snap(x - 4), snap(y)); g.fill(); g.globalAlpha = 1; }); }
-      g.globalAlpha = Math.max(.08, 1 - ba);
-      for (let i = 0; i < 6; i++) { const x0 = -24 + i * 9.6, pts = [[x0, 70 + hov]]; for (let k = 1; k <= 4; k++) pts.push([x0 + Math.sin(t * 3 + i + k * .8) * (4 + k * 2) - k * 3, 70 + hov + k * 12]); strand(pts, 10, 4, '#1c1530', null); }
+    const A = bossAnim(b, t), ba = bspring(A, 'ba', b.blinkA || 0, 120, .8), hov = Math.sin(t * 2.2) * 6, lean = bspring(A, 'ln', clamp(A.vx / 1100, -.3, .3), 30, .55);
+    rigM(A, { lean });
+    const ga = bspring(A, 'ga', -.5 + (b.swing || 0) * 2.6 - (b.glare || 0) * .8 + Math.sin(t * 1.3) * .06, 55, .42);
+    bglow(b.x, b.y, 150, W2, .18 + ba * .4);
+    for (let i = 0; i < 6; i++) { const a = t * .9 + i / 6 * TAU, r = 90 + Math.sin(t * 2 + i) * 8, x = b.x + Math.cos(a) * r, y = b.y + Math.sin(a) * r * .5 - 10; addG(() => { g.globalAlpha = .6; g.fillStyle = W2; g.beginPath(); g.moveTo(snap(x), snap(y - 9)); g.lineTo(snap(x + 4), snap(y)); g.lineTo(snap(x), snap(y + 9)); g.lineTo(snap(x - 4), snap(y)); g.fill(); g.globalAlpha = 1; }); }
+    g.save(); g.globalAlpha = Math.max(.08, 1 - ba);
+    for (let i = 0; i < 6; i++) { const r = brope(A, 'st' + i, 6, 12, bw(b, A, -24 + i * 9.6, 70 + hov), { g: 260, damp: .9, stiff: .08, force: (j) => [Math.sin(t * 3.2 + i * 1.7 + j * .9) * 90 - A.vx * 2, -40] }); strand(r, 10, 4, '#1c1530', null); }
+    rigFrame(b, A, () => {
       bdraw(cloak, 0, hov, Math.sin(t * 1.2) * .03, 1, .5, .5);
-      const ga = -.5 + sw * 2.6;
-      bdraw(scythe, 34, 2 + hov, ga, 1, .3, .68);
-      bsq(38, -12 + hov, BP * 3, '#d8d0e8'); bsq(26, 10 + hov, BP * 3, '#d8d0e8');
-      g.globalAlpha = 1;
-      for (const ex of [-6, 6]) bglow(ex, -42 + hov, 14, W2, .9 * (1 - ba * .7));
-      bglow(0, 14 + hov, 18, W2, .5);
+      const pv = [34, 2 + hov], ux = Math.sin(ga) * .5 + Math.cos(ga) * .866 * 0, d = [Math.cos(ga - 1.05), Math.sin(ga - 1.05)];
+      bdraw(scythe, pv[0], pv[1], ga, 1, .3, .68);
+      bsq(pv[0] + d[0] * 16 - 4, pv[1] + d[1] * 16 - 4, BP * 3, '#d8d0e8'); bsq(pv[0] - d[0] * 14 - 4, pv[1] - d[1] * 14 - 4, BP * 3, '#d8d0e8');
     });
+    g.restore();
+    rigFrame(b, A, () => addG(() => { for (const ex of [-6, 6]) glowDot(g, ex, -42 + hov, 14, W2, .9 * (1 - ba * .7)); glowDot(g, 0, 14 + hov, 18, W2, .5); }));
   },
-  // X. 타락한 금고지기 왕: T자 눈구멍의 투구, 떠 있는 부서진 왕관, 보랏빛 균열이 갉아먹는 금 갑주와 대검
+  // X. 타락한 금고지기 왕: 대검을 두 손으로 쥐고(IK 팔), 내려칠 땐 크게 치켜든 뒤 무게를 싣고, 망토는 걸음과 반대로 끌린다
   king(b, t) {
     const en = b.enraged, V2 = en ? '#ffffff' : '#ff6a3a', ov = { a: '#3a3848', d: '#1e1c28', y: '#d8a838', r: '#ff3a4a', p: '#9a4ad8', k: '#08060c', w: V2, s: '#a8a4b8', c: '#6a0e1a', n: '#3a2418' };
     const body = bspr('kb' + (en ? 1 : 0), 48, 66, P => {
@@ -3013,28 +3153,37 @@ const BOSS_DRAW = {
       P.rect(6, 43, 4, 11, 'n'); for (let y = 44; y < 54; y += 2) P.lineIn(6, y, 9, y + 1, 'd'); P.ell(8, 56, 2.5, 2.5, 'y'); P.set(8, 56, 'r');
     }, '#a8a4b8', ov);
     const fist = bspr('kf', 9, 9, P => { P.poly([[0, 1], [8, 0], [9, 8], [1, 9]], 'a'); P.lineIn(1, 4, 8, 4, 'y'); }, '#3a3848', ov);
-    const br = Math.sin(t * 1.6) * 2, up = b.armUp || 0, sq = (b.squash || 0) * 10;
-    faceFrame(b, () => {
-      motes(0, 0, 220, 240, 10, '#ffd36b', t, 30, 19, BP, true); motes(0, 0, 200, 240, 10, '#b06aff', t, 18, 23);
-      bglow(0, -120, 140, en ? '#ff4a4a' : '#9a4ad8', .16);
-      bdraw(cape, -12, -150 + sq, Math.sin(t * 1.2) * .05 - .06, 1, .5, 0);
-      const grip = [lerp(34, 8, up), lerp(-126, -214, up) + br + sq], rot = lerp(Math.PI - .42, -.45, up);
-      strand([[-30, -146 + sq + br * .5], [lerp(-6, -12, up), lerp(-112, -186, up) + sq], grip], 18, 14, '#3a3848', '#5a586a');
-      bdraw(body, 0, 3 + sq * .3, 0, 1, .5, 1);
+    const A = bossAnim(b, t), up = clamp(bstrike(A, 'up', b.armUp || 0, 42, 340, .36), -.12, 1.15), sq = bspring(A, 'sq', bcrouch(b, A), 180, .38);
+    const sp = Math.min(1, Math.abs(A.vx) / 60), ph = A.walk * .045, br = Math.sin(t * 1.6) * 2, lean = bspring(A, 'ln', clamp(A.vx / 1000, -.06, .06) + Math.sin(ph) * .02 * sp, 28, .7);
+    rigM(A, { lean, sq });
+    const lv = -A.vx * A.f;
+    motes(b.x, b.y, 220, 240, 10, '#ffd36b', t, 30, 19, BP, true); motes(b.x, b.y, 200, 240, 10, '#b06aff', t, 18, 23);
+    bglow(b.x, b.y - 120, 140, en ? '#ff4a4a' : '#9a4ad8', .16);
+    const grip = [lerp(34, 8, up), lerp(-126, -214, up) + br], rot = lerp(Math.PI - .42, -.45, up);
+    const shB = [-30, -146 + br * .5], shF = [34, -146 + br * .5], elB = ik2p(shB[0], shB[1], grip[0], grip[1], 46, 48, p => p[1] - p[0] * .2), elF = ik2p(shF[0], shF[1], grip[0], grip[1], 46, 48, p => p[1] + p[0] * .4);
+    const sk = bspring(A, 'ck', clamp(lv / 500, -.4, .4) + Math.sin(t * 1.2) * .04, 22, .45);
+    rigFrame(b, A, () => {
+      g.save(); g.translate(-12, -150); g.transform(1, 0, sk, 1, 0, 0); bdraw(cape, 0, 0, 0, 1, .5, 0); g.restore();
+    });
+    for (let i = 0; i < 5; i++) { const x0 = -12 - 54 + i * 27 + sk * 168, r = brope(A, 'cp' + i, 4, 9, bw(b, A, x0, 18), { g: 600, damp: .9, force: () => [-A.vx * 1.5, 0] }); strand(r, 6, 3, '#5a0a16', null); }
+    rigFrame(b, A, () => {
+      strand([shB, elB, grip], 14, 11, '#3a3848', '#5a586a');
+      bdraw(body, 0, 3, 0, 1, .5, 1);
       bdraw(sword, grip[0], grip[1], rot, 1, .5, .79);
-      strand([[34, -146 + sq + br * .5], [lerp(44, 30, up), lerp(-112, -186, up) + sq], grip], 18, 14, '#3a3848', '#5a586a');
+      strand([shF, elF, grip], 14, 11, '#3a3848', '#5a586a'); bsq(elF[0] - 4, elF[1] - 4, BP * 3, '#d8a838');
       bdraw(fist, grip[0], grip[1]);
-      bdraw(crown, Math.sin(t * 1.1) * 3, -206 + Math.sin(t * 1.6 + 1) * 4 + sq, -.18 + Math.sin(t * 1.1) * .05, 1, .5, 1);
-      for (const ex of [-6, 12]) bglow(ex, -168 + sq * .3, 12, V2, .9);
-      bglow(0, -108 + sq * .3, 24, '#ff3a4a', .55 + Math.sin(t * 4) * .15);
-      bglow(0, -222 + sq, 26, '#ffd36b', .35);
+      const cx = bspring(A, 'cx', lean * 60, 30, .35), cy = bspring(A, 'cy', -206 + br + sq * 20, 34, .3), cr = bspring(A, 'cr', -.18 + lean * 2 + Math.sin(t * 1.1) * .05, 20, .3);
+      bdraw(crown, cx + Math.sin(t * 1.1) * 3, cy + Math.sin(t * 1.6 + 1) * 3, cr, 1, .5, 1);
+      addG(() => { for (const ex of [-6, 12]) glowDot(g, ex, -168, 12, V2, .9); glowDot(g, 0, -108, 24, '#ff3a4a', .55 + Math.sin(t * 4) * .15); glowDot(g, cx, cy - 16, 26, '#ffd36b', .35); });
     });
   },
 };
 // 보스 초상(게이트 창·튜토리얼): 작은 캔버스에 같은 그림을 맞춰 그린다
 const BOSS_ART = { root: [300, 250, 0], bone: [420, 220, 0], spider: [380, 220, 0], drake: [380, 240, 0], golem: [300, 300, 0], eye: [300, 300, 30], kraken: [300, 330, 70], tree: [300, 300, 0], void: [300, 300, 20], king: [300, 300, 0] };
+// 초상 속 보스도 리깅 상태(밧줄·스프링)를 이어 가도록 보스마다 하나씩 둔다
+const BOSS_PST = {};
 function drawBossPortrait(ctx, L, w, h, t) {
-  const B = BOSSES[L], st = { x: 0, y: 0, face: -1, hp: 1, max: 1, enraged: false, lookX: 60, lookY: 30 }, g0 = g, T0 = time, [bw, bh, oy] = BOSS_ART[B.id];
+  const B = BOSSES[L], st = BOSS_PST[L] || (BOSS_PST[L] = { L, x: 0, y: 0, face: -1, hp: 1, max: 1, enraged: false, lookX: 60, lookY: 30 }), g0 = g, T0 = time, [bw, bh, oy] = BOSS_ART[B.id];
   const k = Math.min(w / bw, h / bh);
   ctx.save(); ctx.translate(w / 2, B.mode === 'ground' ? h * .96 : h / 2 - oy * k); ctx.scale(k, k); ctx.imageSmoothingEnabled = false;
   g = ctx; time = t; try { BOSS_DRAW[B.id](st, t); } finally { g = g0; time = T0; ctx.restore(); }
