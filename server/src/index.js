@@ -406,12 +406,16 @@ export class Room extends DurableObject {
     if (t === 'dig' || t === 'claim') {
       const i = m.i | 0; if (i < 0 || i >= W * H) return;
       const me = this.pos.get(a.id);
-      if (me) { const tx = i % W, ty = Math.floor(i / W), px = (me[0] + 9) / TS, py = (me[1] + 13) / TS; if (Math.abs(tx - px) > 4 || Math.abs(ty - py) > 4) { if (t === 'claim') this.send(ws, { t: 'claim', i, ok: 0 }); return; } }
+      if (me) { const tx = i % W, ty = Math.floor(i / W), px = (me[0] + 9) / TS, py = (me[1] + 13) / TS; if (Math.abs(tx - px) > 16 || Math.abs(ty - py) > 16) { if (t === 'claim') this.send(ws, { t: 'claim', i, ok: 0 }); return; } }
       if (this.mods.has(i)) { if (t === 'claim') this.send(ws, { t: 'claim', i, ok: 0 }); else this.send(ws, { t: 'dig', i, by: 0 }); return; }
       this.markMod(i);
       if (t === 'claim') this.send(ws, { t: 'claim', i, ok: 1, seed: Math.floor(Math.random() * 2 ** 31) });
       this.bcast({ t: 'dig', i, by: a.id, chest: t === 'claim' ? 1 : 0 }, ws);
       return;
+    }
+    if (t === 'fx') {
+      const now = Date.now(); if (now - (a.fxAt || 0) < 400) return; a.fxAt = now; ws.serializeAttachment(a);
+      return this.bcast({ t: 'fx', id: a.id, c: Math.max(0, Math.min(31, m.c | 0)), d: Math.max(1, Math.min(3, m.d | 0)), f: m.f > 0 ? 1 : -1 }, ws);
     }
     if (t === 'open') {
       const type = String(m.type || '').slice(0, 16), best = Math.max(0, Math.min(10, m.best | 0));
