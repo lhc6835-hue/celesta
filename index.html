@@ -1883,7 +1883,7 @@ function drawHero(p, pickId, dig, scarfCol) {
     g.restore();
   };
   // 등에 멘 제트팩(몸 뒤). 분사 중이면 노즐에서 불꽃이 깜빡인다
-  { const jx = -sw / 2 + 1 * PS, jy = -sh + bob + 14 * PS, w2 = 4 * PS, h2 = 8 * PS;
+  { const jx = -sw / 2 + 2 * PS, jy = -sh + bob + 10.5 * PS, w2 = 4 * PS, h2 = 6.5 * PS;
     g.fillStyle = PX_OUT; g.fillRect(jx - PS, jy - PS, w2 + 2 * PS, h2 + 2 * PS);
     g.fillStyle = '#8a8f9a'; g.fillRect(jx, jy, w2, h2); g.fillStyle = '#c8ced8'; g.fillRect(jx, jy, PS, h2); g.fillStyle = '#e04848'; g.fillRect(jx, jy + 2 * PS, w2, PS);
     g.fillStyle = PX_OUT; g.fillRect(jx + PS, jy + h2, 2 * PS, 2 * PS); g.fillStyle = '#5a5a6a'; g.fillRect(jx + PS, jy + h2, 2 * PS, PS);
