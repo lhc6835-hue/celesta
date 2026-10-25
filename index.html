@@ -366,30 +366,35 @@ const store = {
 
 // ───────────── 사운드 (전부 합성) ─────────────
 const Sound = (() => {
-  let ac = null, master = null, on = true, drone = null;
+  let ac = null, master = null, on = true, drone = null, outNode = null, sfxBus = null, voices = 0, mul = 1;
+  const MAX_VOICES = 34;
   function init() {
     if (ac) return;
     try { ac = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { return; }
     master = ac.createGain(); master.gain.value = .55;
-    const comp = ac.createDynamicsCompressor(); master.connect(comp); comp.connect(ac.destination);
+    const comp = ac.createDynamicsCompressor(); comp.threshold.value = -10; comp.knee.value = 8; comp.ratio.value = 8; comp.attack.value = .002; comp.release.value = .2; master.connect(comp); comp.connect(ac.destination); outNode = comp;
+    // 효과음은 따로 모아 한 번 더 눌러 준다: 여러 소리가 한꺼번에 나도 뭉개지거나 튀지 않게
+    sfxBus = ac.createGain(); sfxBus.gain.value = .85; const lim = ac.createDynamicsCompressor(); lim.threshold.value = -16; lim.knee.value = 10; lim.ratio.value = 10; lim.attack.value = .002; lim.release.value = .14; sfxBus.connect(lim); lim.connect(master);
   }
   function tone(f, d = .2, type = 'sine', v = .2, slide = 0, delay = 0) {
-    if (!ac || !on) return;
+    if (!ac || !on || voices >= MAX_VOICES) return;
+    voices++; v *= mul;
     const t = ac.currentTime + delay, o = ac.createOscillator(), g = ac.createGain();
     o.type = type; o.frequency.setValueAtTime(f, t);
     if (slide) o.frequency.exponentialRampToValueAtTime(Math.max(20, f * slide), t + d);
     g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(v, t + .008); g.gain.exponentialRampToValueAtTime(.0008, t + d);
-    o.connect(g); g.connect(master); o.start(t); o.stop(t + d + .05);
+    o.connect(g); g.connect(sfxBus); o.onended = () => { voices--; o.disconnect(); g.disconnect(); }; o.start(t); o.stop(t + d + .05);
   }
   let nbuf = null;
   function noise(d = .2, freq = 1000, v = .2, q = 1, delay = 0, type = 'lowpass', sweep = 0) {
-    if (!ac || !on) return;
+    if (!ac || !on || voices >= MAX_VOICES) return;
+    voices++; v *= mul;
     if (!nbuf) { nbuf = ac.createBuffer(1, ac.sampleRate, ac.sampleRate); const a = nbuf.getChannelData(0); for (let i = 0; i < a.length; i++) a[i] = Math.random() * 2 - 1; }
     const t = ac.currentTime + delay, s = ac.createBufferSource(), f = ac.createBiquadFilter(), g = ac.createGain();
     s.buffer = nbuf; s.loop = true; f.type = type; f.frequency.setValueAtTime(freq, t); f.Q.value = q;
     if (sweep) f.frequency.exponentialRampToValueAtTime(Math.max(40, freq * sweep), t + d);
     g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(v, t + .01); g.gain.exponentialRampToValueAtTime(.0008, t + d);
-    s.connect(f); f.connect(g); g.connect(master); s.start(t, Math.random()); s.stop(t + d + .05);
+    s.connect(f); f.connect(g); g.connect(sfxBus); s.onended = () => { voices--; s.disconnect(); f.disconnect(); g.disconnect(); }; s.start(t, Math.random()); s.stop(t + d + .05);
   }
   const N = n => 440 * Math.pow(2, (n - 69) / 12);
   const sfx = {
@@ -428,6 +433,19 @@ const Sound = (() => {
     buy: () => { tone(N(76), .1, 'square', .05); tone(N(83), .2, 'square', .05, 1, .08); tone(N(88), .3, 'triangle', .05, 1, .16); },
     deny: () => { tone(200, .15, 'square', .06); tone(150, .2, 'square', .06, 1, .1); },
   };
+  // 같은 소리를 짧은 사이에 여러 번 부르면: 창(win) 안에서 lim번까지만, 겹칠수록 조금씩 작게
+  const GOV = { reveal: [.09, 1], fanfare: [.5, 1], sparkle: [.12, 1], coin: [.08, 2], clink: [.06, 2], tick: [.05, 2], whoosh: [.1, 2], boom: [.15, 2], break: [.06, 2], dig: [.06, 2], crack: [.06, 2], shatter: [.25, 1], zap: [.08, 2], bubble: [.06, 2], chain: [.12, 1], hum: [.2, 1], rise: [.3, 1], clunk: [.06, 2], chomp: [.1, 1], buy: [.1, 1], deny: [.15, 1], unlock: [.1, 1], drill: [.15, 1], jet: [.07, 1], creak: [.2, 1], suck: [.2, 1] };
+  const hist = {};
+  for (const [k, fn] of Object.entries(sfx)) {
+    const [win, lim] = GOV[k] || [.04, 3];
+    sfx[k] = (...a) => {
+      if (!ac || !on) return;
+      const now = ac.currentTime, h = hist[k] || (hist[k] = []);
+      while (h.length && now - h[0] > win) h.shift();
+      if (h.length >= lim) return;
+      h.push(now); const m0 = mul; mul = m0 / Math.sqrt(h.length); try { fn(...a); } finally { mul = m0; }
+    };
+  }
   // ───── 배경음악: 16분음표 단위 스케줄러 + 합성 악기 + 리버브/딜레이 ─────
   let voiceN = 0, bus = null, rvSend = null, cur = null, ducked = 0, wantId = null, timer = null;
   function initMusic() {
@@ -652,7 +670,7 @@ const Sound = (() => {
     init, sfx, setDrone, setMusic, duck,
     toggle() { on = !on; if (!on && cur) { fadeOut(cur, .2); cur = null; } else if (on && wantId) setMusic(wantId); return on; },
     get on() { return on; },
-    get _ac() { return ac; }, get _master() { return master; }, get _bus() { return bus; },
+    get _ac() { return ac; }, get _master() { return master; }, get _bus() { return bus; }, get _out() { return outNode; },
   };
 })();
 const S = Sound.sfx;
@@ -3034,9 +3052,14 @@ function updateOpening(dt) {
       const lt = o.lt - c.t0;
       if (lt < 0) { all = false; continue; }
       if (!c.flying) { c.flying = 1; S.whoosh(.3); }
-      if (lt > .55 && !c.rev) { c.rev = 1; const it = itemOf(c), r = it.r; S.reveal(Math.min(r, 6)); if (r >= 3) { S.fanfare(r); } c.pop = 1; o.caption = `${it.name} — ${it.lore}`; for (let k = 0; k < 10 + r * 8; k++) { const a = R(0, TAU), v = R(100, 300 + r * 80); P({ k: 'spark', x: c.x, y: c.y, vx: Math.cos(a) * v, vy: Math.sin(a) * v, life: R(.4, .9), size: R(1.5, 3.5), c: RARITY[r].c, drag: .9 }); } if (r >= 4) { flash(RARITY[r].c, .3); shakeIt(10); } }
+      if (lt > .55 && !c.rev) { c.rev = 1; const it = itemOf(c), r = it.r; o.revQ = Math.max(o.revQ ?? -1, r); c.pop = 1; o.caption = `${it.name} — ${it.lore}`; for (let k = 0; k < 10 + r * 8; k++) { const a = R(0, TAU), v = R(100, 300 + r * 80); P({ k: 'spark', x: c.x, y: c.y, vx: Math.cos(a) * v, vy: Math.sin(a) * v, life: R(.4, .9), size: R(1.5, 3.5), c: RARITY[r].c, drag: .9 }); } if (r >= 4) { flash(RARITY[r].c, .3); shakeIt(10); } }
       if (lt < 1) all = false;
       c.pop = Math.max(0, (c.pop || 0) - dt * 3);
+    }
+    // 같은 순간에 뒤집힌 카드들의 소리는 하나로: 그중 가장 높은 등급의 공개음 한 번, 팡파르는 더 높은 등급일 때만 다시
+    if (o.revQ >= 0 && o.t - (o.revAt ?? -9) > .11) {
+      const r = o.revQ; o.revQ = -1; o.revAt = o.t; S.reveal(Math.min(r, 6));
+      if (r >= 3 && (r > (o.fanR ?? -1) || o.t - (o.fanAt ?? -9) > 1.1)) { o.fanR = r; o.fanAt = o.t; S.fanfare(r); }
     }
     if (all && o.phase === 'loot') o.phase = 'wait';
   }
