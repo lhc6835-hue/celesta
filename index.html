@@ -1392,17 +1392,39 @@ function tryDig(tx, ty, dt) {
   if (v === T.AIR) { player.dig = null; return false; }
   if (v === T.BED) { if (warnT <= 0) { toast('이 아래는 세계의 바닥, 부술 수 없는 기반암이에요.'); S.clunk(); warnT = 2; } return true; }
   const L = layerOfTile(tx, ty), Ly = LAYERS[L];
-  if (v === T.CHEST) { const c = world.chests.get(idx(tx, ty)); if (c) { player.dig = null; player.swing = .3; S.dig(); if (NET.on) netClaim(c, tx, ty); else startOpening(c, tx, ty); } return true; }
+  // 상자도 곡괭이가 내리꽂히는 순간에 열린다
+  if (v === T.CHEST) {
+    if (!world.chests.get(idx(tx, ty))) return true;
+    if (!player.dig || player.dig.tx !== tx || player.dig.ty !== ty) player.dig = { tx, ty, p: 0, need: Infinity, tick: 0, chest: 1 };
+    const d = player.dig; d.tick -= dt;
+    if (d.tick <= 0) { d.tick = SWING_T; player.swing = SWING_T; player.hit = { tx, ty, L, v, chest: 1 }; }
+    return true;
+  }
   if (G.upg.pick < Ly.pick && v !== T.CHEST) {
     if (warnT <= 0) { toast(`${Ly.name}은 너무 단단해요. 곡괭이 Lv${Ly.pick}이 필요해요.`); S.clunk(); sparks(tx * TS + TS / 2, ty * TS + TS / 2, '#fff2b0', 6); warnT = 1.6; }
     player.swing = Math.max(player.swing, .2); return true;
   }
   const hard = Ly.hard * (v === T.STONE ? 1.7 : v === T.BRICK ? 2.3 : v === T.GOLDBRICK ? 3 : v === T.ORE ? 1.4 : 1);
   if (!player.dig || player.dig.tx !== tx || player.dig.ty !== ty) player.dig = { tx, ty, p: 0, need: hard / pickSpd(), tick: 0 };
-  const d = player.dig; d.p += dt; d.tick -= dt;
-  if (d.tick <= 0) { d.tick = .2; player.swing = .2; player.hit = { tx, ty, L, v }; }
-  if (d.p >= d.need) breakTile(tx, ty, L, v);
+  const d = player.dig; d.tick -= dt;
+  if (d.tick <= 0) { d.tick = SWING_T; player.swing = SWING_T; player.hit = { tx, ty, L, v }; }
+  // 드릴은 닿아 있는 동안 계속 갈아 낸다. 곡괭이는 내리꽂는 순간(digImpact)에만 들어간다
+  if (isDrill(G.pickEq)) { d.p += dt; if (d.p >= d.need) breakTile(tx, ty, L, v); }
   return true;
+}
+// 곡괭이 날이 블록에 박히는 순간: 여기서만 피해가 들어가고, 상자는 이때 열린다
+function digImpact(p) {
+  const h = p.hit, d = p.dig; p.hit = null;
+  if (!d || d.tx !== h.tx || d.ty !== h.ty || tileAt(h.tx, h.ty) !== h.v) return;
+  const ix = clamp(p.x + p.w / 2, h.tx * TS + 4, h.tx * TS + 28), iy = clamp(p.y + 13, h.ty * TS + 4, h.ty * TS + 28);
+  S.dig(); kick(-.1, 1.4); sparks(ix, iy, '#fff6d0', 4);
+  if (h.chest) {
+    const c = world.chests.get(idx(h.tx, h.ty)); p.dig = null; if (!c) return;
+    hitStop = .05; if (NET.on) netClaim(c, h.tx, h.ty); else startOpening(c, h.tx, h.ty); return;
+  }
+  debris(h.tx, h.ty, 5, h.L, h.v); dust(ix, iy, 2);
+  d.p += SWING_T;
+  if (d.p >= d.need - 1e-6) breakTile(h.tx, h.ty, h.L, h.v);
 }
 function breakTile(tx, ty, L, v) {
   setTile(tx, ty, T.AIR); if (NET.on) netDig(idx(tx, ty)); player.dig = null; S.break(); debris(tx, ty, 12, L, v); hitStop = .055; shakeA = Math.max(shakeA, 3.5); kick(-.12);
@@ -1459,11 +1481,7 @@ function updatePlayer(dt) {
     if (Math.random() < dt * 40) addP({ x: fx + R(-3, 3), y: fy + R(-3, 3), vx: ax * R(40, 160) + R(-60, 60), vy: ay * R(40, 160) - R(40, 140), life: R(.25, .5), size: R(1.5, 3.5), c: Math.random() < .5 ? col : shade(col, -.3) });
     if (Math.random() < dt * 14) addP({ x: fx, y: fy, vx: ax * R(60, 220) + R(-90, 90), vy: R(-200, -40), life: R(.15, .35), size: R(1, 2), c: '#ffe6a0', glow: 1 });
     if (p.hit) { const h = p.hit; p.hit = null; S.drill(); kick(-.03, .6); if (Math.random() < .5) sparks(fx, fy, '#fff6d0', 2); }
-  } else if (p.hit && p.swing <= .2 * (1 - SWING_HIT)) {
-    const h = p.hit; p.hit = null; S.dig(); debris(h.tx, h.ty, 5, h.L, h.v); kick(-.1, 1.4);
-    const ix = clamp(p.x + p.w / 2, h.tx * TS + 4, h.tx * TS + 28), iy = clamp(p.y + 13, h.ty * TS + 4, h.ty * TS + 28);
-    sparks(ix, iy, '#fff6d0', 4); dust(ix, iy, 2);
-  }
+  } else if (p.hit && p.swing <= SWING_T * (1 - SWING_HIT)) digImpact(p);
   // 말랑한 스프링: 공중에선 속도만큼 늘어나고, 땅에선 0으로 출렁이며 복원
   const tgt = p.ground ? (keys.down && p.dig ? -.06 : 0) : clamp(-p.vy / 1700, -.14, .2);
   p.sqv += ((tgt - p.sq) * 300 - p.sqv * 15) * dt; p.sq = clamp(p.sq + p.sqv * dt, -.45, .45);
@@ -1742,7 +1760,7 @@ function drawTorch(x, y) {
 }
 // 곡괭이 한 번 휘두르기(u: 0→1). 젖히기 → 잠깐 멈춤 → 빠른 내려찍기 → 박힌 채 멈춤 → 뽑으며 원위치
 // 반환값 k: 0 = 젖힌 자세, 1 = 박힌 자세. smear: 내려찍는 동안의 잔상 세기
-const SWING_HIT = .6;
+const SWING_HIT = .6, SWING_T = .2;
 function swingPose(u) {
   if (u < .38) return { k: -ease.outCubic(u / .38) * .12, smear: 0, body: -ease.outCubic(u / .38) };
   if (u < .46) return { k: -.12, smear: 0, body: -1 };
