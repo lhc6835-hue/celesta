@@ -1615,6 +1615,8 @@ function aimTarget(p) {
   if (keys.up) return { tx: cx, ty: row - 1, dir: 3 };
   return { tx: Math.floor((p.face > 0 ? p.x + p.w + 3 : p.x - 3) / TS), ty: row, dir: 1 };
 }
+// 블록 체력 배율(곡괭이·드릴로 파는 데 걸리는 시간)
+const BLOCK_HP = 1.5;
 function tryDig(tx, ty, dt, dir = 1) {
   const v = tileAt(tx, ty);
   if (v === T.AIR) { player.dig = null; return false; }
@@ -1635,7 +1637,7 @@ function tryDig(tx, ty, dt, dir = 1) {
     if (warnT <= 0) { toast(`${Ly.name}은 너무 단단해요. 곡괭이 Lv${Ly.pick}이 필요해요.`); S.clunk(); sparks(tx * TS + TS / 2, ty * TS + TS / 2, '#fff2b0', 6); warnT = 1.6; }
     player.swing = Math.max(player.swing, .2); return true;
   }
-  const hard = Ly.hard * (v === T.STONE ? 1.7 : v === T.BRICK ? 2.3 : v === T.GOLDBRICK ? 3 : v === T.ORE ? 1.4 : 1);
+  const hard = BLOCK_HP * Ly.hard * (v === T.STONE ? 1.7 : v === T.BRICK ? 2.3 : v === T.GOLDBRICK ? 3 : v === T.ORE ? 1.4 : 1);
   if (!player.dig || player.dig.tx !== tx || player.dig.ty !== ty) player.dig = { tx, ty, p: 0, need: hard / pickSpd(), tick: 0 };
   const d = player.dig; d.dir = dir; d.tick -= dt;
   if (d.tick <= 0) { d.tick = SWING_T; player.swing = SWING_T; player.hit = { tx, ty, L, v }; }
