@@ -3521,6 +3521,19 @@ function dunVictory() {
   save();
 }
 // ── 그리기 ──
+// 맞았을 때 번쩍임: 캔버스 filter는 그리기 호출마다 계산돼서 보스처럼 조각이 많은 그림엔 엄청 느리다.
+// 보조 캔버스에 한 번 그리고 흰색을 한 번만 덧칠해 붙인다
+let bossFlashBuf = null;
+function drawBossFlash(b, B, t, k) {
+  const cv = g.canvas;
+  if (!bossFlashBuf || bossFlashBuf.width !== cv.width || bossFlashBuf.height !== cv.height) { bossFlashBuf = document.createElement('canvas'); bossFlashBuf.width = cv.width; bossFlashBuf.height = cv.height; }
+  const fx = bossFlashBuf.getContext('2d'), M = g.getTransform();
+  fx.setTransform(1, 0, 0, 1, 0, 0); fx.globalCompositeOperation = 'source-over'; fx.globalAlpha = 1; fx.clearRect(0, 0, cv.width, cv.height);
+  fx.setTransform(M); fx.imageSmoothingEnabled = false;
+  const g0 = g; g = fx; try { BOSS_DRAW[B.id](b, t); } finally { g = g0; }
+  fx.setTransform(1, 0, 0, 1, 0, 0); fx.globalAlpha = 1; fx.globalCompositeOperation = 'source-atop'; fx.fillStyle = `rgba(255,255,255,${(.6 * k).toFixed(3)})`; fx.fillRect(0, 0, cv.width, cv.height); fx.globalCompositeOperation = 'source-over';
+  g.save(); g.setTransform(1, 0, 0, 1, 0, 0); g.drawImage(bossFlashBuf, 0, 0); g.restore();
+}
 function drawDungeon() {
   if (!DUN.active) return;
   const fy = dunFloorY(), B = BOSSES[DUN.L], t = time;
@@ -3531,10 +3544,9 @@ function drawDungeon() {
     if (e.k === 'beam' && e.t < e.warn) { g.strokeStyle = `rgba(255,90,90,${.5 + .4 * Math.sin(t * 30)})`; g.lineWidth = 2; g.setLineDash([10, 8]); g.beginPath(); if (e.dir === 'h') { g.moveTo(ARENA.x0 * TS, e.pos); g.lineTo((ARENA.x1 + 1) * TS, e.pos); } else { g.moveTo(e.pos, world.arena.top * TS); g.lineTo(e.pos, fy); } g.stroke(); g.setLineDash([]); }
   }
   if (DUN.b) {
-    const b = DUN.b; g.save();
-    if (b.hurt > 0) g.filter = 'brightness(2.2)';
-    BOSS_DRAW[B.id](b, t);
-    g.restore();
+    const b = DUN.b;
+    if (b.hurt > 0) drawBossFlash(b, B, t, Math.min(1, b.hurt / .12));
+    else { g.save(); BOSS_DRAW[B.id](b, t); g.restore(); }
     if (b.glare > 0) { g.globalCompositeOperation = 'lighter'; glowDot(g, b.x, b.y - (B.mode === 'ground' ? 90 : 0), 90, '#ff5a5a', .4 * b.glare); g.globalCompositeOperation = 'source-over'; }
     if (b.enraged && Math.random() < .3) addP({ x: b.x + R(-60, 60), y: b.y - R(0, 120), vx: R(-20, 20), vy: R(-80, -30), life: R(.4, .8), size: 3, c: '#ff5a5a', glow: 1, grav: -30 });
   }
@@ -3570,8 +3582,10 @@ function drawMinion(m, t) {
   const k = m.kind, ov = { a: '#7a5232', g: '#4ec05a', k: '#1a1008', w: '#ffe36b', v: '#8fe3ff', s: '#c8ced8', y: '#ffd36b', r: '#ff4d6d' };
   const rows = { rootling: ['..gg..', '.gggg.', '.aaaa.', 'akwkwa', '.aaaa.', 'a.aa.a'], spiderling: ['v....v', '.vaav.', 'vawawv', '.aaaa.', 'v.aa.v', '.v..v.'], sprout: ['.g..g.', '..gg..', '.aaaa.', 'akwkwa', '.aaaa.', '.a..a.'], knight: ['.yyyy.', '.ssss.', 'sswwss', '.ssss.', 'yrssry', '.s..s.'] }[k] || ['aaaa'];
   const s = cspr('min' + k, () => buildSprite(rows, k === 'knight' ? '#c8ced8' : k === 'spiderling' ? '#3a3a6a' : '#7a5232', ov)), sc = k === 'knight' ? 4.5 : 3.6, hop = Math.abs(Math.sin(m.t * 10)) * 4;
-  g.save(); g.translate(Math.round(m.x), Math.round(m.y - hop)); g.scale(m.face, 1); if (m.flash > 0) g.filter = 'brightness(2.5)';
-  g.drawImage(s, -s.width * sc / 2, -s.height * sc, s.width * sc, s.height * sc); g.restore();
+  g.save(); g.translate(Math.round(m.x), Math.round(m.y - hop)); g.scale(m.face, 1);
+  g.drawImage(s, -s.width * sc / 2, -s.height * sc, s.width * sc, s.height * sc);
+  if (m.flash > 0) { g.globalCompositeOperation = 'lighter'; g.globalAlpha = .7; g.drawImage(s, -s.width * sc / 2, -s.height * sc, s.width * sc, s.height * sc); }
+  g.restore();
   if (m.hp < m.max) { g.fillStyle = PX_OUT; g.fillRect(m.x - 14, m.y - 36, 28, 5); g.fillStyle = '#ff6b6b'; g.fillRect(m.x - 13, m.y - 35, 26 * m.hp / m.max, 3); }
 }
 function updDunHUD() {
