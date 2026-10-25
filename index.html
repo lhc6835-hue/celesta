@@ -43,6 +43,9 @@ button[disabled]{opacity:.45;cursor:not-allowed;filter:none}
 .pad{position:fixed;left:max(12px,env(safe-area-inset-left,0px));bottom:calc(env(safe-area-inset-bottom,0px) + 12px);display:none;grid-template-columns:repeat(3,58px);grid-template-rows:repeat(2,58px);gap:6px;z-index:6}
 .pad button{padding:0;font-size:22px;border-radius:14px;background:#2d2119cc}
 .touch .pad{display:grid}
+#digBtn{display:none;position:fixed;right:max(16px,env(safe-area-inset-right,0px));bottom:calc(env(safe-area-inset-bottom,0px) + 78px);width:84px;height:84px;border-radius:50%;font-size:34px;padding:0;z-index:6;background:radial-gradient(circle at 35% 30%,#e7c063,#a37b2c);border-color:#ffe39a;box-shadow:0 4px 0 #0009,0 0 18px #ffd36b44}
+.touch #digBtn{display:block}
+#digBtn:active{transform:translateY(3px) scale(.96)}
 .modal{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#0b0806cc;backdrop-filter:blur(3px);z-index:20;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:16px}
 .sheet{width:min(760px,100%);max-height:100%;overflow:auto;background:radial-gradient(120% 90% at 50% 0%,#3f2f24,#211812);border:3px solid var(--brass-d);border-radius:16px;box-shadow:0 0 0 1px #000,0 20px 60px #000c;padding:20px}
 .sheet h2{font-family:var(--f-display);font-weight:400;font-size:28px;margin:0 0 4px;color:var(--brass);text-wrap:balance}
@@ -212,6 +215,7 @@ body.touch #chat{bottom:calc(env(safe-area-inset-bottom,0px) + 170px)}
   <button id="bHelp" type="button" aria-label="도움말">❔<span class="bl"> 도움말 (H)</span></button>
   <button id="bSound" type="button">🔊</button>
 </div>
+<button type="button" id="digBtn" data-k="dig" aria-label="캐기">⛏</button>
 <div class="pad" id="pad">
   <span></span><button type="button" data-k="up" aria-label="위">▲</button><span></span>
   <button type="button" data-k="left" aria-label="왼쪽">◀</button><button type="button" data-k="down" aria-label="아래">▼</button><button type="button" data-k="right" aria-label="오른쪽">▶</button>
@@ -244,7 +248,7 @@ body.touch #chat{bottom:calc(env(safe-area-inset-bottom,0px) + 170px)}
       <button class="t-btn" id="bAccount" type="button"><span id="bAccL">SIGN IN</span><small id="bAccK">로그인 · 회원가입 · 클라우드 저장</small></button>
     </div>
     <div class="t-user" id="tUser"></div>
-    <div class="keys"><kbd>←</kbd><kbd>→</kbd> 이동·옆 파기 &nbsp; <kbd>↓</kbd> 아래 파기 &nbsp; <kbd>↑</kbd>/<kbd>Space</kbd> 점프·위 파기 &nbsp; 상자에 곡괭이질하면 열려요</div>
+    <div class="keys"><kbd>←</kbd><kbd>→</kbd> 이동 &nbsp; <kbd>↑</kbd>/<kbd>Space</kbd> 점프 &nbsp; 방향키로 겨누고 <kbd>X</kbd>/<kbd>J</kbd>·마우스 클릭으로 캐기 &nbsp; 상자도 캐기로 열어요</div>
   </div>
   <div class="t-foot">PRESS ENTER TO BEGIN · v1.1</div>
 </div>
@@ -853,7 +857,12 @@ function genWorld(seed) {
     x = Math.floor(x); t[idx(x, y)] = T.CHEST; ores.delete(idx(x, y)); chests.set(idx(x, y), { type: k, L: 0 });
   });
   for (let x = 1; x < W - 1; x++) if (t[idx(x, SURF)] === T.AIR) t[idx(x, SURF)] = T.DIRT;
+  campFloor();
 }
+// 야영지(귀환 장소) 바닥은 부술 수 없는 기반암. 귀환하거나 구조돼 돌아왔을 때 구멍으로 떨어지지 않는다
+const CAMP_X0 = W / 2 - 9, CAMP_X1 = W / 2 + 1;
+const isCampFloor = (x, y) => y === SURF && x >= CAMP_X0 && x <= CAMP_X1;
+function campFloor() { for (let x = CAMP_X0; x <= CAMP_X1; x++) { const i = idx(x, SURF); world.t[i] = T.BED; world.ores.delete(i); world.chests.delete(i); } }
 function RIr(r, a, b) { return Math.floor(a + r() * (b - a + 1)); }
 
 // ───────────── 타일 텍스처 (도트, 16×16 아트를 2배로) ─────────────
@@ -1357,7 +1366,7 @@ function load() {
     return false;
   }
   try {
-    genWorld(d.seed); unpackTiles(d.t);
+    genWorld(d.seed); unpackTiles(d.t); campFloor();
     world.ores = new Map(); let k = 0; for (let i = 0; i < world.t.length; i++) if (world.t[i] === T.ORE) world.ores.set(i, +(d.o[k++] || 0));
     world.chests = new Map(d.c.map(([i, ti, di, vault, L]) => [i, { type: CHEST_ORDER[ti], disguise: di >= 0 ? CHEST_ORDER[di] : null, vault: vault || 0, L }]));
     Object.assign(G, d.G); fixG();
@@ -1370,7 +1379,7 @@ const player = { x: 0, y: 0, vx: 0, vy: 0, w: 18, h: 26, face: 1, ground: false,
   sq: 0, sqv: 0, faceS: 1, lean: 0, coy: 0, jbuf: 0, upPrev: false, wasGround: true, dustT: 0, hit: null, scarf: 1.2, scarfV: 0, lookX: 0 };
 let hitStop = 0, shakeA = 0;
 const kick = (sq, sh = 0) => { player.sqv += sq * 18; shakeA = Math.max(shakeA, sh); };
-const keys = { left: false, right: false, up: false, down: false };
+const keys = { left: false, right: false, up: false, down: false, dig: false };
 function spawn() { player.x = (W / 2 + .5) * TS - player.w / 2; player.y = SURF * TS - player.h; player.vx = player.vy = 0; }
 const solid = v => v !== T.AIR;
 function solidAt(px, py) { return solid(tileAt(Math.floor(px / TS), Math.floor(py / TS))); }
@@ -1387,15 +1396,23 @@ function collideY() {
   p.ground = landed || (p.vy === 0 && (solidAt(l, p.y + p.h + 1) || solidAt(r, p.y + p.h + 1)));
 }
 let warnT = 0;
-function tryDig(tx, ty, dt) {
+function aimTarget(p) {
+  const cx = Math.floor((p.x + p.w / 2) / TS), row = Math.floor((p.y + p.h - 2) / TS);
+  if (keys.down) return { tx: cx, ty: row + 1, dir: 2 };
+  if (keys.up) return { tx: cx, ty: Math.floor((p.y - 2) / TS), dir: 3 };
+  return { tx: Math.floor((p.face > 0 ? p.x + p.w + 3 : p.x - 3) / TS), ty: row, dir: 1 };
+}
+function tryDig(tx, ty, dt, dir = 1) {
   const v = tileAt(tx, ty);
   if (v === T.AIR) { player.dig = null; return false; }
+  if (v === T.BED && isCampFloor(tx, ty)) { if (warnT <= 0) { toast('야영지 바닥은 단단한 기반암이에요. 천막에서 조금 벗어난 곳을 파 보세요.'); S.clunk(); warnT = 2; } return true; }
   if (v === T.BED) { if (warnT <= 0) { toast('이 아래는 세계의 바닥, 부술 수 없는 기반암이에요.'); S.clunk(); warnT = 2; } return true; }
   const L = layerOfTile(tx, ty), Ly = LAYERS[L];
   // 상자도 곡괭이가 내리꽂히는 순간에 열린다
   if (v === T.CHEST) {
     if (!world.chests.get(idx(tx, ty))) return true;
     if (!player.dig || player.dig.tx !== tx || player.dig.ty !== ty) player.dig = { tx, ty, p: 0, need: Infinity, tick: 0, chest: 1 };
+    player.dig.dir = dir;
     const d = player.dig; d.tick -= dt;
     if (d.tick <= 0) { d.tick = SWING_T; player.swing = SWING_T; player.hit = { tx, ty, L, v, chest: 1 }; }
     return true;
@@ -1406,7 +1423,7 @@ function tryDig(tx, ty, dt) {
   }
   const hard = Ly.hard * (v === T.STONE ? 1.7 : v === T.BRICK ? 2.3 : v === T.GOLDBRICK ? 3 : v === T.ORE ? 1.4 : 1);
   if (!player.dig || player.dig.tx !== tx || player.dig.ty !== ty) player.dig = { tx, ty, p: 0, need: hard / pickSpd(), tick: 0 };
-  const d = player.dig; d.tick -= dt;
+  const d = player.dig; d.dir = dir; d.tick -= dt;
   if (d.tick <= 0) { d.tick = SWING_T; player.swing = SWING_T; player.hit = { tx, ty, L, v }; }
   // 드릴은 닿아 있는 동안 계속 갈아 낸다. 곡괭이는 내리꽂는 순간(digImpact)에만 들어간다
   if (isDrill(G.pickEq)) { d.p += dt; if (d.p >= d.need) breakTile(tx, ty, L, v); }
@@ -1449,17 +1466,17 @@ function updatePlayer(dt) {
   p.walk += Math.abs(p.vx) * dt / 13;
   if (keys.up && !p.upPrev) p.jbuf = .13; p.upPrev = keys.up; p.jbuf -= dt;
   p.coy = p.ground ? .1 : p.coy - dt;
-  const cx = Math.floor((p.x + p.w / 2) / TS), row = Math.floor((p.y + p.h - 2) / TS);
+  // 방향키로 겨누고(↓ 아래 · ↑ 위 · 그 밖엔 바라보는 쪽) 캐기 버튼(X/J · 마우스 · ⛏)을 눌러야 판다
   let digging = false;
-  if (keys.down && p.ground) { const tx = cx * TS + TS / 2 - p.w / 2; p.x = lerp(p.x, tx, 1 - Math.pow(.0001, dt)); if (!mv) p.vx = 0; digging = tryDig(cx, row + 1, dt); }
-  else if (keys.up && p.ground && solid(tileAt(cx, Math.floor((p.y - 2) / TS)))) digging = tryDig(cx, Math.floor((p.y - 2) / TS), dt);
-  else if (mv && p.ground && !keys.up) {
-    // 벽을 향해 걸으면 옆을 판다 (↑를 같이 누르면 점프로 턱을 넘는다)
-    const side = Math.floor((mv > 0 ? p.x + p.w + 3 : p.x - 3) / TS);
-    if (solid(tileAt(side, row))) digging = tryDig(side, row, dt);
+  const aim = aimTarget(p);
+  if (keys.dig && p.ground) {
+    if (aim.dir === 2) { const tx = aim.tx * TS + TS / 2 - p.w / 2; p.x = lerp(p.x, tx, 1 - Math.pow(.0001, dt)); if (!mv) p.vx = 0; }
+    if (solid(tileAt(aim.tx, aim.ty))) digging = tryDig(aim.tx, aim.ty, dt, aim.dir);
   }
+  // 빈 곳을 겨누고 눌러도 허공에 한 번씩 휘두른다
+  if (keys.dig && !digging && !p.dig) { p.swingDir = aim.dir; if (p.swing <= 0 && !isDrill(G.pickEq)) { p.swing = SWING_T; S.whoosh(.12); } }
   if (!digging) { p.dig = null; p.hit = null; }
-  if ((p.jbuf > 0 || keys.up) && p.coy > 0 && !digging) {
+  if ((p.jbuf > 0 || keys.up) && p.coy > 0 && !digging && !(keys.dig && aim.dir === 3)) {
     p.vy = -480; p.ground = false; p.coy = 0; p.jbuf = 0; S.jump(); kick(.32); dust(p.x + p.w / 2, p.y + p.h, 4);
   }
   // 누른 만큼 높이: 일찍 떼면 빨리 떨어지고, 정점에선 잠깐 떠 있는다
@@ -1745,7 +1762,7 @@ function drawCamp() {
   const fl = Math.floor(time * 3) % 2; g.fillStyle = PX_OUT; g.fillRect(bx + 8, by - 86, 22, 14 + fl * 2); g.fillStyle = '#e8a83a'; g.fillRect(bx + 8, by - 84, 18, 4); g.fillRect(bx + 8, by - 80, 14 + fl * 4, 4); g.fillStyle = '#ffe08a'; g.fillRect(bx + 8, by - 84, 18, 2);
   // 표지판
   const sg = signSpr(), sx = bx + 76; g.drawImage(sg, sx, by - sg.height * 2 + 2, sg.width * 2, sg.height * 2);
-  g.fillStyle = '#fff2d0'; g.font = 'bold 11px "Gowun Dodum",sans-serif'; g.textAlign = 'center'; g.fillText('↓ 셀레스타', sx + sg.width, by - sg.height * 2 + 17);
+  g.fillStyle = '#fff2d0'; g.font = 'bold 11px "Gowun Dodum",sans-serif'; g.textAlign = 'center'; g.fillText('발굴터 →', sx + sg.width, by - sg.height * 2 + 17);
   // 모닥불
   const fs = fireSpr(Math.floor(time * 6) % 2), fx = bx - 70; g.drawImage(fs, fx - fs.width, by - fs.height * 2 + 2, fs.width * 2, fs.height * 2);
   g.restore();
@@ -1775,7 +1792,7 @@ const SWING_ARC = {
   3: { a0: 2.3, a1: .05, hx0: 1, hy0: 2, hx1: 0, hy1: -3 },       // 위
 };
 const DRILL_ANG = { 1: Math.PI / 2, 2: Math.PI * .97, 3: .04 };
-function drawPlayer() { drawHero(player, G.pickEq, player.dig ? (keys.down ? 2 : keys.up ? 3 : 1) : 0, '#e04848'); }
+function drawPlayer() { drawHero(player, G.pickEq, player.dig ? player.dig.dir || 1 : keys.dig && player.swing > 0 ? player.swingDir || 1 : 0, '#e04848'); }
 // 내 캐릭터와 다른 발굴사가 함께 쓰는 그리기. dig: 0 없음 1 옆 2 아래 3 위
 function drawHero(p, pickId, dig, scarfCol) {
   const x = p.x + p.w / 2, y = p.y + p.h;
@@ -1865,6 +1882,20 @@ function drawWorld() {
   }
   g.fillStyle = PX_OUT; for (const [ex, ey, ew, eh] of edges) g.fillRect(ex, ey, ew, eh);
   g.imageSmoothingEnabled = false; for (const [gx, gy, gv] of grassT) { const gs = TEX.grass[gv]; g.drawImage(gs, gx - 2, gy - 6, gs.width * 2, gs.height * 2); }
+  // 겨누는 칸: 네 귀퉁이 괄호. 캐기 버튼을 누르는 동안 금빛으로 더 밝다
+  if ($('#title').hidden && !opening && player.faint <= 0 && player.ground) {
+    const a = aimTarget(player), v = tileAt(a.tx, a.ty);
+    if (v !== T.AIR && v !== T.BED) {
+      const x0 = a.tx * TS, y0 = a.ty * TS, o2 = keys.dig ? 0 : Math.round(.5 + Math.sin(time * 6) * .5), L2 = 10, lit = keys.dig ? '#ffd36b' : '#fff6e0';
+      g.globalAlpha = keys.dig ? 1 : .9;
+      for (const [cx2, cy2, sx2, sy2] of [[x0, y0, 1, 1], [x0 + TS, y0, -1, 1], [x0, y0 + TS, 1, -1], [x0 + TS, y0 + TS, -1, -1]]) {
+        const ox = cx2 - sx2 * o2, oy = cy2 - sy2 * o2, hx2 = sx2 > 0 ? ox : ox - L2, vy2 = sy2 > 0 ? oy : oy - L2, hy2 = sy2 > 0 ? oy : oy - 2, vx2 = sx2 > 0 ? ox : ox - 2;
+        g.fillStyle = PX_OUT; g.fillRect(hx2 - 1, hy2 - 1, L2 + 2, 4); g.fillRect(vx2 - 1, vy2 - 1, 4, L2 + 2);
+        g.fillStyle = lit; g.fillRect(hx2, hy2, L2, 2); g.fillRect(vx2, vy2, 2, L2);
+      }
+      g.globalAlpha = 1;
+    }
+  }
   if (cam.y < SURF * TS + 10) drawCamp();
   for (const [x, y] of world.torches) if (y >= y0 && y <= y1 && tileAt(x, y) === T.AIR) drawTorch(x, y);
   for (const [x, y] of chestsVis) {
@@ -2841,7 +2872,7 @@ function drawWorldMap(cv, opt = {}) {
 const TUT = [
   { t: '셀레스타에 오신 걸 환영해요', b: '삼백 년 전 하늘에서 떨어진 왕국 셀레스타가 이 땅 아래 잠들어 있어요. 견습 발굴사인 당신의 목표는 <b>열 개의 지층</b>을 파 내려가 맨 밑바닥 <b>왕좌의 금고</b>에 있는 <b>셀레스타의 심장</b>을 여는 거예요. 왼쪽은 지금 세계의 실제 지형 지도예요. 흰 점이 상자, 금색이 봉인된 금고, 노란 선이 지금 위치예요.', art: 'map' },
   { t: '열 개의 지층', b: '깊이 내려갈수록 땅이 단단해지고, 더 높은 등급의 상자가 나와요. 지층마다 들어가려면 <b>곡괭이 강화 단계</b>가 필요해요(오른쪽 표의 Lv). 층마다 풍경과 음악, 원석, 상자 종류가 달라요.', art: 'map2' },
-  { t: '파는 법', b: '<kbd>←</kbd><kbd>→</kbd> 걷다가 벽을 향해 계속 누르면 옆을 파요. <kbd>↓</kbd> 아래를 파고, <kbd>↑</kbd>/<kbd>Space</kbd>로 점프해요. 누른 만큼 높이 뛰고, 머리 위가 막혀 있으면 위를 파요. 블록마다 단단함이 달라서 돌·벽돌은 오래 걸려요. 원석을 캐면 바로 셀라(돈)가 들어와요. 모바일은 왼쪽 아래 방향 버튼을 써요.', art: 'dig' },
+  { t: '파는 법', b: '<kbd>←</kbd><kbd>→</kbd>로 걷고 <kbd>↑</kbd>/<kbd>Space</kbd>로 점프해요(누른 만큼 높이). 파려면 <b>방향키로 겨누고 캐기 버튼</b>을 눌러요. 그냥 서 있으면 바라보는 쪽, <kbd>↓</kbd>를 누르고 있으면 발밑, <kbd>↑</kbd>를 누르고 있으면 머리 위를 겨눠요. 겨눈 칸에 하얀 괄호가 보이고, <kbd>X</kbd>·<kbd>J</kbd>·마우스 왼쪽 버튼(모바일은 오른쪽 아래 ⛏)을 누르는 동안 곡괭이가 내리꽂힐 때마다 블록이 깎여요. 야영지 바닥은 기반암이라 천막 옆 발굴터에서 파 내려가요. 블록마다 단단함이 달라서 돌·벽돌은 오래 걸려요. 원석을 캐면 바로 셀라(돈)가 들어와요. 모바일은 왼쪽 아래 방향 버튼으로 겨눠요.', art: 'dig' },
   { t: '랜턴 기름과 귀환', b: '땅속에서는 랜턴 기름이 계속 줄고, 블록을 팔 때도 줄어요. 기름이 떨어지면 정신을 잃고 조합 구조대가 끌어올리지만 <b>구조비 15%</b>를 내야 해요. 그 전에 <kbd>R</kbd> <b>귀환 두루마리</b>를 쓰면 공짜로 야영지에 돌아와요. 지상에서는 기름이 저절로 채워져요.', art: 'oil' },
   { t: '상자와 열한 개의 등급', b: '상자를 곡괭이로 치면 열려요. 기를 모으는 동안 빛깔이 한 칸씩 오르며 안에 든 <b>최고 등급</b>을 미리 알려 줘요. 벽돌로 둘러싸인 <b>봉인된 금고</b>는 보상이 더 좋고, 평범한 상자처럼 생긴 <b>미믹</b>은 화면을 연타해 달래야 해요. <b>셀레스타</b> 등급은 심장 하나만을 위한 특별한 등급이에요.', art: 'rarity' },
   { t: '야영지 · 강화 · 운명의 모루', b: '지상의 조합 천막(<kbd>E</kbd>)에서 보물을 팔고 장비를 강화해요. <b>강화는 수치만</b> 올려요(파는 힘, 기름, 행운, 나침반). 곡괭이 자체는 <b>⚒ 운명의 모루</b>에서 셀라를 내고 벼려야 바뀌어요. 곡괭이는 24종이고 등급이 높을수록 빠르고, 행운·기름 절약·원석 보너스가 붙어요.', art: 'picks' },
@@ -2997,7 +3028,7 @@ const wsBase = () => ACCT.api.replace(/^http/, 'ws').replace(/\/api\/?$/, '');
 function netSend(o) { if (NET.ws && NET.ws.readyState === 1) { NET.ws.send(typeof o === 'string' ? o : JSON.stringify(o)); return true; } return false; }
 const tIdx = i => [i % W, Math.floor(i / W)];
 function applyMod(i, fx, by) {
-  if (world.t[i] === T.AIR) return;
+  if (world.t[i] === T.AIR || isCampFloor(i % W, Math.floor(i / W))) return;
   const [x, y] = tIdx(i), v = world.t[i], c = world.chests.get(i);
   if (player.dig && player.dig.tx === x && player.dig.ty === y) player.dig = null;
   world.t[i] = T.AIR; world.ores.delete(i); world.chests.delete(i);
@@ -3135,7 +3166,7 @@ function netUpdate(dt) {
   if (NET.claim && now - NET.claim.at > 4000) NET.claim = null;
   if (NET.sendT <= 0) {
     NET.sendT = 1 / 15;
-    const dig = p.dig ? (keys.down ? 2 : keys.up ? 3 : 1) : 0;
+    const dig = p.dig ? p.dig.dir || 1 : keys.dig && p.swing > 0 ? p.swingDir || 1 : 0;
     const flags = (p.face > 0 ? 1 : 0) | (p.ground ? 2 : 0) | (dig << 2) | (p.faint > 0 ? 16 : 0) | (p.swing > 0 ? 32 : 0) | (opening && !opening.forge ? 64 : 0);
     const msg = [0, Math.round(p.x), Math.round(p.y), Math.round(p.vx), Math.round(p.vy), flags, Math.max(0, PICKS.findIndex(k => k.id === G.pickEq))];
     const s = JSON.stringify(msg);
@@ -3315,7 +3346,7 @@ setInterval(() => { if (ACCT.token && document.visibilityState === 'visible' && 
 addEventListener('pagehide', () => { if (NET.ws) { NET.quit = true; try { NET.ws.close(1000); } catch (e) { } } });
 
 // ───────────── 입력 · 루프 ─────────────
-const KEYMAP = { ArrowLeft: 'left', KeyA: 'left', ArrowRight: 'right', KeyD: 'right', ArrowUp: 'up', KeyW: 'up', Space: 'up', ArrowDown: 'down', KeyS: 'down' };
+const KEYMAP = { ArrowLeft: 'left', KeyA: 'left', ArrowRight: 'right', KeyD: 'right', ArrowUp: 'up', KeyW: 'up', Space: 'up', ArrowDown: 'down', KeyS: 'down', KeyX: 'dig', KeyJ: 'dig' };
 addEventListener('keydown', e => {
   Sound.init();
   if (!$('#acctM').hidden) { if (e.code === 'Escape') closeAcct(); return; }
@@ -3337,7 +3368,10 @@ addEventListener('keydown', e => {
 addEventListener('keyup', e => { if (KEYMAP[e.code]) keys[KEYMAP[e.code]] = false; });
 addEventListener('blur', () => { for (const k in keys) keys[k] = false; });
 fxc.addEventListener('pointerdown', e => { e.preventDefault(); openingTap(); });
-document.querySelectorAll('#pad [data-k]').forEach(b => {
+// 마우스 왼쪽 버튼을 누르고 있으면 캐기
+cv.addEventListener('pointerdown', e => { if (e.button === 0 && e.pointerType === 'mouse' && !modalOpen() && !opening) { Sound.init(); keys.dig = true; } });
+addEventListener('pointerup', e => { if (e.pointerType === 'mouse') keys.dig = false; });
+document.querySelectorAll('#pad [data-k], #digBtn').forEach(b => {
   const k = b.dataset.k, on = e => { e.preventDefault(); Sound.init(); keys[k] = true; b.setPointerCapture?.(e.pointerId); }, off = () => keys[k] = false;
   b.addEventListener('pointerdown', on); b.addEventListener('pointerup', off); b.addEventListener('pointercancel', off); b.addEventListener('lostpointercapture', off);
 });
@@ -3353,7 +3387,7 @@ function startGame() {
     lastLayer = -2; camUpdate(0, true); updHUD(); Sound.setDrone(layerAt(Math.floor(player.y / TS)));
   }).then(() => {
     if (!store.get('celesta-tut')) openTut(0);
-    else if (!G.opened) toast('발밑 땅속에서 무언가 반짝여요. ↓ 키로 파 내려가 보세요!');
+    else if (!G.opened) toast('천막 오른쪽 발굴터로 가서 ↓로 겨누고 X(모바일은 ⛏)를 눌러 파 내려가 보세요!');
     if (migrated) toast('세계가 넓어져 지층 열 개짜리 새 대지가 생겼어요. 셀라·도감·강화는 그대로예요.');
   });
 }
