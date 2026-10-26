@@ -199,6 +199,7 @@ kbd{font-family:var(--f-body);background:#0006;border:1px solid var(--brass-d);b
 #bossBar .bb span{position:absolute;inset:0;font-size:10px;line-height:10px;color:#fff;text-shadow:0 1px 0 #000;font-variant-numeric:tabular-nums}
 body.in-dun #netBadge{display:none!important}body.in-dun #toast{top:calc(env(safe-area-inset-top,0px) + 70px)}
 #bossBar.enr .bb{border-color:#ff5a5a;animation:blink .5s infinite alternate}#bossBar.enr .bb i{background:linear-gradient(90deg,#8a1020,#ff3a3a)}
+#downOv{position:fixed;inset:0;z-index:8;pointer-events:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;background:radial-gradient(ellipse at center,#3a000088 0%,#14000acc 70%,#000e 100%);opacity:0}#downOv.on{animation:downIn 2.6s ease forwards}#downOv b{font-family:var(--f-display);font-weight:400;font-size:clamp(34px,8vw,64px);color:#ff7a7a;letter-spacing:.08em;text-shadow:0 4px 0 #000,0 0 24px #ff3a3a88;transform:scale(1.3);animation:downTxt .7s cubic-bezier(.2,1.4,.4,1) forwards}#downOv small{font-size:14px;color:#e8c8c8;text-shadow:0 2px 0 #000}@keyframes downIn{0%{opacity:0}12%{opacity:1}85%{opacity:1}100%{opacity:1}}@keyframes downTxt{to{transform:scale(1)}}
 #actBtn{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom,0px) + 90px);z-index:7;width:64px;height:64px;border-radius:50%;font-size:28px;padding:0;background:radial-gradient(circle at 35% 30%,#8a5ad8,#3a1a6a);border-color:#d8b0ff;animation:skr 1.6s ease-in-out infinite}
 #partyInv{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom,0px) + 170px);z-index:30;display:flex;align-items:center;gap:10px;background:linear-gradient(#3a2b4a,#221830);border:2px solid #c99cff;border-radius:14px;padding:12px 14px;box-shadow:0 10px 30px #000a;width:min(460px,92vw);overflow:hidden}
 #partyInv>div{flex:1;min-width:0}#partyInv b{font-family:var(--f-display);font-weight:400;font-size:17px}#partyInv p{margin:2px 0 0;font-size:12px;color:var(--muted)}
@@ -326,6 +327,7 @@ button .coin{width:14px;height:14px;margin-right:6px;vertical-align:-2px}
 <div id="toast"></div>
 <div id="bossBar" hidden><div class="bn"><b id="bossName"></b><small id="bossEn"></small></div><div class="bb"><i id="bossHp"></i><span id="bossHpT"></span></div></div>
 <div id="partyInv" hidden></div>
+<div id="downOv" hidden><b>쓰러졌어요</b><small>게이트 앞으로 돌아가는 중…</small></div>
 <button type="button" id="actBtn" hidden aria-label="들어가기">🌀</button>
 <div id="netBadge" hidden></div>
 <div id="netAnn" hidden></div>
@@ -1716,6 +1718,8 @@ function dashApply(p) {
 }
 function updatePlayer(dt) {
   const p = player; warnT -= dt;
+  // 던전에서 쓰러짐: 조작은 멈추고 누운 채로 떨어지기만 한다(구조대 대신 게이트 앞으로)
+  if (DUN.active && DUN.state === 'lose') { p.faint = Math.max(.05, (p.faint || 1.8) - dt); p.vx *= Math.pow(.02, dt); p.vy = Math.min(p.vy + 1500 * dt, 900); p.x += p.vx * dt; collideX(); p.y += p.vy * dt; collideY(); p.dig = null; p.hit = null; p.swing = 0; if (p.dsh) p.dsh.t = 0; return; }
   if (p.faint > 0) { p.faint -= dt; if (p.faint <= 0) rescue(); return; }
   skillPhysics(p, dt); stepCast(p, dt);
   const maxv = p.wingsT > 0 ? 230 : 160, acc = p.ground ? 1900 : 1250, dec = p.ground ? 2300 : 650;
@@ -2193,7 +2197,7 @@ function skillBreak(tx, ty, opt = {}) {
 }
 function skillReady() { return SK.cd <= 0 && !opening && player.faint <= 0 && !transBusy && !player.cast && $('#title').hidden && !modalOpen(); }
 function castSkill() {
-  if (VIL.active) return;
+  if (VIL.active || (DUN.active && DUN.state === 'lose')) return;
   if (!skillReady()) { if (SK.cd > 0 && !opening && $('#title').hidden) { S.deny(); skillShake(); } return; }
   const C = curClass(), dir = aimTarget(player).dir;
   Sound.init();
@@ -3786,22 +3790,25 @@ function enterDungeon(L, opt = {}) {
     DUN.active = true; DUN.state = 'intro'; DUN.t = 0; DUN.netAt = performance.now() + 4000; DUN.net = null; DUN.exitPortal = null; DUN.nearExit = false; DUN.fx = []; DUN.mins = []; DUN.hp = DUN.maxHp = 100; DUN.inv = 0; DUN.gap = 2.2; DUN.won = false;
     const n = Math.max(1, opt.size || 1), hp = Math.round(B.hp * (1 + .7 * (n - 1)));
     DUN.b = { L, x: (ARENA.x0 + 19) * TS, y: B.mode === 'ground' ? a.fy * TS : a.fy * TS - B.hit[1] / 2 - 8 - B.lift, vx: 0, vy: 0, face: -1, hp, max: hp, enraged: false, pat: null, t: 0, hurt: 0, onGround: B.mode === 'ground', lookX: 0, lookY: 0, last: '' };
-    player.x = (ARENA.x0 + 3) * TS + 7; player.y = a.fy * TS - player.h; player.vx = player.vy = 0; player.face = 1; player.dig = null; player.cast = null;
+    player.x = (ARENA.x0 + 3) * TS + 7; player.y = a.fy * TS - player.h; player.vx = player.vy = 0; player.face = 1; player.dig = null; player.cast = null; player.faint = 0; $('#downOv').hidden = true;
     G.oil = maxOil(); lastLayer = -2; camUpdate(0, true);
     $('#bossBar').hidden = false; $('#hpWrap').hidden = false; document.body.classList.add('in-dun'); $('#bossName').textContent = B.name; $('#bossEn').textContent = B.en; updDunHUD();
     Sound.setDrone(L);
   }, null, `${B.name}의 둥지`).then(() => { toast(`${B.name}이(가) 깨어났어요! 곡괭이로 캐서 쓰러뜨리세요.`); S.boom(.6); shakeA = 14; });
 }
+// 게이트 앞에 세운다(세계가 새로 생겼어도 그 세계의 같은 지층 게이트)
+function standAtGate(L) { const gt = world.gates && world.gates[L]; if (!gt) return false; player.x = gt.x * TS + 16 - player.w / 2 + 40; player.y = gt.y * TS + TS - player.h; player.vx = player.vy = 0; camUpdate(0, true); return true; }
 function exitDungeon(msg) {
   if (!DUN.active) return;
+  DUN.backGate = { L: DUN.L, until: performance.now() + 20000 };
   const done = () => {
     DUN.active = false; DUN.state = 'off'; DUN.b = null; DUN.fx = []; DUN.mins = [];
     world = DUN.prevWorld; DUN.prevWorld = null;
     const gt = world.gates && world.gates[DUN.L];
     if (gt) { player.x = gt.x * TS + 16 - player.w / 2 + 40; player.y = gt.y * TS + TS - player.h; } else if (DUN.prevPos) { player.x = DUN.prevPos[0]; player.y = DUN.prevPos[1]; }
-    player.vx = player.vy = 0; player.dig = null; player.cast = null; player.hang = 0; player.pull = null; player.slam = null;
+    player.vx = player.vy = 0; player.dig = null; player.cast = null; player.hang = 0; player.pull = null; player.slam = null; player.faint = 0; $('#downOv').hidden = true;
     $('#bossBar').hidden = true; $('#hpWrap').hidden = true; document.body.classList.remove('in-dun');
-    if (DUN.pendWorld) { const m = DUN.pendWorld; DUN.pendWorld = null; netWorld(m.seed, m.mods, true); }
+    if (DUN.pendWorld) { const m = DUN.pendWorld; DUN.pendWorld = null; netWorld(m.seed, m.mods, true); standAtGate(DUN.L); }
     G.oil = maxOil(); lastLayer = -2; camUpdate(0, true); updHUD(); save();
   };
   if (DUN.party && NET.on && NET.room && NET.room.kind === 'dun') { const back = DUN.prevRoom; DUN.party = false; transition('keyhole', () => { }, null, '게이트 밖으로').then(() => { done(); if (back) netJoin(back); else netLeave(); if (msg) toast(msg); }); return; }
@@ -3815,7 +3822,7 @@ function dunHurt(dmg, fromX) {
   S.clunk(); S.deny(); shakeA = Math.max(shakeA, 9); hitStop = .06; floatText(player.x + 9, player.y - 4, `-${dmg}`, '#ff6b6b');
   for (let i = 0; i < 10; i++) addP({ x: player.x + 9, y: player.y + 12, vx: R(-120, 120), vy: R(-160, -40), life: R(.3, .6), size: R(2, 4), c: '#ff6b6b' });
   updDunHUD();
-  if (DUN.hp <= 0) { DUN.state = 'lose'; toast('쓰러졌어요…'); S.boom(.4); if (DUN.party && NET.on) netSend({ t: 'bx', k: 'down' }); setTimeout(() => exitDungeon('게이트 앞에서 정신을 차렸어요. 다시 도전해 보세요!'), 1400); }
+  if (DUN.hp <= 0) { DUN.state = 'lose'; player.faint = 1.8; player.vy = -260; S.boom(.4); shakeA = 16; $('#downOv').hidden = false; $('#downOv').classList.remove('on'); void $('#downOv').offsetWidth; $('#downOv').classList.add('on'); if (DUN.party && NET.on) netSend({ t: 'bx', k: 'down' }); setTimeout(() => exitDungeon('게이트 앞에서 정신을 차렸어요. 다시 도전해 보세요!'), 2600); }
 }
 const pickPower = () => 12 * (1 + (G.upg.pick - 1) * .45) * curPick().spd;
 function damageBoss(v, x, y, big) {
@@ -5855,7 +5862,7 @@ function netWorld(seed, mods, respawn) {
   genWorld(seed); for (const i of mods) applyMod(i, false);
   for (const i of NET.queue) if (world.t[i] !== T.AIR) netSend({ t: 'dig', i }), applyMod(i, false);
   NET.queue = [];
-  if (respawn && !VIL.active) { spawn(); player.vx = player.vy = 0; player.dig = null; }
+  if (respawn && !VIL.active) { spawn(); player.vx = player.vy = 0; player.dig = null; const bg = DUN.backGate; if (bg && !DUN.active && performance.now() < bg.until && standAtGate(bg.L)) DUN.backGate = null; }
   camUpdate(0, true); updHUD();
 }
 function netInit(m) {
@@ -5899,6 +5906,7 @@ function netLeave() {
   transition('keyhole', () => {
     if (solo) { solo.G = JSON.parse(JSON.stringify(G)); store.set('celesta-save-v2', solo); }
     if (!load()) { genWorld(Math.floor(Math.random() * 1e9)); spawn(); }
+    { const bg = DUN.backGate; if (bg && performance.now() < bg.until && standAtGate(bg.L)) DUN.backGate = null; }
     NET.solo = null; G.oil = maxOil(); lastLayer = -2; camUpdate(0, true); updHUD(); save();
     $('#chat').hidden = true; netBadge('');
   }, null, '내 발굴지로').then(() => toast('혼자 하던 내 발굴지로 돌아왔어요.'));
