@@ -89,6 +89,7 @@ button[disabled]{opacity:.45;cursor:not-allowed;filter:none}
 .tag{font-size:11px;letter-spacing:.08em;padding:2px 7px;border-radius:99px;align-self:flex-start;border:1px solid currentColor}
 .up{display:flex;gap:12px;align-items:center;justify-content:space-between;background:#0004;border:1px solid #ffffff14;border-radius:12px;padding:12px;flex-wrap:wrap}
 .up+.up{margin-top:8px}
+.mats{display:flex;flex-wrap:wrap;gap:4px 6px;margin-top:4px!important}.mat{display:inline-flex;align-items:center;gap:4px;font-size:12px;color:#e8dcc4;background:#0005;border:1px solid #ffffff18;border-radius:999px;padding:2px 8px 2px 4px;white-space:nowrap}.mat i{width:10px;height:10px;border-radius:3px;background:var(--c);box-shadow:inset 0 -2px 0 #0006,0 0 0 1px #000}.mat em{font-style:normal;color:#ffe39a;font-variant-numeric:tabular-nums}.mat.lack{border-color:#ff6b6b66}.mat.lack em{color:#ff8a8a}.mat.gold i{--c:#ffd36b;border-radius:50%}.smith-h{font-family:var(--f-display);font-weight:400;color:var(--parch);margin:16px 0 8px;font-size:17px}.smith-h small{font-size:12px;color:var(--muted)}
 .up div{min-width:0;flex:1 1 220px}
 .up b{font-family:var(--f-display);font-weight:400;font-size:18px;color:var(--parch)}
 .up p{margin:2px 0 0;font-size:13px;color:var(--muted);line-height:1.5}
@@ -857,7 +858,7 @@ const TREASURES = [
 ];
 const ORES = [['구리 원석', 3], ['은 원석', 7], ['금 원석', 14], ['수정 원석', 22], ['불꽃석', 32], ['성운석', 48], ['하늘진주', 64], ['세계수 호박', 82], ['공허 결정', 105], ['왕좌석', 130]];
 
-// 강화는 수치만 올린다. 곡괭이 종류는 '운명의 모루' 뽑기로 얻는다.
+// 강화는 수치만 올린다. 곡괭이 종류는 설계도 뽑기 → 대장간 제작으로 얻는다.
 // 제트팩: 연료는 '비행 가능한 초'. 날지 않을 때만 천천히 찬다
 const JET_MAX = [0, 1, 1.5, 2.1, 2.8, 3.6, 4.6, 6], JET_RE = [0, .18, .26, .36, .48, .62, .8, 1.05];
 const UPG = {
@@ -900,6 +901,26 @@ const PICK_BY = Object.fromEntries(PICKS.map(p => [p.id, p]));
 const GACHA_RATE = [40, 27, 16, 9, 4.5, 2, .9, .4, .15, .05];
 const GACHA_COST = [500, 4500];
 const DUPE_REFUND = [60, 90, 140, 220, 420, 800, 1500, 3000, 6000, 12000];
+// ── 대장간: 설계도 + 재료 + 셀라 = 곡괭이 ──
+// 재료는 등급마다 하나. 보물상자를 열면 그 상자 등급(과 한 단계 아래) 재료가 나온다
+const MATS = [
+  ['녹슨 쇳조각', '#a8907a', 'scrap'], ['구리 주괴', '#d8894a', 'ingot'], ['강철 주괴', '#aebccc', 'ingot'], ['울림 수정', '#8fe3ff', 'crystal'], ['잿불 정수', '#ff7a2a', 'orb'],
+  ['미스릴 주괴', '#9ff0e0', 'ingot'], ['별가루 합금', '#c9a8ff', 'ingot'], ['천상 금실', '#fff0a0', 'ingot'], ['성좌 파편', '#8ab4ff', 'crystal'], ['태초의 핵', '#ff9ad8', 'orb'],
+];
+const CRAFT_COST = [150, 300, 600, 1200, 2400, 4800, 9000, 17000, 32000, 60000];
+// 곡괭이 등급 T: 같은 등급 재료 + 한 단계 아래 재료(일반은 쇳조각만)
+const recipeOf = pk => { const T = pk.tier; return { gold: CRAFT_COST[T], mats: T ? [[T, 2 + Math.ceil(T / 2)], [T - 1, 3 + T]] : [[0, 5]] }; };
+const canCraft = pk => { const r = recipeOf(pk); return G.gold >= r.gold && r.mats.every(([t, n]) => (G.mats[t] || 0) >= n); };
+// 상자 등급 → 재료 몇 개
+function rollMats(tier, vault) {
+  const out = {}, add = (t, n) => { if (t >= 0 && t < MATS.length && n > 0) out[t] = (out[t] || 0) + n; };
+  const T = Math.min(9, tier), v = vault ? 1 : 0;
+  add(T, RI(1, 3) + v); add(T - 1, RI(1, 3) + v);
+  if (Math.random() < .2 + v * .2) add(T + 1, 1);
+  if (tier >= 10) { add(9, 4); add(8, 4); }
+  return out;
+}
+const matChip = (t, have, need) => `<span class="mat${need != null && have < need ? ' lack' : ''}" style="--c:${MATS[t][1]}"><i></i>${MATS[t][0]}${need != null ? ` <em>${have}/${need}</em>` : ` <em>×${have}</em>`}</span>`;
 function pickPerk(pk) { const a = [`속도 ×${pk.spd.toFixed(2)}`]; if (pk.luck) a.push(`행운 +${Math.round(pk.luck * 100)}%`); if (pk.oil < 1) a.push(`기름 −${Math.round((1 - pk.oil) * 100)}%`); if (pk.ore > 1) a.push(`원석 ×${pk.ore.toFixed(2)}`); return a.join(' · '); }
 
 // ───────────── 월드 생성 ─────────────
@@ -1554,9 +1575,9 @@ const pickSprite = (id, f = 0) => {
 };
 
 // ───────────── 게임 상태 · 저장 ─────────────
-const G = { gold: 0, bag: [], foundT: {}, foundC: {}, upg: { pick: 1, lantern: 1, luck: 0, compass: 0, jet: 1, jetre: 1 }, cls: 'apprentice', classes: { apprentice: 1 }, cpity: 0, cpulls: 0, oil: 100, opened: 0, heart: false, deepest: 0, picks: { rusty: 1 }, pickEq: 'rusty', pity: 0, pulls: 0, seen: [] };
+const G = { gold: 0, bag: [], foundT: {}, foundC: {}, upg: { pick: 1, lantern: 1, luck: 0, compass: 0, jet: 1, jetre: 1 }, cls: 'apprentice', classes: { apprentice: 1 }, cpity: 0, cpulls: 0, oil: 100, opened: 0, heart: false, deepest: 0, picks: { rusty: 1 }, pickEq: 'rusty', pity: 0, pulls: 0, seen: [], mats: {}, bps: {} };
 const curPick = () => PICK_BY[G.pickEq] || PICKS[0];
-function fixG() { G.upg = Object.assign({ pick: 1, lantern: 1, luck: 0, compass: 0, jet: 1, jetre: 1 }, G.upg); G.picks = G.picks || { rusty: 1 }; if (!G.picks.rusty) G.picks.rusty = 1; if (!PICK_BY[G.pickEq]) G.pickEq = 'rusty'; G.pity = G.pity || 0; G.classes = G.classes || { apprentice: 1 }; if (!G.classes.apprentice) G.classes.apprentice = 1; if (!CLASS_BY[G.cls] || !G.classes[G.cls]) G.cls = 'apprentice'; G.cpity = G.cpity || 0; G.cpulls = G.cpulls || 0; G.pulls = G.pulls || 0; G.seen = G.seen || []; }
+function fixG() { G.upg = Object.assign({ pick: 1, lantern: 1, luck: 0, compass: 0, jet: 1, jetre: 1 }, G.upg); G.picks = G.picks || { rusty: 1 }; if (!G.picks.rusty) G.picks.rusty = 1; if (!PICK_BY[G.pickEq]) G.pickEq = 'rusty'; G.pity = G.pity || 0; G.classes = G.classes || { apprentice: 1 }; if (!G.classes.apprentice) G.classes.apprentice = 1; if (!CLASS_BY[G.cls] || !G.classes[G.cls]) G.cls = 'apprentice'; G.cpity = G.cpity || 0; G.cpulls = G.cpulls || 0; G.pulls = G.pulls || 0; G.seen = G.seen || []; G.mats = G.mats || {}; G.bps = G.bps || {}; }
 const jetMax = () => JET_MAX[G.upg.jet || 1], jetRe = () => JET_RE[G.upg.jetre || 1];
 const maxOil = () => [0, 100, 150, 215, 290, 380, 480, 600, 740][G.upg.lantern];
 const lightR = () => [0, 5, 6, 7, 8, 9, 10, 11, 12][G.upg.lantern];
@@ -3928,10 +3949,52 @@ function startForge(n) {
   G.gold -= cost; updHUD();
   const ids = rollPicks(n), maxR = Math.max(...ids.map(id => PICK_BY[id].tier));
   closeModals();
-  startOpening({ type: 'forge', L: 0 }, 0, 0, { loot: ids.map(pk => ({ pk })), maxR, forge: true });
-  opening.sx = VW / 2; opening.sy = VH * .5; FX.forge.charge = n >= 10 ? 3.4 : 2.8;
+  startOpening({ type: 'forge', L: 0 }, 0, 0, { loot: ids.map(pk => ({ pk, bp: 1 })), maxR, forge: true });
+  opening.bpMode = true; opening.sx = VW / 2; opening.sy = VH * .5; FX.forge.charge = n >= 10 ? 3.4 : 2.8;
   opening.fg = { n: n >= 10 ? 5 : 4, hits: 0, heat: 0, sq: 0, sqv: 0, pulse: 0, freeze: 0, ang: 0, hint: 0 };
 }
+
+// 대장간 제작: 같은 모루 연출로 두드려서 진짜 곡괭이를 꺼낸다
+function startCraft(id) {
+  const pk = PICK_BY[id], r = recipeOf(pk);
+  if (!G.bps[id] || G.picks[id] || !canCraft(pk) || opening) { S.deny(); return; }
+  G.gold -= r.gold; for (const [t, n] of r.mats) G.mats[t] -= n; updHUD(); save();
+  closeModals();
+  startOpening({ type: 'forge', L: 0 }, 0, 0, { loot: [{ pk: id }], maxR: pk.tier, forge: true });
+  opening.craft = id; opening.sx = VW / 2; opening.sy = VH * .5; FX.forge.charge = 2.8;
+  opening.fg = { n: 4, hits: 0, heat: 0, sq: 0, sqv: 0, pulse: 0, freeze: 0, ang: 0, hint: 0 };
+}
+// 설계도 그림: 푸른 도면 종이에 흰 선으로 곡괭이 윤곽, 위아래 나무 축
+// 도면 선: 곡괭이 그림의 가장자리 칸만 흰 선, 안쪽은 옅게
+function pickSilhouette(id) { return cspr('pksil2' + id, () => {
+  const sp = pickSprite(id), w = sp.width, h = sp.height, c = mkCanvas(w, h), x = c.getContext('2d'); x.drawImage(sp, 0, 0);
+  const im = x.getImageData(0, 0, w, h), d = im.data, A = (i, j) => i < 0 || j < 0 || i >= w || j >= h ? 0 : d[(j * w + i) * 4 + 3], out = x.createImageData(w, h), o = out.data;
+  for (let j = 0; j < h; j++) for (let i = 0; i < w; i++) { if (!A(i, j)) continue; const k = (j * w + i) * 4, edge = !A(i - 1, j) || !A(i + 1, j) || !A(i, j - 1) || !A(i, j + 1); o[k] = 226; o[k + 1] = 242; o[k + 2] = 255; o[k + 3] = edge ? 255 : 60; }
+  x.putImageData(out, 0, 0); return c; }); }
+function drawBlueprint(c, id, x, y, size, t = 0) {
+  const pk = PICK_BY[id], Z = Math.max(1, Math.round(size / 36)), w = Math.round(size * .78 / Z) * Z, h = Math.round(size * .92 / Z) * Z, x0 = Math.round(x - w / 2), y0 = Math.round(y - h / 2), rc = RARITY[pk.tier].prism ? '#ffffff' : RARITY[pk.tier].c;
+  c.save(); c.imageSmoothingEnabled = false;
+  c.fillStyle = PX_OUT; c.fillRect(x0 - Z, y0 - Z, w + 2 * Z, h + 2 * Z);
+  c.fillStyle = '#24508a'; c.fillRect(x0, y0, w, h);
+  c.fillStyle = 'rgba(150,200,255,.22)'; for (let gx = x0 + 3 * Z; gx < x0 + w; gx += 4 * Z) c.fillRect(gx, y0, Z, h); for (let gy = y0 + 3 * Z; gy < y0 + h; gy += 4 * Z) c.fillRect(x0, gy, w, Z);
+  c.fillStyle = 'rgba(255,255,255,.12)'; c.fillRect(x0, y0, w, 2 * Z);
+  // 도면 테두리선과 등급색 모서리 표식
+  c.fillStyle = 'rgba(220,240,255,.55)'; c.fillRect(x0 + 2 * Z, y0 + 2 * Z, w - 4 * Z, Z); c.fillRect(x0 + 2 * Z, y0 + h - 3 * Z, w - 4 * Z, Z); c.fillRect(x0 + 2 * Z, y0 + 2 * Z, Z, h - 4 * Z); c.fillRect(x0 + w - 3 * Z, y0 + 2 * Z, Z, h - 4 * Z);
+  c.fillStyle = rc; c.fillRect(x0 + w - 7 * Z, y0 + h - 7 * Z, 3 * Z, 3 * Z);
+  const sil = pickSilhouette(id), k = Math.max(1, Math.floor(Math.min(w * .7 / sil.width, h * .7 / sil.height)));
+  c.globalAlpha = .92; c.drawImage(sil, Math.round(x - sil.width * k / 2), Math.round(y - sil.height * k / 2), sil.width * k, sil.height * k); c.globalAlpha = 1;
+  // 위아래 나무 축
+  for (const yy of [y0 - 2 * Z, y0 + h - Z]) { c.fillStyle = PX_OUT; c.fillRect(x0 - 3 * Z, yy - Z, w + 6 * Z, 4 * Z); c.fillStyle = '#b8864a'; c.fillRect(x0 - 2 * Z, yy, w + 4 * Z, 2 * Z); c.fillStyle = '#e0b070'; c.fillRect(x0 - 2 * Z, yy, w + 4 * Z, Z); }
+  c.restore();
+}
+// 재료 그림
+const MAT_PX = {
+  scrap: ['..aa....', '.aAaa.a.', 'aaAaaaaa', '.aaa1aa1', '..a11a1.'],
+  ingot: ['...aaaaaa...', '..aAAAAAAa..', '.aaaaaaaaaa.', 'aaaaaaaaaaa1', 'a1aaaaaaaa11', '.1111111111.'],
+  crystal: ['...aa...', '..aAaa..', '..aAaa..', '.aaAaaa.', '.aaAaa1.', 'aaaAaa11', 'aaaaa111', '.aaa111.', '..a11...'],
+  orb: ['....a....', '...aAa...', '..aAAaa..', '.aaAaaaa.', '.aAaaaa1.', '.aaaaa11.', '..aa111..', '...111...'],
+};
+function drawMatIcon(c, t, x, y, size) { const [, col, kind] = MATS[t], sp = cspr('mat' + t, () => buildSprite(MAT_PX[kind], col)), k = Math.max(1, Math.floor(size / Math.max(sp.width, sp.height))); c.imageSmoothingEnabled = false; c.drawImage(sp, Math.round(x - sp.width * k / 2), Math.round(y - sp.height * k / 2), sp.width * k, sp.height * k); }
 
 // ───────────── 개봉 연출 엔진 ─────────────
 let opening = null;
@@ -4196,9 +4259,10 @@ function drawForgeScene(c, o, a) {
     const q = c.createLinearGradient(bx - pw, 0, bx + pw, 0); q.addColorStop(0, rgba(rarCol(o.maxR, o.t), 0)); q.addColorStop(.5, rgba(rarCol(o.maxR, o.t), .5 * pk2 * a)); q.addColorStop(1, rgba(rarCol(o.maxR, o.t), 0));
     c.fillStyle = q; c.fillRect(bx - pw, -10, pw * 2, by + 10);
     glowDot(c, bx, yy, 26 * Z, rarCol(o.maxR, o.t), .45 * a); c.globalCompositeOperation = 'source-over';
-    c.save(); c.translate(bx, yy); c.rotate(rot); c.drawImage(spr, -spr.width * k2 / 2, -spr.height * k2 / 2, spr.width * k2, spr.height * k2);
+    if (o.bpMode) { c.save(); c.translate(bx, yy); c.rotate(Math.sin(o.t * 1.6) * .04); drawBlueprint(c, best, 0, 0, 22 * Z, o.t); c.restore(); }
+    else { c.save(); c.translate(bx, yy); c.rotate(rot); c.drawImage(spr, -spr.width * k2 / 2, -spr.height * k2 / 2, spr.width * k2, spr.height * k2);
     const sh = (o.t * .9) % 2.2; if (sh < 1) { c.globalCompositeOperation = 'lighter'; c.fillStyle = 'rgba(255,255,255,.35)'; c.fillRect(-spr.width * k2 / 2 + sh * spr.width * k2 - 2 * Z, -spr.height * k2 / 2, 2 * Z, spr.height * k2); c.globalCompositeOperation = 'source-over'; }
-    c.restore();
+    c.restore(); }
   }
   // 망치와 팔: 손(축)도 망치를 따라 살짝 들린다. 마지막 한 방 뒤에는 화면 밖으로 빠진다
   let ang = f.freeze > 0 ? 0 : f.ang, out = 0;
@@ -4310,7 +4374,7 @@ function doBurst() {
 function startLoot() {
   const o = opening; o.phase = 'loot'; o.lt = 0;
   const L = layoutCards(o.loot.length); let t0 = 0;
-  o.cards = o.loot.map((x, j) => { const base = typeof x === 'number' ? { i: x } : x, r = itemOf(base).r; if (r >= 3) t0 += .3; const c = { ...base, ...L[j], t0, isNew: base.cls ? !G.classes[base.cls] : base.pk ? !G.picks[base.pk] : !G.foundT[base.i] }; t0 += .38; return c; });
+  o.cards = o.loot.map((x, j) => { const base = typeof x === 'number' ? { i: x } : x, r = itemOf(base).r; if (r >= 3) t0 += .3; const c = { ...base, ...L[j], t0, isNew: base.cls ? !G.classes[base.cls] : base.pk ? !G.picks[base.pk] && !(base.bp && G.bps[base.pk]) : !G.foundT[base.i] }; t0 += .38; return c; });
 }
 function openingTap() {
   const o = opening; if (!o) return;
@@ -4334,15 +4398,26 @@ function finishOpening() {
     campTab = 'class'; openCamp(); return;
   }
   if (o.forge) {
-    let refund = 0, fresh = 0;
-    for (const c of o.cards) { if (G.picks[c.pk]) { refund += DUPE_REFUND[PICK_BY[c.pk].tier]; G.picks[c.pk]++; } else { G.picks[c.pk] = 1; fresh++; } }
-    G.gold += refund;
     opening = null; fxc.classList.remove('on'); fg.setTransform(1, 0, 0, 1, 0, 0); fg.clearRect(0, 0, fxc.width, fxc.height);
+    if (o.craft) {
+      // 대장간 제작: 진짜 곡괭이가 된다
+      const pk = PICK_BY[o.craft]; G.picks[pk.id] = (G.picks[pk.id] || 0) + 1; delete G.bps[pk.id];
+      updHUD(); save(); Sound.duck(0);
+      toast(`${pk.name} 완성! 대장간이나 도감에서 장착할 수 있어요.`);
+      campTab = 'smith'; openCamp(); return;
+    }
+    // 설계도 뽑기: 이미 가진 설계도·곡괭이는 녹여서 셀라로
+    let refund = 0, fresh = 0;
+    for (const c of o.cards) { if (G.picks[c.pk] || G.bps[c.pk]) refund += DUPE_REFUND[PICK_BY[c.pk].tier]; else { G.bps[c.pk] = 1; fresh++; } }
+    G.gold += refund;
     updHUD(); save(); Sound.duck(0);
-    toast(`새 곡괭이 ${fresh}개${refund ? ` · 중복은 녹여서 ${refund.toLocaleString()} 셀라를 돌려받았어요` : ''}`);
-    campTab = 'forge'; openCamp(); return;
+    toast(`${fresh ? `새 설계도 ${fresh}장! 대장간에서 재료와 셀라로 만들 수 있어요` : '새 설계도는 없었어요'}${refund ? ` · 겹친 설계도는 ${refund.toLocaleString()} 셀라로 돌려받았어요` : ''}`);
+    campTab = fresh ? 'smith' : 'forge'; openCamp(); return;
   }
   for (const c of o.cards) { G.bag.push(c.i); G.foundT[c.i] = (G.foundT[c.i] || 0) + 1; }
+  // 재료: 상자 등급에 맞춰 같이 나온다(미믹은 없음)
+  let matMsg = '';
+  if (o.actual !== 'mimic' && CHESTS[o.actual]) { const got = rollMats(CHESTS[o.actual].tier, o.c && o.c.vault); for (const t in got) G.mats[t] = (G.mats[t] || 0) + got[t]; matMsg = Object.keys(got).map(t => `${MATS[t][0]} ×${got[t]}`).join(', '); }
   if (o.actual !== 'mimic' || o.cards.length) { G.foundC[o.actual] = (G.foundC[o.actual] || 0) + 1; G.opened++; }
   setTile(o.tx, o.ty, T.AIR); world.chests.delete(i);
   if (NET.on) netSend({ t: 'open', i, type: o.actual, best: o.maxR });
@@ -4350,13 +4425,15 @@ function finishOpening() {
   opening = null; fxc.classList.remove('on'); fg.setTransform(1, 0, 0, 1, 0, 0); fg.clearRect(0, 0, fxc.width, fxc.height);
   updHUD(); save(); Sound.duck(0);
   if (wasHeart) { G.heart = true; save(); setTimeout(showEnding, 400); }
-  else if (G.opened === 1) toast('첫 상자를 열었어요! 보물은 야영지에서 팔 수 있어요.');
+  else if (G.opened === 1) toast(`첫 상자를 열었어요! 보물은 야영지에서 팔고, 재료(${matMsg})는 대장간에서 곡괭이를 만들 때 써요.`);
+  else if (matMsg) toast(`재료 획득 · ${matMsg}`);
 }
 
 // ───────────── 개봉 연출 그리기 ─────────────
 function wrapText(c, s, maxW) { const words = s.split(' '), lines = []; let cur = ''; for (const w of words) { const t = cur ? cur + ' ' + w : w; if (c.measureText(t).width > maxW && cur) { lines.push(cur); cur = w; } else cur = t; } if (cur) lines.push(cur); return lines; }
 function itemOf(card) {
   if (card.cls) { const C = CLASS_BY[card.cls]; return { name: C.name, r: C.tier, sub: `${RARITY[C.tier].name} 직업`, lore: `${C.icon} ${C.skill} — ${C.desc}`, icon: (c, x, y, sz, t) => drawClassPortrait(c, C.id, x, y + sz * .05, sz * .95, t, false) }; }
+  if (card.pk && card.bp) { const p = PICK_BY[card.pk]; return { name: `${p.name} 설계도`, r: p.tier, sub: `${RARITY[p.tier].name} 곡괭이 설계도`, lore: `대장간에서 만들 수 있어요 · ${pickPerk(p)}`, icon: (c, x, y, sz, t) => drawBlueprint(c, p.id, x, y, sz, t) }; }
   if (card.pk) { const p = PICK_BY[card.pk]; return { name: p.name, r: p.tier, sub: `${RARITY[p.tier].name} 곡괭이`, lore: `${pickPerk(p)} — ${p.lore}`, icon: (c, x, y, sz, t) => drawPickIcon(c, p.id, x, y, sz, t) }; }
   const T0 = TREASURES[card.i]; return { name: T0[0], r: T0[1], sub: `${RARITY[T0[1]].name} · ${T0[2].toLocaleString()} 셀라`, lore: T0[5], icon: (c, x, y, sz, t) => drawIcon(c, T0[3], T0[4], x, y, sz, t) };
 }
@@ -4893,13 +4970,13 @@ const TUT = [
   { t: '제트팩', b: '등에 멘 제트팩으로 잠깐 날 수 있어요. <b>공중에서 점프를 한 번 더 누르거나</b>, 점프를 <b>길게 누르고 있으면</b> 불을 뿜으며 떠올라요. 연료는 왼쪽 위 파란 막대와 캐릭터 옆 작은 막대로 보이고, <b>날지 않을 때 천천히</b> 다시 차요. 야영지 상점의 <b>제트팩 연료통</b>은 최대 연료를, <b>제트팩 재충전기</b>는 차는 속도를 올려 줘요. 깊은 굴에서 빠져나오거나 벽을 넘을 때 써 보세요.', art: 'jet' },
   { t: '랜턴 기름과 귀환', b: '땅속에서는 랜턴 기름이 계속 줄고, 블록을 팔 때도 줄어요. 기름이 떨어지면 정신을 잃고 조합 구조대가 끌어올리지만 <b>구조비 15%</b>를 내야 해요. 그 전에 <kbd>R</kbd> <b>귀환 두루마리</b>를 쓰면 공짜로 야영지에 돌아와요. 지상에서는 기름이 저절로 채워져요.', art: 'oil' },
   { t: '상자와 열한 개의 등급', b: '상자를 곡괭이로 치면 열려요. 기를 모으는 동안 빛깔이 한 칸씩 오르며 안에 든 <b>최고 등급</b>을 미리 알려 줘요. 벽돌로 둘러싸인 <b>봉인된 금고</b>는 보상이 더 좋고, 평범한 상자처럼 생긴 <b>미믹</b>은 화면을 연타해 달래야 해요. <b>셀레스타</b> 등급은 심장 하나만을 위한 특별한 등급이에요.', art: 'rarity' },
-  { t: '야영지 · 강화 · 운명의 모루', b: '지상의 조합 천막(<kbd>E</kbd>)에서 보물을 팔고 장비를 강화해요. <b>강화는 수치만</b> 올려요(파는 힘, 기름, 행운, 나침반). 곡괭이 자체는 <b>⚒ 운명의 모루</b>에서 셀라를 내고 벼려야 바뀌어요. 곡괭이는 24종이고 등급이 높을수록 빠르고, 행운·기름 절약·원석 보너스가 붙어요.', art: 'picks' },
+  { t: '야영지 · 강화 · 설계도 · 대장간', b: '지상의 조합 천막(<kbd>E</kbd>)에서 보물을 팔고 장비를 강화해요. <b>강화는 수치만</b> 올려요(파는 힘, 기름, 행운, 나침반). 새 곡괭이는 <b>📐 설계도 뽑기</b>에서 셀라를 내고 설계도를 뽑은 다음, <b>🔨 대장간</b>에서 설계도 + 재료 + 셀라를 내고 만들어요. 재료는 보물상자를 열면 상자 등급에 맞게 나와요. 곡괭이는 24종이고 등급이 높을수록 빠르고, 행운·기름 절약·원석 보너스가 붙어요.', art: 'picks' },
   { t: '오른쪽 위치 바', b: '화면 오른쪽 세로 바는 세계 전체의 단면이에요. 로마 숫자가 지층 번호이고, <b>리오 얼굴</b>이 지금 내 위치, 점선이 지금까지 가장 깊이 간 곳, 맨 아래 하트가 셀레스타의 심장이에요. 아직 가 보지 않은 지층은 어둡게 보여요. 나중에 온라인 기능이 생기면 다른 발굴사들도 색 점으로 여기에 나타나요.', art: 'bar' },
   { t: '보물 나침반', b: '왼쪽 위 다이얼은 <b>가장 가까운 상자</b>를 가리켜요. 바늘 색이 그 상자의 등급 색이에요. 야영지에서 나침반을 강화하면 탐지 반경이 넓어지고, Lv2부터 거리와 등급, Lv3부터 다음 후보 두 개(테두리의 작은 점)와 봉인된 금고까지 알려 줘요. 상자 바로 옆에 오면 다이얼이 빛나요.', art: 'compass' },
   { t: '게이트와 보스', b: '지층마다 한 곳씩 <b>커다란 빈 동굴</b>이 있고, 그 안에 빛나는 <b>게이트</b>가 서 있어요. 앞에 서서 <kbd>E</kbd>(모바일은 ✋ 버튼)를 누르면 그 지층의 <b>보스</b> 정보와 패턴이 나와요. <b>혼자 도전</b>하거나, 로그인했다면 같은 서버의 발굴사나 접속 중인 친구를 골라 <b>파티로 초대</b>할 수 있어요. 보스는 <b>겨누고 캐서</b> 체력을 깎아요. 직업 능력도 통해요. 체력이 절반 아래로 내려가면 분노해서 빨라지고, 내 체력 100이 다 떨어지면 게이트 밖으로 밀려나요. 쓰러뜨리면 셀라와 그 지층 최고 등급의 보상 상자를 받아요(첫 토벌은 셀라 두 배).', art: 'boss' },
   { t: '도감 · 계정 · 저장', b: '<kbd>C</kbd> 도감에는 찾은 상자·보물·곡괭이가 모여요. 한 번 연 상자는 도감에서 눌러 개봉 연출을 다시 볼 수 있어요. 진행은 브라우저에 자동 저장되고, 로그인하면 서버에 클라우드 저장돼서 다른 기기에서도 이어서 할 수 있어요.', art: 'codex' },
   { t: '온라인 · 친구', b: '<kbd>O</kbd> 또는 🌐 버튼으로 온라인 창을 열어요. <b>공개 서버</b>는 누구나 들어와 같은 땅을 함께 파는 곳이에요. <b>개인 서버</b>는 처음엔 나 혼자지만 친구를 <b>초대</b>하거나 <b>초대 코드</b>를 알려 주면 함께할 수 있어요. 온라인 서버의 지형은 <b>10분마다 새로 생겨나요</b>(위쪽 표시에 남은 시간이 보여요). 다 캐도 곧 새 땅이 열려요. 상자는 <b>먼저 친 사람</b>이 열어요. 서버 안에서는 <kbd>Enter</kbd> 채팅, <kbd>1</kbd>~<kbd>8</kbd> 이모트를 써요. 다른 발굴사는 오른쪽 위치 바에 색 점으로도 보여요. 곡괭이·셀라·도감은 혼자 할 때와 똑같이 이어져요.', art: 'online' },
-  { t: '준비됐어요!', b: '처음엔 발밑의 나무상자부터 열어 보세요. 원석과 보물을 팔아 곡괭이를 강화하고, 모루에서 좋은 곡괭이를 노리세요. 이 설명은 언제든 <kbd>H</kbd> 또는 오른쪽 아래 ❔ 버튼으로 다시 볼 수 있어요.', art: 'end' },
+  { t: '준비됐어요!', b: '처음엔 발밑의 나무상자부터 열어 보세요. 원석과 보물을 팔아 곡괭이를 강화하고, 좋은 설계도를 뽑아 대장간에서 만들어 보세요. 이 설명은 언제든 <kbd>H</kbd> 또는 오른쪽 아래 ❔ 버튼으로 다시 볼 수 있어요.', art: 'end' },
 ];
 let tutPage = 0;
 function openTut(p = 0) { tutPage = p; renderTut(); $('#tutM').hidden = false; }
@@ -4946,8 +5023,8 @@ const modalOpen = () => !$('#gateM').hidden || !$('#netM').hidden || !$('#campM'
 function iconCanvas(drawFn, size = 120) { const c = document.createElement('canvas'); c.width = size * 2; c.height = size * 2; const x = c.getContext('2d'); x.scale(2, 2); drawFn(x, size); return c; }
 let campTab = 'sell', confirmNew = false;
 function openCamp() { if (opening) return; campTab = campTab || 'sell'; confirmNew = false; renderCamp(); $('#campM').hidden = false; }
-const CAMP_TABS = [['sell', '💰', '판매'], ['up', '⬆', '강화'], ['forge', '⚒', '운명의 모루'], ['class', '🎭', '직업 계약소'], ['board', '📜', '게시판']];
-const CAMP_NPC = { sell: '조합장 모르덴이 파이프를 물고 장부를 넘깁니다. “살아 돌아왔구먼. 캐 온 걸 보여 보게.”', up: '조합 기술자 피오가 공구 상자를 엽니다. “강화는 수치만 올려 줘요. 곡괭이 자체는 모루에서!”', board: '게시판에는 조합 공고와 오래된 연대기가 빼곡히 붙어 있습니다.' };
+const CAMP_TABS = [['sell', '💰', '판매'], ['up', '⬆', '강화'], ['forge', '📐', '설계도 뽑기'], ['smith', '🔨', '대장간'], ['class', '🎭', '직업 계약소'], ['board', '📜', '게시판']];
+const CAMP_NPC = { sell: '조합장 모르덴이 파이프를 물고 장부를 넘깁니다. “살아 돌아왔구먼. 캐 온 걸 보여 보게.”', up: '조합 기술자 피오가 공구 상자를 엽니다. “강화는 수치만 올려 줘요. 새 곡괭이는 설계도를 뽑아서 대장간에서 만들어요!”', board: '게시판에는 조합 공고와 오래된 연대기가 빼곡히 붙어 있습니다.' };
 const UPG_ICON = { pick: '⛏', lantern: '🏮', luck: '🍀', jet: '🔥', jetre: '🔋', compass: '🧭' };
 function renderCamp() {
   classAnim++;
@@ -4980,6 +5057,7 @@ function renderCamp() {
     $('#sellAll').onclick = () => { G.gold += total; G.bag = []; S.buy(); S.coin(); updHUD(); save(); toast(`보물을 팔아 ${total.toLocaleString()} 셀라를 받았어요.`); renderCamp(); };
   } else if (campTab === 'class') { renderClassTab(body);
   } else if (campTab === 'forge') { renderForge(body);
+  } else if (campTab === 'smith') { renderSmith(body);
   } else if (campTab === 'up') {
     const grid = document.createElement('div'); grid.className = 'upg-grid'; body.appendChild(grid);
     for (const [k, U0] of Object.entries(UPG)) {
@@ -5002,7 +5080,7 @@ function renderCamp() {
       <section><h3>지층 안내</h3><div class="layers">${LAYERS.map((Ly, i) => { const seen = (G.seen || []).includes(i) || i === 0; return `<div class="${seen ? '' : 'q'}"><span class="rn">${ROMAN[i]}</span><b>${seen ? Ly.name : '???'}</b><small>${(Ly.from - SURF) * 2}m~ · 곡괭이 Lv${Ly.pick}</small></div>`; }).join('')}</div></section>
       <section><h3>대낙하 연대기</h3><p class="lore">${CHRONICLE}</p></section>
       <div class="row danger"><button type="button" id="newGame">${confirmNew ? '정말 처음부터? 한 번 더 누르면 지워져요' : '새 세계에서 처음부터'}</button></div></div>`);
-    $('#newGame').onclick = () => { if (!confirmNew) { confirmNew = true; renderCamp(); return; } store.set('celesta-save-v1', null); store.set('celesta-save-v2', null); G.gold = 0; G.bag = []; G.foundT = {}; G.foundC = {}; G.upg = { pick: 1, lantern: 1, luck: 0, compass: 0 }; G.opened = 0; G.heart = false; G.deepest = 0; G.seen = []; G.picks = { rusty: 1 }; G.pickEq = 'rusty'; G.pity = 0; G.pulls = 0; closeModals(); transition('dirt', () => { genWorld(Math.floor(Math.random() * 1e9)); spawn(); G.oil = maxOil(); camUpdate(0, true); save(); updHUD(); }).then(() => toast('새로운 지층이 펼쳐졌어요.')); };
+    $('#newGame').onclick = () => { if (!confirmNew) { confirmNew = true; renderCamp(); return; } store.set('celesta-save-v1', null); store.set('celesta-save-v2', null); G.gold = 0; G.bag = []; G.foundT = {}; G.foundC = {}; G.upg = { pick: 1, lantern: 1, luck: 0, compass: 0 }; G.opened = 0; G.heart = false; G.deepest = 0; G.seen = []; G.picks = { rusty: 1 }; G.pickEq = 'rusty'; G.pity = 0; G.pulls = 0; G.mats = {}; G.bps = {}; closeModals(); transition('dirt', () => { genWorld(Math.floor(Math.random() * 1e9)); spawn(); G.oil = maxOil(); camUpdate(0, true); save(); updHUD(); }).then(() => toast('새로운 지층이 펼쳐졌어요.')); };
   }
 }
 const NOTICES = ["층이 바뀔 때마다 땅이 단단해지니 곡괭이를 미리 강화할 것.", "벽돌로 둘러싸인 ‘봉인된 금고’ 방의 상자는 보상이 한 단계 좋음.", "나무상자, 철테궤, 금화궤처럼 생긴 미믹 주의. 물리기 싫으면 배를 문질러 달랠 것.", "기름이 떨어지면 구조대가 출동하지만 구조비 15%를 받음. 귀환 두루마리(R)는 공짜."];
@@ -5034,11 +5112,29 @@ function renderCodex() {
   });
 }
 function pickCanvas(id, size, owned) { return iconCanvas((x, sz) => { if (!owned) x.filter = 'brightness(0) opacity(.45)'; drawPickIcon(x, id, sz / 2, sz / 2, sz * .62, 0); }, size); }
-function renderPickGrid(grid) {
+function renderSmith(body) {
+  const list = PICKS.filter(p => G.bps[p.id] && !G.picks[p.id]).sort((a, b) => a.tier - b.tier), have = MATS.map((_, t) => G.mats[t] || 0);
+  body.innerHTML = `<p class="sub">대장장이 브론이 화로에 풀무질을 합니다. “설계도랑 재료, 그리고 품삯을 가져오면 뭐든 두드려 주지. 재료는 보물상자에서 나와. 깊은 상자일수록 귀한 재료가 들었고.”</p>
+  <div class="up"><div><b>재료 창고</b><p class="mats">${have.some(n => n) ? have.map((n, t) => n ? matChip(t, n) : '').join('') : '아직 재료가 없어요. 보물상자를 열면 상자 등급에 맞는 재료가 나와요.'}</p></div></div>
+  <h3 class="smith-h">제작할 수 있는 설계도 <small>${list.length}장</small></h3>
+  <div class="grid" id="smithGrid">${list.length ? '' : '<p class="sub">가진 설계도가 없어요. <b>📐 설계도 뽑기</b>에서 설계도를 뽑아 오세요.</p>'}</div>
+  <h3 class="smith-h">내 곡괭이</h3><div class="grid" id="pickGrid"></div>`;
+  const grid = $('#smithGrid');
+  for (const pk of list) {
+    const r = recipeOf(pk), ok = canCraft(pk), el = document.createElement('div'); el.className = 'card';
+    el.appendChild(iconCanvas((x, sz) => drawBlueprint(x, pk.id, sz / 2, sz / 2, sz * .8), 110));
+    el.insertAdjacentHTML('beforeend', `<span class="tag" style="color:${RARITY[pk.tier].prism ? '#fff' : RARITY[pk.tier].c}">${RARITY[pk.tier].name}</span><b>${pk.name}</b><p>${pickPerk(pk)}</p><p class="mats">${r.mats.map(([t, n]) => matChip(t, G.mats[t] || 0, n)).join('')}<span class="mat gold${G.gold < r.gold ? ' lack' : ''}"><i></i>${r.gold.toLocaleString()} 셀라</span></p>`);
+    const b = document.createElement('button'); b.type = 'button'; b.className = ok ? 'primary' : ''; b.textContent = ok ? '🔨 제작하기' : '재료가 모자라요'; b.disabled = !ok; b.onclick = () => startCraft(pk.id); el.appendChild(b);
+    grid.appendChild(el);
+  }
+  renderPickGrid($('#pickGrid'), true);
+}
+function renderPickGrid(grid, ownedOnly) {
   PICKS.forEach(pk => {
-    const n = G.picks[pk.id] || 0, eq = G.pickEq === pk.id, el = document.createElement('div'); el.className = 'card' + (n ? '' : ' locked');
-    el.appendChild(pickCanvas(pk.id, 110, n));
-    el.insertAdjacentHTML('beforeend', `<span class="tag" style="color:${RARITY[pk.tier].prism ? '#fff' : RARITY[pk.tier].c}">${RARITY[pk.tier].name}</span><b>${n ? pk.name : '???'}</b><p>${n ? pickPerk(pk) + (n > 1 ? ` · ${n}개 보유` : '') : `운명의 모루에서 ${RARITY[pk.tier].name} 등급으로 나와요.`}</p>`);
+    const n = G.picks[pk.id] || 0, eq = G.pickEq === pk.id, bp = !n && G.bps[pk.id], el = document.createElement('div'); el.className = 'card' + (n || bp ? '' : ' locked');
+    if (ownedOnly && !n) return;
+    el.appendChild(bp ? iconCanvas((x, sz) => drawBlueprint(x, pk.id, sz / 2, sz / 2, sz * .8), 110) : pickCanvas(pk.id, 110, n));
+    el.insertAdjacentHTML('beforeend', `<span class="tag" style="color:${RARITY[pk.tier].prism ? '#fff' : RARITY[pk.tier].c}">${RARITY[pk.tier].name}</span><b>${n || bp ? pk.name : '???'}</b><p>${n ? pickPerk(pk) + (n > 1 ? ` · ${n}개 보유` : '') : bp ? '설계도 보유 · 🔨 대장간에서 만들 수 있어요' : `설계도 뽑기에서 ${RARITY[pk.tier].name} 등급으로 나와요.`}</p>`);
     if (n) { const b = document.createElement('button'); b.type = 'button'; b.className = eq ? '' : 'primary'; b.textContent = eq ? '장착 중' : '장착하기'; b.disabled = eq; b.onclick = () => { G.pickEq = pk.id; S.buy(); save(); toast(`${pk.name}을(를) 들었어요. ${pickPerk(pk)}`); renderCamp(); if (!$('#codexM').hidden) renderCodex(); }; el.appendChild(b); }
     grid.appendChild(el);
   });
@@ -5178,10 +5274,10 @@ function renderClassTab(body) {
 }
 function renderForge(body) {
   const cur = curPick(), owned = PICKS.filter(p => G.picks[p.id]).length;
-  body.innerHTML = `<p class="sub">조합 대장장이 브론이 망치를 어깨에 걸칩니다. “강화는 쇠를 단단하게 할 뿐이야. 새 곡괭이를 원하면 모루에 맡겨 보게. 무엇이 나올지는 나도 몰라.”</p>
+  body.innerHTML = `<p class="sub">도면 장인 리라가 운명의 모루 위에 빈 양피지를 펼칩니다. “모루가 두드려 주는 건 <b>설계도</b>뿐이에요. 무엇이 찍혀 나올지는 모루 마음이고요. 실제 곡괭이는 옆 <b>대장간</b>의 브론 아저씨가 재료를 받고 만들어 줘요.”</p>
   <div class="up"><div><b>지금 든 곡괭이 · ${cur.name}</b><p>${RARITY[cur.tier].name} · ${pickPerk(cur)} · 강화 Lv${G.upg.pick}과 곱해져요</p></div></div>
-  <div class="up"><div><b>등급별 확률</b><p class="rates">${GACHA_RATE.map((r, i) => `<span style="color:${RARITY[i].prism ? '#fff' : RARITY[i].c}">${RARITY[i].name} ${r}%</span>`).join(' · ')}</p><p>10회 벼리기는 영웅 이상 1개 확정 · 전설 이상이 ${60 - G.pity}회 안에 반드시 나와요 · 중복은 녹여서 셀라로 돌려줘요</p></div></div>
-  <div class="row" style="margin:12px 0"><button class="primary" type="button" id="f1">1회 벼리기 · ${GACHA_COST[0].toLocaleString()} 셀라</button><button class="primary" type="button" id="f10">10회 벼리기 · ${GACHA_COST[1].toLocaleString()} 셀라</button><span class="sub" style="margin:0">보유 ${G.gold.toLocaleString()} 셀라 · 수집 ${owned}/${PICKS.length}</span></div>
+  <div class="up"><div><b>등급별 확률</b><p class="rates">${GACHA_RATE.map((r, i) => `<span style="color:${RARITY[i].prism ? '#fff' : RARITY[i].c}">${RARITY[i].name} ${r}%</span>`).join(' · ')}</p><p>10회 뽑기는 영웅 이상 1장 확정 · 전설 이상이 ${60 - G.pity}회 안에 반드시 나와요 · 이미 가진 설계도·곡괭이가 나오면 셀라로 돌려줘요</p></div></div>
+  <div class="row" style="margin:12px 0"><button class="primary" type="button" id="f1">설계도 1회 · ${GACHA_COST[0].toLocaleString()} 셀라</button><button class="primary" type="button" id="f10">설계도 10회 · ${GACHA_COST[1].toLocaleString()} 셀라</button><span class="sub" style="margin:0">보유 ${G.gold.toLocaleString()} 셀라 · 설계도 ${Object.keys(G.bps).length}장 · 곡괭이 ${owned}/${PICKS.length}</span></div>
   <div class="grid" id="pickGrid"></div>`;
   $('#f1').disabled = G.gold < GACHA_COST[0]; $('#f10').disabled = G.gold < GACHA_COST[1];
   $('#f1').onclick = () => startForge(1); $('#f10').onclick = () => startForge(10);
