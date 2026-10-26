@@ -2804,16 +2804,16 @@ function openShop(id) { if (opening) return; campTab = id; confirmNew = false; r
 // 뒤쪽 원경: 언덕 위 지붕들과 나무, 창문 불빛(패럴랙스 .55)
 function drawVilBack(vw) {
   const f = .55, ox = cam.x * (1 - f), sx0 = Math.floor((cam.x * f - 200) / 90), sx1 = Math.ceil((cam.x * f + vw + 200) / 90);
-  g.fillStyle = '#4a3a5e'; g.fillRect(cam.x - 2, VGY - 46, vw + 4, 46);
+  g.fillStyle = '#2a3252'; g.fillRect(cam.x - 2, VGY - 46, vw + 4, 46);
   for (let k = sx0; k <= sx1; k++) {
     const x = ox + k * 90 + hash2(k, 0, 71) * 40, h = 30 + hash2(k, 1, 71) * 40, w = 40 + hash2(k, 2, 71) * 26, y = VGY - 34;
-    if (hash2(k, 3, 71) < .3) { g.fillStyle = '#3c3050'; g.beginPath(); g.ellipse(x + w / 2, y - h * .6, w * .45, h * .55, 0, 0, TAU); g.fill(); g.fillRect(x + w / 2 - 3, y - h * .3, 6, h * .3 + 2); continue; }
-    g.fillStyle = '#3e3254'; g.fillRect(Math.round(x), Math.round(y - h), Math.round(w), Math.round(h + 2));
-    g.beginPath(); g.moveTo(Math.round(x - 4), Math.round(y - h)); g.lineTo(Math.round(x + w / 2), Math.round(y - h - 18 - hash2(k, 4, 71) * 10)); g.lineTo(Math.round(x + w + 4), Math.round(y - h)); g.fillStyle = '#34284a'; g.fill();
+    if (hash2(k, 3, 71) < .3) { g.fillStyle = '#25304e'; g.beginPath(); g.ellipse(x + w / 2, y - h * .6, w * .45, h * .55, 0, 0, TAU); g.fill(); g.fillRect(x + w / 2 - 3, y - h * .3, 6, h * .3 + 2); continue; }
+    g.fillStyle = '#2c3456'; g.fillRect(Math.round(x), Math.round(y - h), Math.round(w), Math.round(h + 2));
+    g.beginPath(); g.moveTo(Math.round(x - 4), Math.round(y - h)); g.lineTo(Math.round(x + w / 2), Math.round(y - h - 18 - hash2(k, 4, 71) * 10)); g.lineTo(Math.round(x + w + 4), Math.round(y - h)); g.fillStyle = '#242a4a'; g.fill();
     for (let i = 0; i < 3; i++) if (hash2(k, 10 + i, 71) > .35) { const wx = Math.round(x + 6 + i * (w - 16) / 2), wy = Math.round(y - h + 10 + hash2(k, 20 + i, 71) * (h - 22)); g.fillStyle = (hash2(k, 30 + i, Math.floor(time * .3)) > .97) ? '#7a6a6a' : '#ffcf7a'; g.fillRect(wx, wy, 4, 5); g.globalCompositeOperation = 'lighter'; glowDot(g, wx + 2, wy + 2, 10, '#ffb060', .25); g.globalCompositeOperation = 'source-over'; }
   }
   // 풍차 날개(멀리)
-  const mx = ox + 2600 * f + 300, my = VGY - 120; g.fillStyle = '#34284a'; g.fillRect(Math.round(mx - 5), my, 10, 90);
+  const mx = ox + 2600 * f + 300, my = VGY - 120; g.fillStyle = '#242a4a'; g.fillRect(Math.round(mx - 5), my, 10, 90);
   for (let i = 0; i < 4; i++) { const a = time * .4 + i * Math.PI / 2; g.save(); g.translate(Math.round(mx), my); g.rotate(a); g.fillRect(-2, 0, 4, 46); g.fillRect(2, 10, 8, 34); g.restore(); }
 }
 // 길: 풀 가장자리 · 자갈길 · 흙
@@ -2835,13 +2835,80 @@ function drawVilSign(x, y, txt) {
   g.fillStyle = PX_OUT; g.fillRect(Math.round(x - w / 2) - 2, y - 2, w + 4, 22); g.fillStyle = '#6a4a2a'; g.fillRect(Math.round(x - w / 2), y, w, 18); g.fillStyle = '#8a6a3a'; g.fillRect(Math.round(x - w / 2), y, w, 2);
   g.fillStyle = '#ffe8b0'; g.textAlign = 'center'; g.fillText(txt, Math.round(x), y + 13);
 }
+// ── 마을 하늘: 별 뜬 밤의 골짜기(땅속 발굴터의 노을 하늘과 다르게) ──
+// 하늘 그라데이션은 디더링한 저해상도 캔버스를 화면 크기가 바뀔 때만 다시 만든다
+let vilSky = null;
+function vilSkyCanvas() {
+  const w = Math.ceil(VW / 4) + 1, h = Math.ceil(VH / 4) + 1;
+  if (vilSky && vilSky.width === w && vilSky.height === h) return vilSky;
+  const c = mkCanvas(w, h), x = c.getContext('2d'), im = x.createImageData(w, h), d = im.data, hz = h * .72;
+  const st = [[0, '#0a0c26'], [.28, '#151e4c'], [.48, '#243878'], [.62, '#45508e'], [.74, '#8a6aa2'], [.84, '#da8c8e'], [.92, '#f6b07a'], [1, '#ffd29a']].map(([p, q]) => [p, hexToRgb(q)]);
+  for (let y = 0; y < h; y++) {
+    const k = clamp(y / hz, 0, 1); let i = 0; while (i < st.length - 2 && k > st[i + 1][0]) i++;
+    const u = (k - st[i][0]) / (st[i + 1][0] - st[i][0]), A = st[i][1], B = st[i + 1][1];
+    for (let X = 0; X < w; X++) { const th = (BAYER[(y & 3) * 4 + (X & 3)] + .5) / 16, o = (y * w + X) * 4, step = 12;
+      for (let ch = 0; ch < 3; ch++) { const v = lerp(A[ch], B[ch], u); d[o + ch] = clamp(Math.floor(v / step + th) * step, 0, 255); } d[o + 3] = 255; }
+  }
+  x.putImageData(im, 0, 0); return vilSky = c;
+}
+function drawVilSky() {
+  const t = time, u = Math.max(2, Math.round(2 * zoom)), hzY = VH * .72, px = (x, y, w, h) => g.fillRect(Math.round(x / u) * u, Math.round(y / u) * u, w, h);
+  g.setTransform(DPR, 0, 0, DPR, 0, 0); g.imageSmoothingEnabled = false; g.drawImage(vilSkyCanvas(), 0, 0, vilSky.width * 4, vilSky.height * 4);
+  // 별: 몇 개는 십자로 반짝인다
+  const sh = cam.x * .03;
+  for (let i = 0; i < 170; i++) { const sx = ((hash2(i, 1, 101) * (VW + 200) - sh) % (VW + 200) + VW + 200) % (VW + 200) - 100, sy = Math.pow(hash2(i, 2, 101), 1.4) * hzY * .78, tw = .45 + .55 * Math.sin(t * (1 + hash2(i, 3, 101) * 2.5) + i), big = hash2(i, 4, 101) > .93;
+    g.globalAlpha = clamp(tw, .15, 1) * (1 - sy / hzY * .6); g.fillStyle = hash2(i, 5, 101) > .8 ? '#ffe9c0' : '#dfe8ff'; px(sx, sy, u, u); if (big && tw > .7) { px(sx - u, sy, u, u); px(sx + u, sy, u, u); px(sx, sy - u, u, u); px(sx, sy + u, u, u); } }
+  g.globalAlpha = 1;
+  // 오로라: 화면을 가로지르며 천천히 일렁이는 띠
+  g.globalCompositeOperation = 'lighter';
+  for (let x = 0; x < VW; x += u) { const wx = x + cam.x * .06, y0 = hzY * .1 + Math.sin(wx * .0042 + t * .18) * hzY * .07 + Math.sin(wx * .011 - t * .11) * hzY * .025, hh = hzY * (.1 + .06 * Math.sin(wx * .006 + t * .25)), a = .5 + .5 * Math.sin(wx * .0023 - t * .3), col = Math.sin(wx * .0017 + t * .05) > .3 ? [180, 120, 255] : [90, 255, 180];
+    for (let k = 0; k < 6; k++) { const f = k / 6; g.fillStyle = `rgba(${col[0]},${col[1]},${col[2]},${(.34 * a * Math.sin(f * Math.PI) * (1 - f * .4)).toFixed(3)})`; px(x, y0 + f * hh, u, Math.ceil(hh / 6) + u); } }
+  // 달과 달무리
+  const mx = Math.round((VW * .76 - cam.x * .015) / u) * u, my = Math.round(hzY * .3 / u) * u, mr = 13;
+  glowDot(g, mx, my, mr * u * 4.5, '#9ab4ff', .22); glowDot(g, mx, my, mr * u * 2, '#fff2d0', .25);
+  g.globalCompositeOperation = 'source-over';
+  for (let j = -mr; j <= mr; j++) { const w2 = Math.round(Math.sqrt(mr * mr - j * j)); g.fillStyle = j < -mr * .4 ? '#fffbea' : '#f4ecd0'; g.fillRect(mx - w2 * u, my + j * u, w2 * 2 * u, u); }
+  g.fillStyle = '#d8cfb0'; for (const [cx, cy, r] of [[-4, -2, 3], [4, 3, 2], [1, -6, 2], [-2, 6, 2], [6, -4, 1]]) for (let j = -r; j <= r; j++) { const w2 = Math.round(Math.sqrt(r * r - j * j)); g.fillRect(mx + (cx - w2) * u, my + (cy + j) * u, w2 * 2 * u || u, u); }
+  g.fillStyle = 'rgba(40,40,90,.18)'; for (let j = -mr; j <= mr; j++) { const w2 = Math.round(Math.sqrt(mr * mr - j * j)); g.fillRect(mx + Math.max(-w2, w2 - 5) * u, my + j * u, Math.min(5, w2 * 2) * u, u); }
+  // 달빛 받은 구름
+  for (let k = 0; k < 5; k++) { const cw = 70 + hash2(k, 1, 103) * 90, cx = ((hash2(k, 0, 103) * (VW + 400) + t * (4 + k * 2) - cam.x * .05) % (VW + 400)) - 200, cy = hzY * (.38 + hash2(k, 2, 103) * .25);
+    for (let j = 0; j < 4; j++) { const ww = cw * (1 - Math.abs(j - 1.3) * .28), xx = cx + (cw - ww) / 2 + Math.sin(k + j) * 6; g.fillStyle = j === 0 ? '#6a6aa8' : j === 3 ? '#232a58' : '#3c4480'; px(xx, cy + j * u * 2, Math.round(ww / u) * u, u * 2); } g.fillStyle = 'rgba(255,240,210,.5)'; px(cx + cw * .25, cy - u, Math.round(cw * .4 / u) * u, u); }
+  // 별똥별
+  const ss = (t * .12) % 1, sk = Math.floor(t * .12); if (ss < .08) { const k = ss / .08, x0 = hash2(sk, 1, 104) * VW, y0 = hzY * (.08 + hash2(sk, 2, 104) * .2); g.globalCompositeOperation = 'lighter'; for (let i = 0; i < 10; i++) { g.globalAlpha = (1 - i / 10) * (1 - k); g.fillStyle = '#fff6e0'; px(x0 - (k * 260 - i * 7), y0 + (k * 110 - i * 3), u, u); } g.globalAlpha = 1; g.globalCompositeOperation = 'source-over'; }
+}
+// 원경 언덕 세 겹(월드 좌표, 패럴랙스). 가운데 겹엔 불 켜진 오두막, 가까운 겹엔 전나무 숲
+function drawVilHills(vw) {
+  const L = [[.08, 96, 70, .0016, 211, '#6a5e96', 0, '#a894c0'], [.2, 64, 52, .0028, 223, '#3c3e74', 1, '#6a6aa8'], [.34, 36, 34, .0045, 239, '#25294e', 2, '#3e4878']], t = time;
+  for (const [f, base, amp, fq, seed, col, kind, rim] of L) {
+    const ox = cam.x * (1 - f), x0 = Math.floor((cam.x - ox) / 4) * 4 - 8, ridge = wx => VGY - base - amp * fbm1(wx * fq, seed, 3);
+    g.fillStyle = col;
+    for (let x = x0; x < x0 + vw + 16; x += 4) { const y = Math.round(ridge(x) / 2) * 2; g.fillRect(ox + x, y, 4, VGY - y + 4); }
+    g.fillStyle = rim; for (let x = x0; x < x0 + vw + 16; x += 4) { const y = Math.round(ridge(x) / 2) * 2; g.fillRect(ox + x, y, 4, 2); }
+    g.fillStyle = col;
+    if (kind === 1) for (let k = Math.floor(x0 / 130); k < (x0 + vw) / 130 + 1; k++) { if (hash2(k, 0, 225) < .55) continue; const x = k * 130 + hash2(k, 1, 225) * 60, y = ridge(x) + 4; g.fillStyle = '#2a2a58'; g.fillRect(ox + x - 6, y - 8, 12, 9); g.beginPath(); g.moveTo(ox + x - 8, y - 8); g.lineTo(ox + x, y - 15); g.lineTo(ox + x + 8, y - 8); g.fill(); g.fillStyle = '#ffd27a'; g.fillRect(ox + x - 2, y - 5, 3, 3); g.globalCompositeOperation = 'lighter'; glowDot(g, ox + x, y - 4, 14, '#ffb060', .35 + Math.sin(t * 1.3 + k) * .05); g.globalCompositeOperation = 'source-over'; }
+    if (kind === 2) for (let x = x0; x < x0 + vw + 16; x += 10) { if (hash2(Math.floor(x / 10), 0, 241) < .45) continue; const y = ridge(x) + 2, hh = 14 + hash2(Math.floor(x / 10), 1, 241) * 16; g.fillStyle = '#1a2040'; for (let j = 0; j < hh; j += 4) { const w2 = Math.round((j / hh) * 6 + 1) * 2; g.fillRect(Math.round(ox + x - w2 / 2), Math.round(y - hh + j), w2, 4); } g.fillRect(ox + x - 1, y - 2, 2, 4); }
+    // 언덕 밑에 깔린 안개
+    const mist = g.createLinearGradient(0, VGY - base * .6, 0, VGY); mist.addColorStop(0, 'rgba(170,180,230,0)'); mist.addColorStop(1, 'rgba(170,180,230,.14)'); g.fillStyle = mist; g.fillRect(cam.x - 2, VGY - base * .6, vw + 4, base * .6 + 2);
+  }
+}
+// 가로등 사이를 잇는 줄전구
+function drawVilLights() {
+  const lamps = VIL_SET.filter(e => e[1] === 'lamp').map(e => e[2]).sort((a, b) => a - b), cols = ['#ffd36b', '#ff8a9a', '#8ab4ff', '#9affb0'], t = time, top = VGY - 46 * VP + 2;
+  for (let i = 0; i < lamps.length - 1; i++) { const a = lamps[i], b = lamps[i + 1]; if (b - a > 700 || b < cam.x - 50 || a > cam.x + VW / zoom + 50) continue; const n = Math.floor((b - a) / 18), sag = Math.min(60, (b - a) * .09);
+    g.strokeStyle = '#1a1428'; g.lineWidth = 2; g.beginPath(); for (let k = 0; k <= 40; k++) { const u = k / 40; g.lineTo(lerp(a, b, u), top + Math.sin(u * Math.PI) * sag); } g.stroke();
+    for (let k = 1; k < n; k++) { const u = k / n, x = lerp(a, b, u), y = top + Math.sin(u * Math.PI) * sag + 3, c = cols[(k + i) % 4], on = .6 + .4 * Math.sin(t * 2 + k * .9); g.fillStyle = PX_OUT; g.fillRect(Math.round(x) - 2, Math.round(y) - 1, 5, 6); g.fillStyle = c; g.fillRect(Math.round(x) - 1, Math.round(y), 3, 4); g.globalCompositeOperation = 'lighter'; glowDot(g, x, y + 2, 11, c, .35 * on); g.globalCompositeOperation = 'source-over'; } }
+  // 반딧불
+  g.globalCompositeOperation = 'lighter';
+  for (let i = 0; i < 26; i++) { const bx = hash2(i, 1, 251) * VIL.W, x = bx + Math.sin(t * .5 + i * 2.1) * 40, y = VGY - 20 - hash2(i, 2, 251) * 90 + Math.sin(t * .8 + i) * 14; if (x < cam.x - 20 || x > cam.x + VW / zoom + 20) continue; const a = Math.max(0, Math.sin(t * 1.6 + i * 1.7)); glowDot(g, x, y, 9, '#d8ff8a', .6 * a); g.fillStyle = `rgba(240,255,190,${a.toFixed(2)})`; g.fillRect(Math.round(x), Math.round(y), 2, 2); }
+  g.globalCompositeOperation = 'source-over';
+}
 function drawVillage() {
   g.setTransform(DPR * zoom, 0, 0, DPR * zoom, -cam.x * DPR * zoom, -cam.y * DPR * zoom);
   const vw = VW / zoom, vh = VH / zoom, t = time, vis = (x, w) => x + w > cam.x - 40 && x - w < cam.x + vw + 40;
   g.fillStyle = '#0b0710'; g.fillRect(cam.x - 2, cam.y - 2, vw + 4, vh + 4);
-  drawBackdrop(); g.setTransform(DPR * zoom, 0, 0, DPR * zoom, -cam.x * DPR * zoom, -cam.y * DPR * zoom);
+  drawVilSky(); g.setTransform(DPR * zoom, 0, 0, DPR * zoom, -cam.x * DPR * zoom, -cam.y * DPR * zoom);
   g.imageSmoothingEnabled = false;
-  drawVilBack(vw); drawVilGround(vw, vh);
+  drawVilHills(vw); drawVilBack(vw); drawVilGround(vw, vh);
   // 건물 → 소품 순서로
   for (const [kind, k, x] of VIL_SET) if (kind === 'bld') { const s = bldSpr(k); if (vis(x, s.width * VP / 2)) vdraw(s, x, VGY + 2); }
   // 건물별 움직이는 부분
@@ -2858,6 +2925,7 @@ function drawVillage() {
   for (const [kind, k, x] of VIL_SET) if (kind === 'prop') { const s = PROP[k](); if (!vis(x, s.width * VP)) continue; vdraw(s, x, VGY + (k === 'fount' ? 4 : 1));
     if (k === 'lamp') { g.globalCompositeOperation = 'lighter'; glowDot(g, x, VGY - 46 * VP + 10, 60, '#ffb060', .3 + Math.sin(t * 2 + x) * .04); glowDot(g, x, VGY - 46 * VP + 10, 16, '#fff0c0', .6); g.globalCompositeOperation = 'source-over'; }
     if (k === 'fate') { g.globalCompositeOperation = 'lighter'; glowDot(g, x, VGY - 30, 30, '#ffd36b', .35 + Math.sin(t * 2.4) * .12); g.globalCompositeOperation = 'source-over'; } }
+  drawVilLights();
   // 고양이는 고물 더미 위에서 졸고 있다
   { const s = PROP.cat(); if (vis(520, 30)) vdraw(s, 512, VGY - 30 + Math.floor(t % 3) * 0, VP); if (vis(520, 30) && (t % 5) < 2.5) { g.fillStyle = '#fff2d0'; g.font = '10px sans-serif'; g.fillText('z', 528, VGY - 54 - (t % 2.5) * 6); } }
   // 창문 불빛
