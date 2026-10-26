@@ -900,7 +900,7 @@ const PICKS = [
 ].map(([id, name, tier, shape, head, grip, st, lore]) => ({ id, name, tier, shape, head, grip, spd: st.spd || 1, luck: st.luck || 0, oil: st.oil || 1, ore: st.ore || 1, lore }));
 const PICK_BY = Object.fromEntries(PICKS.map(p => [p.id, p]));
 const GACHA_RATE = [40, 27, 16, 9, 4.5, 2, .9, .4, .15, .05];
-const GACHA_COST = [500, 4500];
+const GACHA_COST = [500, 4500, 42000];
 const DUPE_REFUND = [60, 90, 140, 220, 420, 800, 1500, 3000, 6000, 12000];
 // ── 대장간: 설계도 + 재료 + 셀라 = 곡괭이 ──
 // 재료는 등급마다 하나. 보물상자를 열면 그 상자 등급(과 한 단계 아래) 재료가 나온다
@@ -1517,7 +1517,7 @@ const CLASSES = [
     pal: { h: '#d8d0f8', w: '#fff2b0', t: '#f4f4ff', r: '#d8ccff', n: '#c8b8a0', k: '#d8d8e8' } },
 ];
 const CLASS_BY = Object.fromEntries(CLASSES.map((c, i) => [c.id, Object.assign(c, { idx: i })]));
-const CLASS_COST = [1200, 10800], CLASS_REFUND = [120, 180, 280, 440, 840, 1600, 3000, 6000, 12000, 24000];
+const CLASS_COST = [1200, 10800, 100000], CLASS_REFUND = [120, 180, 280, 440, 840, 1600, 3000, 6000, 12000, 24000];
 const curClass = () => CLASS_BY[G.cls] || CLASSES[0];
 
 const HERO_HEAD = [
@@ -4344,16 +4344,25 @@ function rollPicks(n) {
   return out.sort((a, b) => PICK_BY[a].tier - PICK_BY[b].tier);
 }
 function startForge(n) {
-  const cost = GACHA_COST[n >= 10 ? 1 : 0];
+  const cost = GACHA_COST[n >= 100 ? 2 : n >= 10 ? 1 : 0];
   if (G.gold < cost || opening) { S.deny(); return; }
   G.gold -= cost; updHUD();
-  const ids = rollPicks(n), maxR = Math.max(...ids.map(id => PICK_BY[id].tier));
+  // 100회는 10회 묶음 열 번(묶음마다 영웅 이상 확정)
+  const ids = n >= 100 ? Array.from({ length: n / 10 }, () => rollPicks(10)).flat() : rollPicks(n), maxR = Math.max(...ids.map(id => PICK_BY[id].tier)), all = ids.map(pk => ({ pk, bp: 1 })), cp = n >= 100 ? compactLoot(all) : null;
   closeModals();
-  startOpening({ type: 'forge', L: 0 }, 0, 0, { loot: ids.map(pk => ({ pk, bp: 1 })), maxR, forge: true });
-  opening.bpMode = true; opening.sx = VW / 2; opening.sy = VH * .5; FX.forge.charge = n >= 10 ? 3.4 : 2.8;
+  startOpening({ type: 'forge', L: 0 }, 0, 0, { loot: cp ? cp.list : all, maxR, forge: true });
+  opening.bpMode = true; if (cp) { opening.all = all; opening.summary = lootSummary(all, '장') + ` · ${cp.kinds}종${cp.hidden ? ` (낮은 등급 ${cp.hidden}종은 생략)` : ''}`; } opening.sx = VW / 2; opening.sy = VH * .5; FX.forge.charge = n >= 10 ? 3.4 : 2.8;
   opening.fg = { n: n >= 10 ? 5 : 4, hits: 0, heat: 0, sq: 0, sqv: 0, pulse: 0, freeze: 0, ang: 0, hint: 0 };
 }
 
+// 100회 뽑기: 결과는 100개 그대로 계산하고, 화면에는 같은 결과를 한 장으로 묶어(×N) 높은 등급부터 몇 장만 띄운다
+const tierOf = x => x.pk ? PICK_BY[x.pk].tier : CLASS_BY[x.cls].tier;
+function compactLoot(all) {
+  const m = new Map(); for (const x of all) { const k = x.pk || x.cls, e = m.get(k); if (e) e.n++; else m.set(k, { ...x, n: 1 }); }
+  const cap = VW < 600 ? 10 : 20, list = [...m.values()].sort((a, b) => tierOf(b) - tierOf(a) || b.n - a.n).slice(0, cap);
+  return { list: list.sort((a, b) => tierOf(a) - tierOf(b)), hidden: m.size - list.length, kinds: m.size };
+}
+function lootSummary(all, what) { const hi = all.filter(x => tierOf(x) >= 3).length, top = Math.max(...all.map(tierOf)); return `${all.length}회 결과 · 영웅 이상 ${hi}${what} · 최고 ${RARITY[top].name}`; }
 // 대장간 제작: 같은 모루 연출로 두드려서 진짜 곡괭이를 꺼낸다
 function startCraft(id) {
   const pk = PICK_BY[id], r = recipeOf(pk);
@@ -4690,8 +4699,9 @@ function dustCloud(n) { const o = O(); for (let i = 0; i < n; i++) P({ k: 'steam
 function layoutCards(n) {
   const twoRows = n > 1 && (Math.min(128, (VW - 32 - (n - 1) * 10) / n) < 84);
   const perRow = twoRows ? Math.ceil(n / 2) : n;
-  const cw = Math.min(128, (VW - 32 - (perRow - 1) * 10) / perRow), ch = cw * 1.38;
-  const top = VH * .56, out = [];
+  // 카드가 많으면(100회) 두 줄이 아래 설명 글 위에 들어오도록 작게, 조금 위에서부터
+  const many = n > 10, cw = Math.min(128, (VW - 32 - (perRow - 1) * 10) / perRow, many ? ((VH * .53 - 96) / 2 - 5) / 1.38 : 999), ch = cw * 1.38;
+  const top = VH * (many ? .47 : .56), out = [];
   for (let i = 0; i < n; i++) {
     const row = twoRows ? Math.floor(i / perRow) : 0, inRow = twoRows ? (row ? n - perRow : perRow) : n, col = i - row * perRow;
     const x = VW / 2 + (col - (inRow - 1) / 2) * (cw + 10), y = top + row * (ch + 10) + ch / 2;
@@ -4734,7 +4744,7 @@ function updateOpening(dt) {
       const lt = o.lt - c.t0;
       if (lt < 0) { all = false; continue; }
       if (!c.flying) { c.flying = 1; S.whoosh(.3); }
-      if (lt > .55 && !c.rev) { c.rev = 1; const it = itemOf(c), r = it.r; o.revQ = Math.max(o.revQ ?? -1, r); c.pop = 1; o.caption = `${it.name} — ${it.lore}`; for (let k = 0; k < 10 + r * 8; k++) { const a = R(0, TAU), v = R(100, 300 + r * 80); P({ k: 'spark', x: c.x, y: c.y, vx: Math.cos(a) * v, vy: Math.sin(a) * v, life: R(.4, .9), size: R(1.5, 3.5), c: RARITY[r].c, drag: .9 }); } if (r >= 4) { flash(RARITY[r].c, .3); shakeIt(10); } }
+      if (lt > .55 && !c.rev) { c.rev = 1; const it = itemOf(c), r = it.r; o.revQ = Math.max(o.revQ ?? -1, r); c.pop = 1; o.caption = `${it.name} — ${it.lore}`; const many = o.cards.length > 10; for (let k = 0; k < (10 + r * 8) * (many ? .3 : 1); k++) { const a = R(0, TAU), v = R(100, 300 + r * 80); P({ k: 'spark', x: c.x, y: c.y, vx: Math.cos(a) * v, vy: Math.sin(a) * v, life: R(.4, .9), size: R(1.5, 3.5), c: RARITY[r].c, drag: .9 }); } if (r >= (many ? 6 : 4)) { flash(RARITY[r].c, .3); shakeIt(10); } }
       if (lt < 1) all = false;
       c.pop = Math.max(0, (c.pop || 0) - dt * 3);
     }
@@ -4774,7 +4784,7 @@ function doBurst() {
 function startLoot() {
   const o = opening; o.phase = 'loot'; o.lt = 0;
   const L = layoutCards(o.loot.length); let t0 = 0;
-  o.cards = o.loot.map((x, j) => { const base = typeof x === 'number' ? { i: x } : x, r = itemOf(base).r; if (r >= 3) t0 += .3; const c = { ...base, ...L[j], t0, isNew: base.cls ? !G.classes[base.cls] : base.pk ? !G.picks[base.pk] && !(base.bp && G.bps[base.pk]) : !G.foundT[base.i] }; t0 += .38; return c; });
+  o.cards = o.loot.map((x, j) => { const base = typeof x === 'number' ? { i: x } : x, r = itemOf(base).r; if (r >= 3) t0 += o.loot.length > 10 ? .12 : .3; const c = { ...base, ...L[j], t0, isNew: base.cls ? !G.classes[base.cls] : base.pk ? !G.picks[base.pk] && !(base.bp && G.bps[base.pk]) : !G.foundT[base.i] }; t0 += o.loot.length > 10 ? .16 : .38; return c; });
 }
 function openingTap() {
   const o = opening; if (!o) return;
@@ -4790,7 +4800,7 @@ function finishOpening() {
   if (o.preview) { opening = null; fxc.classList.remove('on'); fg.setTransform(1, 0, 0, 1, 0, 0); fg.clearRect(0, 0, fxc.width, fxc.height); Sound.duck(0); return; }
   if (o.contract) {
     let refund = 0, fresh = 0;
-    for (const c of o.cards) { if (G.classes[c.cls]) { refund += CLASS_REFUND[CLASS_BY[c.cls].tier]; G.classes[c.cls]++; } else { G.classes[c.cls] = 1; fresh++; } }
+    for (const c of (o.all || o.cards)) { if (G.classes[c.cls]) { refund += CLASS_REFUND[CLASS_BY[c.cls].tier]; G.classes[c.cls]++; } else { G.classes[c.cls] = 1; fresh++; } }
     G.gold += refund;
     opening = null; fxc.classList.remove('on'); fg.setTransform(1, 0, 0, 1, 0, 0); fg.clearRect(0, 0, fxc.width, fxc.height);
     updHUD(); save(); Sound.duck(0);
@@ -4808,7 +4818,7 @@ function finishOpening() {
     }
     // 설계도 뽑기: 이미 가진 설계도·곡괭이는 녹여서 셀라로
     let refund = 0, fresh = 0;
-    for (const c of o.cards) { if (G.picks[c.pk] || G.bps[c.pk]) refund += DUPE_REFUND[PICK_BY[c.pk].tier]; else { G.bps[c.pk] = 1; fresh++; } }
+    for (const c of (o.all || o.cards)) { if (G.picks[c.pk] || G.bps[c.pk]) refund += DUPE_REFUND[PICK_BY[c.pk].tier]; else { G.bps[c.pk] = 1; fresh++; } }
     G.gold += refund;
     updHUD(); save(); Sound.duck(0);
     toast(`${fresh ? `새 설계도 ${fresh}장! 대장간에서 재료와 셀라로 만들 수 있어요` : '새 설계도는 없었어요'}${refund ? ` · 겹친 설계도는 ${refund.toLocaleString()} 셀라로 돌려받았어요` : ''}`);
@@ -4862,22 +4872,33 @@ function drawCard(c, card, o) {
   const flip = clamp((lt - .45) / .3, 0, 1), sx = Math.abs(Math.cos(flip * Math.PI)) * sc, front = flip > .5;
   const w = card.cw, h = card.ch, pop = 1 + (card.pop || 0) * .12;
   c.save(); c.globalAlpha = alpha; c.translate(x, y); c.scale(Math.max(.02, sx) * pop, sc * pop);
-  if (front && r >= 2) { c.globalCompositeOperation = 'lighter'; glowDot(c, 0, 0, w * (.8 + r * .12), col, .35 + Math.sin(o.t * 4) * .08); c.globalCompositeOperation = 'source-over'; }
-  if (front && r >= 4) { c.save(); c.rotate(o.t * .6); c.globalCompositeOperation = 'lighter'; for (let i = 0; i < 10; i++) { c.rotate(TAU / 10); c.fillStyle = rgba(col, .16); c.beginPath(); c.moveTo(0, 0); c.lineTo(-w * .12, -w * 1.3); c.lineTo(w * .12, -w * 1.3); c.closePath(); c.fill(); } c.restore(); }
+  const many = o.cards.length > 10;
+  if (front && r >= (many ? 4 : 2)) { c.globalCompositeOperation = 'lighter'; glowDot(c, 0, 0, w * (many ? .7 : .8 + r * .12), col, .35 + Math.sin(o.t * 4) * .08); c.globalCompositeOperation = 'source-over'; }
+  if (front && r >= (many ? 6 : 4)) { c.save(); c.rotate(o.t * .6); c.globalCompositeOperation = 'lighter'; for (let i = 0; i < 10; i++) { c.rotate(TAU / 10); c.fillStyle = rgba(col, .16); c.beginPath(); c.moveTo(0, 0); c.lineTo(-w * .12, -w * 1.3); c.lineTo(w * .12, -w * 1.3); c.closePath(); c.fill(); } c.restore(); }
   rr(c, -w / 2, -h / 2, w, h, w * .08);
   if (!front) {
     c.fillStyle = grad(c, -h / 2, h / 2, '#3a2b22', '#1a120e'); c.fill(); c.lineWidth = 3; c.strokeStyle = '#8a6a2a'; c.stroke();
     c.strokeStyle = '#d2a94e'; c.lineWidth = 2; c.beginPath(); c.arc(0, 0, w * .22, 0, TAU); c.stroke(); star4(c, 0, 0, w * .16, '#d2a94e');
   } else {
-    c.fillStyle = grad(c, -h / 2, h / 2, shade(col, -.62), '#120d0a'); c.fill();
-    c.lineWidth = r >= 4 ? 4 : 3; c.strokeStyle = col; c.stroke(); tierFrame(c, r, w, h, o.t);
-    c.save(); rr(c, -w / 2, -h / 2, w, h, w * .08); c.clip(); c.fillStyle = 'rgba(255,255,255,.06)'; c.fillRect(-w / 2, -h / 2, w, h * .08);
-    const sh = ((o.t * .8 + (card.i || card.x * .01) * .13) % 2) - .5; c.fillStyle = 'rgba(255,255,255,.08)'; c.beginPath(); c.moveTo(-w / 2 + sh * w * 2, -h / 2); c.lineTo(-w / 2 + sh * w * 2 + w * .3, -h / 2); c.lineTo(-w / 2 + sh * w * 2 - w * .2, h / 2); c.lineTo(-w / 2 + sh * w * 2 - w * .5, h / 2); c.fill(); c.restore();
-    it.icon(c, 0, -h * .14, w * .55, o.t);
-    c.textAlign = 'center'; c.fillStyle = '#f6ecd4'; const fs = Math.max(10, w * .11); c.font = `${fs}px "Song Myung","Nanum Myeongjo",serif`;
-    const lines = wrapText(c, it.name, w * .88).slice(0, 2); lines.forEach((ln, k) => c.fillText(ln, 0, h * .22 + k * fs * 1.15));
-    c.font = `${Math.max(9, w * .085)}px "Gowun Dodum",sans-serif`; c.fillStyle = col; c.fillText(it.sub, 0, h * .44);
-    if (card.isNew) { c.save(); c.translate(w / 2 - w * .1, -h / 2 + w * .1); c.rotate(.5); c.fillStyle = '#e0604a'; c.fillRect(-w * .26, -w * .065, w * .52, w * .13); c.fillStyle = '#fff'; c.font = `bold ${Math.max(8, w * .085)}px "Gowun Dodum",sans-serif`; c.fillText('NEW', 0, w * .03); c.restore(); }
+    // 앞면은 처음 한 번만 그려 두고(보조 캔버스) 매 프레임 붙인다. 무지개 등급만 색이 변해서 매번 그린다
+    const face = c => {
+      rr(c, -w / 2, -h / 2, w, h, w * .08);
+      c.fillStyle = grad(c, -h / 2, h / 2, shade(col, -.62), '#120d0a'); c.fill();
+      c.lineWidth = r >= 4 ? 4 : 3; c.strokeStyle = col; c.stroke(); tierFrame(c, r, w, h, o.t);
+      c.save(); rr(c, -w / 2, -h / 2, w, h, w * .08); c.clip(); c.fillStyle = 'rgba(255,255,255,.06)'; c.fillRect(-w / 2, -h / 2, w, h * .08); c.restore();
+      it.icon(c, 0, -h * .14, w * .55, o.t);
+      c.textAlign = 'center'; c.fillStyle = '#f6ecd4'; const fs = Math.max(10, w * .11); c.font = `${fs}px "Song Myung","Nanum Myeongjo",serif`;
+      const lines = wrapText(c, it.name, w * .88).slice(0, 2); lines.forEach((ln, k) => c.fillText(ln, 0, h * .22 + k * fs * 1.15));
+      c.font = `${Math.max(9, w * .085)}px "Gowun Dodum",sans-serif`; c.fillStyle = col; c.fillText(it.sub, 0, h * .44);
+      if (card.n > 1) { const fz = Math.max(10, w * .12); c.font = `bold ${fz}px "Gowun Dodum",sans-serif`; const tw = c.measureText(`×${card.n}`).width + fz * .7; c.fillStyle = 'rgba(10,6,4,.82)'; rr(c, -w / 2 + w * .06, -h / 2 + w * .06, tw, fz * 1.4, fz * .35); c.fill(); c.fillStyle = '#ffe39a'; c.textAlign = 'left'; c.fillText(`×${card.n}`, -w / 2 + w * .06 + fz * .35, -h / 2 + w * .06 + fz * 1.05); c.textAlign = 'center'; }
+      if (card.isNew) { c.save(); c.translate(w / 2 - w * .1, -h / 2 + w * .1); c.rotate(.5); c.fillStyle = '#e0604a'; c.fillRect(-w * .26, -w * .065, w * .52, w * .13); c.fillStyle = '#fff'; c.font = `bold ${Math.max(8, w * .085)}px "Gowun Dodum",sans-serif`; c.fillText('NEW', 0, w * .03); c.restore(); }
+    };
+    if (!RARITY[r].prism) {
+      const q = Math.min(3, DPR * 1.15), key = w + 'x' + h + (card.isNew ? 'n' : '');
+      if (!card.face || card.faceK !== key) { const cv = mkCanvas(Math.ceil(w * q) + 8, Math.ceil(h * q) + 8), x = cv.getContext('2d'); x.scale(q, q); x.translate(w / 2 + 4 / q, h / 2 + 4 / q); face(x); card.face = cv; card.faceK = key; card.faceQ = q; }
+      c.drawImage(card.face, -w / 2 - 4 / card.faceQ, -h / 2 - 4 / card.faceQ, card.face.width / card.faceQ, card.face.height / card.faceQ);
+    } else face(c);
+    c.save(); rr(c, -w / 2, -h / 2, w, h, w * .08); c.clip(); const sh = ((o.t * .8 + (card.i || card.x * .01) * .13) % 2) - .5; c.fillStyle = 'rgba(255,255,255,.08)'; c.beginPath(); c.moveTo(-w / 2 + sh * w * 2, -h / 2); c.lineTo(-w / 2 + sh * w * 2 + w * .3, -h / 2); c.lineTo(-w / 2 + sh * w * 2 - w * .2, h / 2); c.lineTo(-w / 2 + sh * w * 2 - w * .5, h / 2); c.fill(); c.restore();
   }
   c.restore();
 }
@@ -4992,6 +5013,7 @@ function drawOpening() {
     c.font = '12px "Gowun Dodum",sans-serif'; c.fillStyle = '#b9a88a'; c.fillText(`남은 시간 ${Math.max(0, 5 - o.mt).toFixed(1)}초`, VW / 2, y + 38);
   }
   // 설명 · 안내
+  if (o.summary && (o.phase === 'loot' || o.phase === 'wait')) { const fz = Math.min(15, VW * .034); c.font = `bold ${fz}px "Gowun Dodum",sans-serif`; c.textAlign = 'center'; c.fillStyle = '#ffe39a'; const ls = wrapText(c, o.summary, VW - 32); ls.forEach((l, i) => c.fillText(l, VW / 2, VH * .47 - 14 - (ls.length - 1 - i) * fz * 1.3)); }
   if (o.caption) { c.font = `${Math.min(15, VW * .036)}px "Gowun Dodum",sans-serif`; c.fillStyle = '#e8dcc0'; const lines = wrapText(c, o.caption, Math.min(620, VW - 40)); const by = VH - 54 - (lines.length - 1) * 20; lines.forEach((l, i) => c.fillText(l, VW / 2, by + i * 20)); }
   const prompt = o.phase === 'wait' ? '탭하거나 Space를 눌러 챙기기' : o.phase === 'charge' || o.phase === 'intro' ? '탭하면 빨리 감기' : o.phase === 'loot' ? '탭하면 모두 공개' : '';
   if (prompt) { c.font = '13px "Gowun Dodum",sans-serif'; c.fillStyle = `rgba(210,169,78,${.55 + .45 * Math.sin(o.t * 4)})`; c.fillText(prompt, VW / 2, VH - 20); }
@@ -5554,13 +5576,14 @@ function rollClasses(n) {
   return out.sort((a, b) => CLASS_BY[a].tier - CLASS_BY[b].tier);
 }
 function startContract(n) {
-  const cost = CLASS_COST[n >= 10 ? 1 : 0];
+  const cost = CLASS_COST[n >= 100 ? 2 : n >= 10 ? 1 : 0];
   if (G.gold < cost || opening) { S.deny(); return; }
   G.gold -= cost; updHUD();
-  const ids = rollClasses(n), maxR = Math.max(...ids.map(id => CLASS_BY[id].tier));
+  const ids = n >= 100 ? Array.from({ length: n / 10 }, () => rollClasses(10)).flat() : rollClasses(n), maxR = Math.max(...ids.map(id => CLASS_BY[id].tier)), all = ids.map(cls => ({ cls })), cp = n >= 100 ? compactLoot(all) : null;
   closeModals();
   FX.contract.charge = n >= 10 ? 3.4 : 2.8;
-  startOpening({ type: 'contract', L: 0 }, 0, 0, { loot: ids.map(cls => ({ cls })), maxR, contract: true });
+  startOpening({ type: 'contract', L: 0 }, 0, 0, { loot: cp ? cp.list : all, maxR, contract: true });
+  if (cp) { opening.all = all; opening.summary = lootSummary(all, '명') + ` · ${cp.kinds}종${cp.hidden ? ` (낮은 등급 ${cp.hidden}종은 생략)` : ''}`; }
   opening.sx = VW / 2; opening.sy = VH * .5; opening.contract = true; opening.starfield = .5;
   opening.ct = { n: n >= 10 ? 5 : 4, hits: 0, hint: 0, pulse: 0, seals: [] };
 }
@@ -5581,6 +5604,7 @@ function contractCharge(k, dt) {
   }
   if (Math.random() < dt * 30) { const a = R(0, TAU), r = R(26, 40) * Z; P({ k: 'suck', x: cx + Math.cos(a) * r, y: cy + Math.sin(a) * r * .4 + 14 * Z, tx: cx, ty: cy, life: R(.5, .9), size: 2, c: rarCol(Math.max(1, o.hint)) }); }
 }
+let silBuf = null;
 function drawContractScene(c, o, a) {
   const ct = o.ct, { Z, cx, cy } = contractGeo(o), dt = o.dt || 0, post = o.bt >= 0, t = o.t;
   ct.pulse = Math.max(0, ct.pulse - dt * 3);
@@ -5627,7 +5651,15 @@ function drawContractScene(c, o, a) {
     c.fillStyle = q; c.fillRect(cx - pw, -10, pw * 2, cy + 30 * Z); glowDot(c, cx, yy, 30 * Z, rarCol(o.maxR, t), .5 * a); c.globalCompositeOperation = 'source-over';
     const w = spr.width * sc, h = spr.height * sc;
     drawClassPortrait(c, best, cx, yy, h, t, false);
-    if (reveal < 1) { c.globalAlpha = a * dim * (1 - reveal); c.filter = 'brightness(0) invert(1)'; drawClassPortrait(c, best, cx, yy, h, t, false); c.filter = 'none'; c.globalAlpha = a * dim; }
+    // 흰 실루엣으로 시작해 서서히 드러난다. filter는 조각마다 계산돼 무척 느려서 보조 캔버스에 그려 흰색으로 덮는다
+    if (reveal < 1) {
+      const k = c.getTransform().a, S = Math.ceil(h * 2 * k);
+      if (!silBuf) silBuf = document.createElement('canvas'); if (silBuf.width !== S) { silBuf.width = S; silBuf.height = S; }
+      const bx = silBuf.getContext('2d'); bx.setTransform(1, 0, 0, 1, 0, 0); bx.globalCompositeOperation = 'source-over'; bx.clearRect(0, 0, S, S); bx.setTransform(k, 0, 0, k, 0, 0); bx.imageSmoothingEnabled = false;
+      drawClassPortrait(bx, best, h, h, h, t, false);
+      bx.setTransform(1, 0, 0, 1, 0, 0); bx.globalCompositeOperation = 'source-in'; bx.fillStyle = '#ffffff'; bx.fillRect(0, 0, S, S); bx.globalCompositeOperation = 'source-over';
+      c.globalAlpha = a * dim * (1 - reveal); c.drawImage(silBuf, cx - h, yy - h, h * 2, h * 2); c.globalAlpha = a * dim;
+    }
     if (o.bt > .5) { c.font = `${Math.max(12, 5 * Z)}px "Song Myung",serif`; c.textAlign = 'center'; c.fillStyle = rgba('#f6ecd4', seg(o.bt, .5, .9)); c.fillText(C.en, cx, yy + h / 2 + 6 * Z); }
   }
   c.restore();
@@ -5658,10 +5690,10 @@ function renderClassTab(body) {
   <div class="up cls-cur"><canvas id="clsShow" width="200" height="200"></canvas><div><span class="tag" style="color:${RARITY[cur.tier].prism ? '#fff' : RARITY[cur.tier].c}">${RARITY[cur.tier].name} 직업</span><b>${cur.name} <small>${cur.en}</small></b>
     <p style="color:#e8d8ff"><b style="font-size:15px">${cur.icon} ${cur.skill}</b> · 재사용 ${cur.cd}초 · <kbd>Q</kbd>/<kbd>K</kbd> (모바일은 보라색 버튼)</p><p>${cur.desc}</p><p style="opacity:.8">${cur.lore}</p></div></div>
   <div class="up"><div><b>등급별 확률</b><p class="rates">${GACHA_RATE.map((r, i) => `<span style="color:${RARITY[i].prism ? '#fff' : RARITY[i].c}">${RARITY[i].name} ${r}%</span>`).join(' · ')}</p><p>10회 계약은 영웅 이상 1개 확정 · 전설 이상이 ${60 - G.cpity}회 안에 반드시 나와요 · 이미 맺은 직업은 계약금 일부를 돌려줘요</p></div></div>
-  <div class="row" style="margin:12px 0"><button class="primary" type="button" id="c1">1회 계약 · ${CLASS_COST[0].toLocaleString()} 셀라</button><button class="primary" type="button" id="c10">10회 계약 · ${CLASS_COST[1].toLocaleString()} 셀라</button><span class="sub" style="margin:0">보유 ${G.gold.toLocaleString()} 셀라 · 직업 ${owned}/${CLASSES.length}</span></div>
+  <div class="row" style="margin:12px 0"><button class="primary" type="button" id="c1">1회 계약 · ${CLASS_COST[0].toLocaleString()} 셀라</button><button class="primary" type="button" id="c10">10회 계약 · ${CLASS_COST[1].toLocaleString()} 셀라</button><button class="primary" type="button" id="c100">100회 계약 · ${CLASS_COST[2].toLocaleString()} 셀라</button><span class="sub" style="margin:0">보유 ${G.gold.toLocaleString()} 셀라 · 직업 ${owned}/${CLASSES.length}</span></div>
   <div class="grid" id="clsGrid"></div>`;
   $('#c1').disabled = G.gold < CLASS_COST[0]; $('#c10').disabled = G.gold < CLASS_COST[1];
-  $('#c1').onclick = () => startContract(1); $('#c10').onclick = () => startContract(10);
+  $('#c1').onclick = () => startContract(1); $('#c10').onclick = () => startContract(10); $('#c100').onclick = () => startContract(100); $('#c100').disabled = G.gold < CLASS_COST[2];
   const grid = $('#clsGrid');
   CLASSES.forEach(C => {
     const n = G.classes[C.id] || 0, eq = G.cls === C.id, el = document.createElement('div'); el.className = 'card' + (n ? '' : ' locked');
@@ -5680,9 +5712,9 @@ function renderForge(body) {
   body.innerHTML = `<p class="sub">도면 장인 리라가 운명의 모루 위에 빈 양피지를 펼칩니다. “모루가 두드려 주는 건 <b>설계도</b>뿐이에요. 무엇이 찍혀 나올지는 모루 마음이고요. 실제 곡괭이는 옆 <b>대장간</b>의 브론 아저씨가 재료를 받고 만들어 줘요.”</p>
   <div class="up"><div><b>지금 든 곡괭이 · ${cur.name}</b><p>${RARITY[cur.tier].name} · ${pickPerk(cur)} · 강화 Lv${G.upg.pick}과 곱해져요</p></div></div>
   <div class="up"><div><b>등급별 확률</b><p class="rates">${GACHA_RATE.map((r, i) => `<span style="color:${RARITY[i].prism ? '#fff' : RARITY[i].c}">${RARITY[i].name} ${r}%</span>`).join(' · ')}</p><p>10회 뽑기는 영웅 이상 1장 확정 · 전설 이상이 ${60 - G.pity}회 안에 반드시 나와요 · 이미 가진 설계도·곡괭이가 나오면 셀라로 돌려줘요</p></div></div>
-  <div class="row" style="margin:12px 0"><button class="primary" type="button" id="f1">설계도 1회 · ${GACHA_COST[0].toLocaleString()} 셀라</button><button class="primary" type="button" id="f10">설계도 10회 · ${GACHA_COST[1].toLocaleString()} 셀라</button><span class="sub" style="margin:0">보유 ${G.gold.toLocaleString()} 셀라 · 설계도 ${Object.keys(G.bps).length}장 · 곡괭이 ${owned}/${PICKS.length}</span></div>
+  <div class="row" style="margin:12px 0"><button class="primary" type="button" id="f1">설계도 1회 · ${GACHA_COST[0].toLocaleString()} 셀라</button><button class="primary" type="button" id="f10">설계도 10회 · ${GACHA_COST[1].toLocaleString()} 셀라</button><button class="primary" type="button" id="f100">설계도 100회 · ${GACHA_COST[2].toLocaleString()} 셀라</button><span class="sub" style="margin:0">보유 ${G.gold.toLocaleString()} 셀라 · 설계도 ${Object.keys(G.bps).length}장 · 곡괭이 ${owned}/${PICKS.length}</span></div>
   <div class="grid" id="pickGrid"></div>`;
-  $('#f1').disabled = G.gold < GACHA_COST[0]; $('#f10').disabled = G.gold < GACHA_COST[1];
+  $('#f1').disabled = G.gold < GACHA_COST[0]; $('#f10').disabled = G.gold < GACHA_COST[1]; $('#f100').disabled = G.gold < GACHA_COST[2]; $('#f100').onclick = () => startForge(100);
   $('#f1').onclick = () => startForge(1); $('#f10').onclick = () => startForge(10);
   renderPickGrid($('#pickGrid'));
 }
