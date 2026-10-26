@@ -70,6 +70,7 @@ button[disabled]{opacity:.45;cursor:not-allowed;filter:none}
 .touch .skill small{display:none}
 #jumpBtn{display:none;position:fixed;right:max(112px,calc(env(safe-area-inset-right,0px) + 112px));bottom:calc(env(safe-area-inset-bottom,0px) + 70px);width:66px;height:66px;border-radius:50%;padding:0;z-index:6;color:#f6ecd4;background:radial-gradient(circle at 35% 30%,#5a8ac0,#2a4a7a);border-color:#9fd0ff;box-shadow:0 4px 0 #0009,0 0 14px #6ab0ff33;align-items:center;justify-content:center}
 .touch #jumpBtn{display:flex}
+#dashBtn{display:none;position:fixed;right:max(118px,calc(env(safe-area-inset-right,0px) + 118px));bottom:calc(env(safe-area-inset-bottom,0px) + 146px);width:54px;height:54px;border-radius:50%;padding:0;z-index:6;font-size:24px;background:radial-gradient(circle at 35% 30%,#7ad0c0,#2a6a6a);border-color:#9fffe8;box-shadow:0 4px 0 #0009,0 0 14px #6affd033;align-items:center;justify-content:center}.touch #dashBtn{display:flex}#dashBtn:active{transform:translateY(3px) scale(.96)}
 #jumpBtn:active{transform:translateY(3px) scale(.96)}
 #digBtn{display:none;position:fixed;right:max(16px,env(safe-area-inset-right,0px));bottom:calc(env(safe-area-inset-bottom,0px) + 78px);width:84px;height:84px;border-radius:50%;font-size:34px;padding:0;z-index:6;background:radial-gradient(circle at 35% 30%,#e7c063,#a37b2c);border-color:#ffe39a;box-shadow:0 4px 0 #0009,0 0 18px #ffd36b44}
 .touch #digBtn{display:block}
@@ -319,6 +320,7 @@ button .coin{width:14px;height:14px;margin-right:6px;vertical-align:-2px}
 </div>
 <button type="button" id="digBtn" data-k="dig" aria-label="캐기">⛏</button>
 <button type="button" id="skillBtn" aria-label="직업 능력"><span id="skillBtnI">✊</span></button>
+<button type="button" id="dashBtn" data-k="dash" aria-label="대쉬">💨</button>
 <button type="button" id="jumpBtn" data-k="jump" aria-label="점프"><svg viewBox="0 0 24 24" width="30" height="30" aria-hidden="true"><path d="M12 4l7 8h-4.5v7h-5v-7H5z" fill="currentColor"/></svg></button>
 <div id="stick" aria-label="조이스틱"><div class="ring"></div><i class="arr u"></i><i class="arr d"></i><i class="arr l"></i><i class="arr r"></i><div class="knob" id="knob"></div></div>
 <div id="toast"></div>
@@ -1614,7 +1616,7 @@ const player = { x: 0, y: 0, vx: 0, vy: 0, w: 18, h: 26, face: 1, ground: false,
   sq: 0, sqv: 0, faceS: 1, lean: 0, coy: 0, jbuf: 0, upPrev: false, wasGround: true, dustT: 0, hit: null, scarf: 1.2, scarfV: 0, lookX: 0 };
 let hitStop = 0, shakeA = 0;
 const kick = (sq, sh = 0) => { player.sqv += sq * 18; shakeA = Math.max(shakeA, sh); };
-const keys = { left: false, right: false, up: false, down: false, dig: false, jump: false };
+const keys = { left: false, right: false, up: false, down: false, dig: false, jump: false, dash: false };
 function spawn() { player.x = (W / 2 + .5) * TS - player.w / 2; player.y = SURF * TS - player.h; player.vx = player.vy = 0; }
 const solid = v => v !== T.AIR;
 function solidAt(px, py) { return solid(tileAt(Math.floor(px / TS), Math.floor(py / TS))); }
@@ -1694,6 +1696,24 @@ function breakTile(tx, ty, L, v) {
     sparks(tx * TS + 16, ty * TS + 16, LAYERS[L].ore[0], 10); updHUD();
   }
 }
+// 대쉬: Shift / L(모바일 💨). 0.16초 동안 빠르게 미끄러지고 그동안은 떨어지지 않는다. 공중에선 착지 전까지 한 번, 던전에선 잠깐 무적
+function dashStep(p, dt, mv) {
+  const D = p.dsh || (p.dsh = { t: 0, cd: 0, prev: false, air: 1, dir: 1 });
+  D.cd -= dt; if (p.ground) D.air = 1;
+  const want = (keys.dash && !D.prev) || keys.dashTap; keys.dashTap = false;
+  if (want && D.cd <= 0 && (p.ground || D.air > 0) && !p.slam && !p.pull && !p.cast && !(p.faint > 0) && !p.dig) {
+    D.t = .16; D.cd = .5; if (!p.ground) D.air = 0; D.dir = mv || p.face || 1; p.face = D.dir;
+    S.whoosh(.5); kick(.25); dust(p.x + p.w / 2, p.y + p.h, 5);
+    if (DUN.active) DUN.inv = Math.max(DUN.inv, .22);
+  }
+  D.prev = keys.dash;
+  if (D.t > 0) { D.t -= dt; if (D.t <= 0) p.vx = D.dir * 170; }
+}
+function dashApply(p) {
+  const D = p.dsh; if (!D || D.t <= 0) return;
+  p.vx = D.dir * 560; p.vy = 0; p.sq = -.12;
+  addP({ x: p.x + p.w / 2 - D.dir * 8 + R(-3, 3), y: p.y + R(4, p.h - 4), vx: -D.dir * R(40, 120), vy: R(-10, 10), life: R(.15, .3), size: R(2, 4), c: 'rgba(255,250,230,.7)', grav: 0 });
+}
 function updatePlayer(dt) {
   const p = player; warnT -= dt;
   if (p.faint > 0) { p.faint -= dt; if (p.faint <= 0) rescue(); return; }
@@ -1706,7 +1726,7 @@ function updatePlayer(dt) {
     else p.vx += mv * acc * dt;
     p.vx = clamp(p.vx, -maxv, maxv); p.face = mv;
   } else { const d = dec * dt; p.vx = Math.abs(p.vx) <= d ? 0 : p.vx - Math.sign(p.vx) * d; }
-  p.walk += Math.abs(p.vx) * dt / 13;
+  p.walk += Math.abs(p.vx) * dt / 13; dashStep(p, dt, mv);
   if (keys.jump && !p.upPrev) p.jbuf = .13; p.upPrev = keys.jump; p.jbuf -= dt;
   p.coy = p.ground ? .1 : p.coy - dt;
   // 방향키로 겨누고(↓ 아래 · ↑ 위 · 그 밖엔 바라보는 쪽) 캐기 버튼(X/J · 마우스 · ⛏)을 눌러야 판다
@@ -1743,6 +1763,7 @@ function updatePlayer(dt) {
     if (J.fuel <= 0) { S.clunk(); toast('제트팩 연료가 바닥났어요!'); }
   } else { J.idle += dt; if (J.idle > .35) J.fuel = Math.min(jetMax(), J.fuel + jetRe() * dt); }
   skillAfterGravity(p, dt);
+  dashApply(p);
   const vyPre = p.vy;
   p.x += p.vx * dt; collideX();
   p.y += p.vy * dt; collideY();
@@ -2766,11 +2787,12 @@ function updateVillage(dt) {
   const maxv = 170, acc = p.ground ? 1900 : 1250, dec = p.ground ? 2300 : 650, mv = (keys.right ? 1 : 0) - (keys.left ? 1 : 0);
   if (mv) { if (p.ground && p.vx * mv < -60) { p.vx += mv * dec * dt; if (Math.random() < dt * 30) dust(p.x + p.w / 2 - mv * 6, p.y + p.h, 1); } else p.vx += mv * acc * dt; p.vx = clamp(p.vx, -maxv, maxv); p.face = mv; }
   else { const d = dec * dt; p.vx = Math.abs(p.vx) <= d ? 0 : p.vx - Math.sign(p.vx) * d; }
-  p.walk += Math.abs(p.vx) * dt / 13;
+  p.walk += Math.abs(p.vx) * dt / 13; dashStep(p, dt, mv);
   if (keys.jump && !p.upPrev) p.jbuf = .13; p.upPrev = keys.jump; p.jbuf -= dt; p.coy = p.ground ? .1 : p.coy - dt;
   if ((p.jbuf > 0 || keys.jump) && p.coy > 0) { p.vy = -480; p.ground = false; p.coy = 0; p.jbuf = 0; S.jump(); kick(.32); dust(p.x + p.w / 2, p.y + p.h, 4); }
   const gm = p.vy < 0 && !keys.jump ? 2.4 : Math.abs(p.vy) < 90 ? .55 : p.vy > 0 ? 1.22 : 1;
   p.vy = Math.min(p.vy + 1500 * gm * dt, 900);
+  dashApply(p);
   const vyPre = p.vy;
   p.x = clamp(p.x + p.vx * dt, 40, VIL.W - 40 - p.w); p.y += p.vy * dt;
   if (p.y >= VGY - p.h) { p.y = VGY - p.h; if (!p.ground) { const k = clamp(vyPre / 900, .12, .5); kick(-k * .9); dust(p.x + p.w / 2, p.y + p.h, Math.round(3 + k * 10)); } p.vy = 0; p.ground = true; } else p.ground = false;
@@ -6098,7 +6120,7 @@ setInterval(() => { if (ACCT.token && document.visibilityState === 'visible' && 
 addEventListener('pagehide', () => { if (NET.ws) { NET.quit = true; try { NET.ws.close(1000); } catch (e) { } } });
 
 // ───────────── 입력 · 루프 ─────────────
-const KEYMAP = { ArrowLeft: ['left'], KeyA: ['left'], ArrowRight: ['right'], KeyD: ['right'], ArrowUp: ['up', 'jump'], KeyW: ['up', 'jump'], Space: ['jump'], ArrowDown: ['down'], KeyS: ['down'], KeyX: ['dig'], KeyJ: ['dig'] };
+const KEYMAP = { ArrowLeft: ['left'], KeyA: ['left'], ArrowRight: ['right'], KeyD: ['right'], ArrowUp: ['up', 'jump'], KeyW: ['up', 'jump'], Space: ['jump'], ArrowDown: ['down'], KeyS: ['down'], KeyX: ['dig'], KeyJ: ['dig'], ShiftLeft: ['dash'], ShiftRight: ['dash'], KeyL: ['dash'] };
 addEventListener('keydown', e => {
   Sound.init();
   if (!$('#acctM').hidden) { if (e.code === 'Escape') closeAcct(); return; }
@@ -6109,7 +6131,7 @@ addEventListener('keydown', e => {
   if (e.code === 'Escape') { closeModals(); return; }
   if (!$('#title').hidden) { if (e.code === 'Enter' || e.code === 'Space') { startGame(); e.preventDefault(); } return; }
   if (modalOpen()) return;
-  if (KEYMAP[e.code]) { for (const k of KEYMAP[e.code]) keys[k] = true; e.preventDefault(); }
+  if (KEYMAP[e.code]) { for (const k of KEYMAP[e.code]) { keys[k] = true; if (k === 'dash' && !e.repeat) keys.dashTap = true; } e.preventDefault(); }
   if (e.code === 'KeyR') recall();
   if (e.code === 'KeyC') openCodex();
   if (e.code === 'KeyH') openTut(0);
@@ -6125,8 +6147,8 @@ fxc.addEventListener('pointerdown', e => { e.preventDefault(); openingTap(); });
 // 마우스 왼쪽 버튼을 누르고 있으면 캐기
 cv.addEventListener('pointerdown', e => { if (e.button === 0 && e.pointerType === 'mouse' && !modalOpen() && !opening) { Sound.init(); keys.dig = true; } });
 addEventListener('pointerup', e => { if (e.pointerType === 'mouse') keys.dig = false; });
-document.querySelectorAll('#digBtn, #jumpBtn').forEach(b => {
-  const k = b.dataset.k, on = e => { e.preventDefault(); Sound.init(); keys[k] = true; b.setPointerCapture?.(e.pointerId); }, off = () => keys[k] = false;
+document.querySelectorAll('#digBtn, #jumpBtn, #dashBtn').forEach(b => {
+  const k = b.dataset.k, on = e => { e.preventDefault(); Sound.init(); keys[k] = true; if (k === 'dash') keys.dashTap = true; b.setPointerCapture?.(e.pointerId); }, off = () => keys[k] = false;
   b.addEventListener('pointerdown', on); b.addEventListener('pointerup', off); b.addEventListener('pointercancel', off); b.addEventListener('lostpointercapture', off);
 });
 // 가상 조이스틱: 좌우로 걷고(바라보는 쪽을 겨눔), 위·아래로 머리 위·발밑을 겨눈다. 점프는 따로 버튼
