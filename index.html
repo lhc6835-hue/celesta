@@ -24,17 +24,31 @@ canvas{position:fixed;inset:0;width:100%;height:100%;display:block}
 #fx.on{pointer-events:auto}
 .hud{position:fixed;top:calc(env(safe-area-inset-top,0px) + 10px);left:max(12px,env(safe-area-inset-left,0px));right:max(12px,env(safe-area-inset-right,0px));display:flex;gap:10px;align-items:flex-start;justify-content:space-between;pointer-events:none;z-index:5}
 .plate{background:linear-gradient(#3a2b22,#251b16);border:2px solid var(--brass-d);box-shadow:inset 0 0 0 1px #00000080,0 4px 14px #0008;border-radius:10px;padding:8px 12px}
-.hud .left{display:flex;flex-direction:column;gap:6px;min-width:0}
+.hud .left{display:flex;flex-direction:column;gap:5px;min-width:0;padding:8px 12px 9px}
+.hud .ph{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
+.hud .ph .depth{font-family:var(--f-impact);font-size:14px;color:#e8dcc0;letter-spacing:.02em}
+.meter{display:flex;align-items:center;gap:6px}.meter>em{font-style:normal;font-size:12px;width:14px;text-align:center;filter:drop-shadow(0 1px 0 #000)}.meter>span{font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums;min-width:44px;text-align:right}
+.meter .oil{flex:1}
 .layer-name{font-family:var(--f-display);font-size:18px;color:var(--brass);letter-spacing:.04em;text-shadow:0 2px 0 #000}
 .depth{font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
-.oil{width:180px;max-width:42vw;height:10px;background:#0006;border:1px solid var(--brass-d);border-radius:6px;overflow:hidden}
+.oil{width:150px;max-width:38vw;height:9px;background:#0006;border:1px solid var(--brass-d);border-radius:6px;overflow:hidden}
 .oil>i{display:block;height:100%;background:linear-gradient(90deg,#ff9b3d,#ffd36b);transition:width .2s}
-.oil.jet{height:6px}.oil.jet>i{background:linear-gradient(90deg,#3a8ce0,#7fe0ff);transition:none}
+.oil.jet{height:7px}.oil.jet>i{background:linear-gradient(90deg,#3a8ce0,#7fe0ff);transition:none}
 .oil.low>i{background:linear-gradient(90deg,#c0392b,#ff7a50);animation:blink .6s infinite alternate}
 @keyframes blink{to{opacity:.4}}
 .gold{font-family:var(--f-impact);font-size:20px;color:#ffd66b;font-variant-numeric:tabular-nums;display:flex;align-items:center;gap:6px}
 .gold small{font-family:var(--f-body);font-size:12px;color:var(--muted)}
-.btns{position:fixed;right:max(12px,env(safe-area-inset-right,0px));bottom:calc(env(safe-area-inset-bottom,0px) + 12px);display:flex;gap:8px;z-index:6;flex-wrap:wrap;justify-content:flex-end;max-width:60vw}
+.btns{position:fixed;right:max(12px,env(safe-area-inset-right,0px));bottom:calc(env(safe-area-inset-bottom,0px) + 12px);display:flex;gap:6px;z-index:7;align-items:center;padding:5px;border-radius:14px;background:#1a1210cc;border:1px solid #ffffff14;box-shadow:0 6px 18px #0008;backdrop-filter:blur(4px)}
+.btns>button{height:40px;min-width:40px;padding:0 12px;display:flex;align-items:center;gap:6px;border-radius:10px;font-size:16px}
+.btns kbd{font:600 10px/1 var(--f-body);color:#c8b8a0;background:#0006;border:1px solid #ffffff22;border-radius:4px;padding:2px 4px;margin-left:2px}
+#bReturn .bl{font-size:13px}
+#bMenu{font-size:18px}#bMenu[aria-expanded=true]{background:#3a2b22;border-color:var(--brass)}
+#menuPop{position:absolute;right:0;bottom:calc(100% + 8px);display:flex;flex-direction:column;gap:4px;padding:6px;min-width:168px;border-radius:12px;background:linear-gradient(#3a2b22,#251b16);border:2px solid var(--brass-d);box-shadow:0 10px 24px #000a}
+#menuPop[hidden]{display:none}
+#menuPop button{display:flex;align-items:center;gap:8px;justify-content:flex-start;width:100%;padding:9px 10px;font-size:15px;border-radius:8px;background:transparent;border:1px solid transparent;box-shadow:none}
+#menuPop button:hover{background:#ffffff10;border-color:#ffffff18}
+#menuPop .bl{font-size:13px;flex:1;text-align:left}#menuPop kbd{margin-left:auto}
+#bMenu .dot{position:absolute;top:-6px;right:-6px}
 button{font-family:var(--f-body);font-size:14px;color:var(--parch);background:linear-gradient(#4a372b,#2d2119);border:2px solid var(--brass-d);border-radius:9px;padding:9px 13px;cursor:pointer;box-shadow:0 3px 0 #0009;transition:transform .08s,filter .15s}
 button:hover{filter:brightness(1.18)}
 button:active{transform:translateY(2px);box-shadow:0 1px 0 #0009}
@@ -178,7 +192,7 @@ kbd{font-family:var(--f-body);background:#0006;border:1px solid var(--brass-d);b
 .rar-ladder small{font-family:"Silkscreen",monospace;font-size:9px;opacity:.8;align-self:center}
 .rar-ladder span.prism{background:linear-gradient(90deg,#ff5a5a33,#ffd36b33,#5aff9a33,#5ac8ff33,#c85aff33)}
 .rar-ladder span.heart{grid-column:1/-1;background:linear-gradient(90deg,#ff8fc833,#ffd36b33);font-weight:700}
-@media (max-width:640px){.btns .bl{display:none}.btns{max-width:none;gap:6px}.btns button{padding:9px 11px}#depthBar{width:48px;height:calc(100dvh - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px) - 240px)}#compassDial{width:78px;height:99px;top:calc(env(safe-area-inset-top,0px) + 100px)}}
+@media (max-width:640px){#bReturn .bl,.btns>button kbd{display:none}.btns>button{padding:0 11px}#depthBar{width:48px;height:calc(100dvh - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px) - 240px)}#compassDial{width:78px;height:99px;top:calc(env(safe-area-inset-top,0px) + 100px)}}
 .acct-form{display:grid;gap:6px;margin-top:6px}
 .acct-form label{font-size:12px;color:var(--muted);letter-spacing:.04em;margin-top:6px}
 .acct-form input,.acct-srv input{font:15px var(--f-body);color:var(--parch);background:#0007;border:2px solid var(--brass-d);border-radius:8px;padding:10px 12px;min-width:0;width:100%;box-sizing:border-box;user-select:text;-webkit-user-select:text}
@@ -287,7 +301,7 @@ button .coin{width:14px;height:14px;margin-right:6px;vertical-align:-2px}
 .board .danger button{border-color:#8a3a2a;color:#ffb8a8}
 @media (max-width:560px){.camp-head{gap:8px;padding:12px 12px 8px}.camp-ico{width:34px;height:34px}.camp-gold{padding:4px 10px 4px 6px}.camp-gold small{display:none}.camp-head h2{font-size:20px}.camp-head .ttl small{display:none}.camp-gold b{font-size:15px}.board .stats{grid-template-columns:repeat(2,1fr)}.camp-tabs button{padding:9px 10px;font-size:13px}.camp-body{padding:12px}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
-@media (max-width:560px){.layer-name{font-size:15px}.gold{font-size:17px}.btns button{padding:8px 10px;font-size:13px}}
+@media (max-width:560px){.layer-name{font-size:15px}.gold{font-size:17px}.oil{width:120px}}
 </style>
 
 </head>
@@ -301,23 +315,25 @@ button .coin{width:14px;height:14px;margin-right:6px;vertical-align:-2px}
 <canvas id="trans" hidden></canvas>
 <div class="hud" id="hud" hidden>
   <div class="left plate">
-    <div class="layer-name" id="layerName">들풀 표토</div>
-    <div class="depth" id="depth">깊이 0m</div>
-    <div class="oil" id="oil"><i id="oilBar" style="width:100%"></i></div>
-    <div class="oil jet" id="jet" title="제트팩 연료"><i id="jetBar" style="width:100%"></i></div>
-    <div class="oil hp" id="hpWrap" hidden title="체력"><i id="hpBar" style="width:100%"></i></div>
+    <div class="ph"><div class="layer-name" id="layerName">들풀 표토</div><span class="depth" id="depth">0m</span></div>
+    <div class="meter" title="랜턴 기름"><em>🏮</em><div class="oil" id="oil"><i id="oilBar" style="width:100%"></i></div><span id="oilVal">100</span></div>
+    <div class="meter" title="제트팩 연료"><em>🔥</em><div class="oil jet" id="jet"><i id="jetBar" style="width:100%"></i></div></div>
+    <div class="meter" id="hpWrap" hidden title="체력"><em>❤</em><div class="oil hp"><i id="hpBar" style="width:100%"></i></div></div>
     <div class="skill" id="skillChip"><i id="skillDial"><span id="skillIcon">✊</span></i><span><b id="skillName">혼신의 일격</b><small id="skillKey">Q · 준비됨</small></span></div>
   </div>
   <div class="plate gold" id="gold">0 <small>셀라</small></div>
 </div>
 <div class="btns" id="btns" hidden>
-  <button id="bCamp" type="button" aria-label="야영지">⛺<span class="bl"> 야영지</span></button>
-  <button id="bReturn" type="button" aria-label="귀환">↑<span class="bl"> 귀환 (R)</span></button>
-  <button id="bCodex" type="button" aria-label="도감">📖<span class="bl"> 도감 (C)</span></button>
-  <button id="bNet" type="button" aria-label="온라인">🌐<span class="bl"> 온라인 (O)</span></button>
-  <button id="bAcct" type="button" aria-label="계정">☁<span class="bl"> 로그인</span></button>
-  <button id="bHelp" type="button" aria-label="도움말">❔<span class="bl"> 도움말 (H)</span></button>
-  <button id="bSound" type="button">🔊</button>
+  <button id="bCamp" type="button" aria-label="야영지">⛺</button>
+  <button id="bReturn" type="button" aria-label="귀환" title="귀환 두루마리 (R)">⤒<span class="bl">귀환</span><kbd>R</kbd></button>
+  <button id="bMenu" type="button" aria-label="메뉴" aria-expanded="false">☰</button>
+  <div id="menuPop" hidden>
+    <button id="bCodex" type="button" aria-label="도감">📖<span class="bl"> 도감</span><kbd>C</kbd></button>
+    <button id="bNet" type="button" aria-label="온라인">🌐<span class="bl"> 온라인</span><kbd>O</kbd></button>
+    <button id="bAcct" type="button" aria-label="계정">👤<span class="bl"> 로그인</span></button>
+    <button id="bHelp" type="button" aria-label="도움말">❔<span class="bl"> 도움말</span><kbd>H</kbd></button>
+    <button id="bSound" type="button" aria-label="소리">🔊<span class="bl"> 소리</span></button>
+  </div>
 </div>
 <button type="button" id="digBtn" data-k="dig" aria-label="캐기">⛏</button>
 <button type="button" id="skillBtn" aria-label="직업 능력"><span id="skillBtnI">✊</span></button>
@@ -1731,7 +1747,7 @@ function updatePlayer(dt) {
     p.vx = clamp(p.vx, -maxv, maxv); p.face = mv;
   } else { const d = dec * dt; p.vx = Math.abs(p.vx) <= d ? 0 : p.vx - Math.sign(p.vx) * d; }
   p.walk += Math.abs(p.vx) * dt / 13; dashStep(p, dt, mv);
-  if (keys.jump && !p.upPrev) p.jbuf = .13; p.upPrev = keys.jump; p.jbuf -= dt;
+  if ((keys.jump && !p.upPrev) || keys.jumpTap) p.jbuf = .13; keys.jumpTap = false; p.upPrev = keys.jump; p.jbuf -= dt;
   p.coy = p.ground ? .1 : p.coy - dt;
   // 방향키로 겨누고(↓ 아래 · ↑ 위 · 그 밖엔 바라보는 쪽) 캐기 버튼(X/J · 마우스 · ⛏)을 눌러야 판다
   let digging = false;
@@ -2792,7 +2808,7 @@ function updateVillage(dt) {
   if (mv) { if (p.ground && p.vx * mv < -60) { p.vx += mv * dec * dt; if (Math.random() < dt * 30) dust(p.x + p.w / 2 - mv * 6, p.y + p.h, 1); } else p.vx += mv * acc * dt; p.vx = clamp(p.vx, -maxv, maxv); p.face = mv; }
   else { const d = dec * dt; p.vx = Math.abs(p.vx) <= d ? 0 : p.vx - Math.sign(p.vx) * d; }
   p.walk += Math.abs(p.vx) * dt / 13; dashStep(p, dt, mv);
-  if (keys.jump && !p.upPrev) p.jbuf = .13; p.upPrev = keys.jump; p.jbuf -= dt; p.coy = p.ground ? .1 : p.coy - dt;
+  if ((keys.jump && !p.upPrev) || keys.jumpTap) p.jbuf = .13; keys.jumpTap = false; p.upPrev = keys.jump; p.jbuf -= dt; p.coy = p.ground ? .1 : p.coy - dt;
   if ((p.jbuf > 0 || keys.jump) && p.coy > 0) { p.vy = -480; p.ground = false; p.coy = 0; p.jbuf = 0; S.jump(); kick(.32); dust(p.x + p.w / 2, p.y + p.h, 4); }
   const gm = p.vy < 0 && !keys.jump ? 2.4 : Math.abs(p.vy) < 90 ? .55 : p.vy > 0 ? 1.22 : 1;
   p.vy = Math.min(p.vy + 1500 * gm * dt, 900);
@@ -5098,7 +5114,7 @@ function refreshAcctUI() {
   $('#bAccL').textContent = on ? ACCT.user.toUpperCase() : 'SIGN IN';
   $('#bAccK').textContent = on ? '계정 · 클라우드 저장 관리' : '로그인 · 회원가입 · 클라우드 저장';
   $('#tUser').textContent = on ? `☁ SIGNED IN AS ${ACCT.user} · CLOUD SAVE ON` : '';
-  const b = $('#bAcct'); if (b) b.innerHTML = `☁<span class="bl"> ${on ? ACCT.user : '로그인'}</span>`;
+  const b = $('#bAcct'); if (b) b.innerHTML = `👤<span class="bl"> ${on ? ACCT.user : '로그인'}</span>`;
 }
 // 게임이 저장될 때마다 호출된다. 45초에 한 번만 실제로 올린다.
 function cloudSaveSoon(force) {
@@ -5461,7 +5477,9 @@ let lastLayer = -2;
 function updHUD() {
   const row = Math.floor((player.y + player.h - 2) / TS), L = layerAt(row);
   $('#layerName').textContent = VIL.active ? '황동나침반 마을' : row <= SURF ? '나침반 야영지' : LAYERS[L].name;
-  $('#depth').textContent = `깊이 ${Math.max(0, (row - SURF) * 2)}m · 기름 ${Math.ceil(G.oil)}/${maxOil()}`;
+  $('#depth').textContent = `${Math.max(0, (row - SURF) * 2)}m`; $('#oilVal').textContent = `${Math.ceil(G.oil)}/${maxOil()}`;
+  // 보물 나침반은 정보판 바로 아래(체력 막대가 붙으면 그만큼 내려간다)
+  { const r = $('.hud .left').getBoundingClientRect(); if (r.height) { const top = Math.round(r.bottom + 8) + 'px'; if ($('#compassDial').style.top !== top) $('#compassDial').style.top = top; } }
   $('#oilBar').style.width = `${G.oil / maxOil() * 100}%`; $('#oil').classList.toggle('low', G.oil / maxOil() < .25);
   $('#gold').innerHTML = `${G.gold.toLocaleString()} <small>셀라</small>`;
   $('#bCamp').hidden = row > SURF;
@@ -6025,7 +6043,7 @@ function sendEmote(k) { if (!NET.on) return; netSend({ t: 'emote', e: k }); }
 const NET_ERR = { NO_USER: '그런 아이디의 발굴사가 없어요.', SELF: '자기 자신에게는 보낼 수 없어요.', ALREADY: '이미 친구예요.', NO_REQUEST: '이미 처리된 신청이에요.', NOT_OWNER: '방장만 할 수 있어요.', NO_SERVER: '없어진 서버예요.', BAD_CODE: '초대 코드가 맞지 않아요.', TOO_MANY_SERVERS: '개인 서버는 세 개까지 만들 수 있어요.' };
 const netErr = e => NET_ERR[e && e.message] || errText(e);
 const call = (action, p = {}) => api(action, { username: ACCT.user, token: ACCT.token, ...p });
-function netBtn() { const b = $('#bNet'); if (b) b.innerHTML = `🌐<span class="bl"> 온라인 (O)</span>${NET.badge ? `<i class="dot">${NET.badge}</i>` : ''}`; }
+function netBtn() { const b = $('#bNet'); if (b) b.innerHTML = `🌐<span class="bl"> 온라인</span>${NET.badge ? `<i class="dot">${NET.badge}</i>` : '<kbd>O</kbd>'}`; const m = $('#bMenu'); if (m) m.innerHTML = `☰${NET.badge ? `<i class="dot">${NET.badge}</i>` : ''}`; }
 function netBadge(text) {
   const el = $('#netBadge'); if (!el) return;
   if (text === '') { el.hidden = true; return; }
@@ -6131,6 +6149,7 @@ addEventListener('pagehide', () => { if (NET.ws) { NET.quit = true; try { NET.ws
 const KEYMAP = { ArrowLeft: ['left'], KeyA: ['left'], ArrowRight: ['right'], KeyD: ['right'], ArrowUp: ['up', 'jump'], KeyW: ['up', 'jump'], Space: ['jump'], ArrowDown: ['down'], KeyS: ['down'], KeyX: ['dig'], KeyJ: ['dig'], ShiftLeft: ['dash'], ShiftRight: ['dash'], KeyL: ['dash'] };
 addEventListener('keydown', e => {
   Sound.init();
+  if (!$('#menuPop').hidden && e.code === 'Escape') { menuSet(false); return; }
   if (!$('#acctM').hidden) { if (e.code === 'Escape') closeAcct(); return; }
   if (!$('#netM').hidden) { if (e.code === 'Escape') closeNet(); return; }
   if (!$('#gateM').hidden) { if (e.code === 'Escape') $('#gateM').hidden = true; return; }
@@ -6139,7 +6158,7 @@ addEventListener('keydown', e => {
   if (e.code === 'Escape') { closeModals(); return; }
   if (!$('#title').hidden) { if (e.code === 'Enter' || e.code === 'Space') { startGame(); e.preventDefault(); } return; }
   if (modalOpen()) return;
-  if (KEYMAP[e.code]) { for (const k of KEYMAP[e.code]) { keys[k] = true; if (k === 'dash' && !e.repeat) keys.dashTap = true; } e.preventDefault(); }
+  if (KEYMAP[e.code]) { for (const k of KEYMAP[e.code]) { keys[k] = true; if (k === 'dash' && !e.repeat) keys.dashTap = true; if (k === 'jump' && !e.repeat) keys.jumpTap = true; } e.preventDefault(); }
   if (e.code === 'KeyR') recall();
   if (e.code === 'KeyC') openCodex();
   if (e.code === 'KeyH') openTut(0);
@@ -6156,7 +6175,7 @@ fxc.addEventListener('pointerdown', e => { e.preventDefault(); openingTap(); });
 cv.addEventListener('pointerdown', e => { if (e.button === 0 && e.pointerType === 'mouse' && !modalOpen() && !opening) { Sound.init(); keys.dig = true; } });
 addEventListener('pointerup', e => { if (e.pointerType === 'mouse') keys.dig = false; });
 document.querySelectorAll('#digBtn, #jumpBtn, #dashBtn').forEach(b => {
-  const k = b.dataset.k, on = e => { e.preventDefault(); Sound.init(); keys[k] = true; if (k === 'dash') keys.dashTap = true; b.setPointerCapture?.(e.pointerId); }, off = () => keys[k] = false;
+  const k = b.dataset.k, on = e => { e.preventDefault(); Sound.init(); keys[k] = true; if (k === 'dash') keys.dashTap = true; if (k === 'jump') keys.jumpTap = true; b.setPointerCapture?.(e.pointerId); }, off = () => keys[k] = false;
   b.addEventListener('pointerdown', on); b.addEventListener('pointerup', off); b.addEventListener('pointercancel', off); b.addEventListener('lostpointercapture', off);
 });
 // 가상 조이스틱: 좌우로 걷고(바라보는 쪽을 겨눔), 위·아래로 머리 위·발밑을 겨눈다. 점프는 따로 버튼
@@ -6189,7 +6208,7 @@ function updSkillHUD() {
   $('#skillBtn').classList.toggle('ready', SK.cd <= 0); $('#skillChip').classList.toggle('shake', skillShakeT > 0);
 }
 $('#bCamp').onclick = openCamp; $('#bReturn').onclick = recall; $('#bCodex').onclick = openCodex;
-$('#bSound').onclick = () => { Sound.init(); const on = Sound.toggle(); $('#bSound').textContent = on ? '🔊' : '🔇'; if (on) Sound.setDrone(layerAt(Math.floor(player.y / TS))); };
+$('#bSound').onclick = () => { Sound.init(); const on = Sound.toggle(); $('#bSound').innerHTML = `${on ? '🔊' : '🔇'}<span class="bl"> 소리 ${on ? '켜짐' : '꺼짐'}</span>`; if (on) Sound.setDrone(layerAt(Math.floor(player.y / TS))); };
 for (const m of ['#campM', '#codexM', '#acctM', '#tutM', '#netM', '#gateM']) $(m).addEventListener('pointerdown', e => { if (e.target === $(m)) closeModals(); });
 if (matchMedia('(pointer: coarse)').matches) document.body.classList.add('touch');
 
@@ -6215,6 +6234,10 @@ $('#chatIn').addEventListener('keydown', e => {
   else if (e.key === 'Escape') closeChat();
 });
 $('#chatIn').addEventListener('blur', () => setTimeout(() => { if (document.activeElement !== $('#chatIn')) $('#chat').classList.remove('open'); renderChat(); }, 120));
+const menuSet = on => { $('#menuPop').hidden = !on; $('#bMenu').setAttribute('aria-expanded', on ? 'true' : 'false'); };
+$('#bMenu').onclick = e => { e.stopPropagation(); menuSet($('#menuPop').hidden); S.tick && S.tick(); };
+$('#menuPop').addEventListener('click', e => { if (e.target.closest('button') && e.target.closest('button').id !== 'bSound') menuSet(false); });
+addEventListener('pointerdown', e => { if (!$('#menuPop').hidden && !e.target.closest('#btns')) menuSet(false); });
 $('#bStart').onclick = startGame; $('#bHelp').onclick = () => openTut(0); $('#bAccount').onclick = openAcct; $('#bAcct').onclick = openAcct;
 // 타이틀 화면에서도 첫 터치부터 야영지 테마가 흐른다
 addEventListener('pointerdown', () => { if (!$('#title').hidden) { Sound.init(); Sound.setMusic('surface'); } }, { once: true });
